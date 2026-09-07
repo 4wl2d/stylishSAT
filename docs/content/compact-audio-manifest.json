@@ -1,0 +1,2291 @@
+{
+  "schemaVersion": 1,
+  "reviewStatus": "COMPACT_AUDIO_MACHINE_VALIDATED_DEVICE_PLAYBACK_AND_HUMAN_LISTENING_REVIEW_PENDING",
+  "scope": "Only 21 new Listening and 6 new Speaking sample masters; original 3 legacy WAVs and all ASR fixtures excluded. All 27 WAV masters preserved in place.",
+  "engine": {
+    "ffmpegVersion": "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
+    "encoder": "libopus",
+    "container": "Ogg",
+    "codec": "Opus",
+    "numpyVersion": "2.5.1",
+    "nominalBitrateBitsPerSecond": 48000,
+    "rateControl": "constrained VBR",
+    "application": "audio",
+    "frameDurationMs": 20,
+    "compressionLevel": 10,
+    "mono": true,
+    "resamplingFilter": "aresample=48000:resampler=swr:dither_method=0:filter_size=32:phase_shift=10:exact_rational=1:filter_type=kaiser:kaiser_beta=9",
+    "linearGain": 0.85,
+    "gainDb": -1.411621,
+    "gainPurpose": "Constant headroom prevents lossy-codec reconstruction overshoot; WAV masters remain unchanged.",
+    "encodingFilter": "volume=0.85:precision=double,aresample=48000:resampler=swr:dither_method=0:filter_size=32:phase_shift=10:exact_rational=1:filter_type=kaiser:kaiser_beta=9",
+    "bitexactFlags": [
+      "-fflags +bitexact",
+      "-flags:a +bitexact"
+    ],
+    "oggSerialOffset": 0,
+    "metadataPolicy": "Drop inherited metadata; retain only the stable encoder tag written by FFmpeg. No timestamps, filenames, transcripts or user metadata are embedded."
+  },
+  "androidSupport": {
+    "mediaPlayerGuide": "https://developer.android.com/media/platform/mediaplayer",
+    "supportedFormats": "https://developer.android.com/media/platform/supported-formats",
+    "documentedDecoder": "Opus supported from Android 5.0; Ogg is a listed container.",
+    "appMinSdk": 29,
+    "assessment": "The documented platform requirement is met for this app. Actual MediaPlayer device playback remains a separate integration check."
+  },
+  "timelinePolicy": {
+    "reference": "https://www.rfc-editor.org/rfc/rfc7845",
+    "description": "Opus granule positions and pre-skip use a 48kHz clock. Playable duration is (final granule − pre-skip)/48000. FFprobe container duration includes pre-skip and is not the comparison duration. Every derivative is fully decoded at 48kHz and again at the master sample rate. Resampling may add one source-rate frame; no negative frame delta, trim, pad, or seek is used in validation.",
+    "transcriptSegments": "Original millisecond transcript boundaries remain valid; at most one source-rate frame is added, which can increase the rounded total duration by 1 millisecond at a rounding boundary."
+  },
+  "statistics": {
+    "count": 27,
+    "sourceBytes": 163967812,
+    "compactBytes": 22732065,
+    "savedBytes": 141235747,
+    "reductionPercent": 86.136264
+  },
+  "assets": {
+    "audio/expansion/listening-v3-allotment-orientation.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-allotment-orientation.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-allotment-orientation",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-allotment-orientation.wav",
+        "sha256": "23cd6b9f9705deed5f19946087f57a67566eaefc9a6c985d634ee5366624ee18",
+        "pcmSha256": "3fbee597ed50b5b5349b99c796368f5f75f71218be17a7e1bcf3b1352ee1b676",
+        "bytes": 6920766,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3460361,
+        "durationMs": 156932,
+        "durationExactSeconds": "3460361/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-allotment-orientation.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 935184,
+      "sha256": "13b26042378b90f26eeea2678e045e55cc04c362a947b4d8028ec0eb4f4688b2",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47673,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7533071,
+        "playableFramesAt48k": 7532759,
+        "playableDurationMs": 156932,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 159,
+        "packetCount": 7849,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "156.938979",
+      "validation": {
+        "decodedFramesAt48k": 7532759,
+        "decodedPcmAt48kSha256": "d52d417568fb08df4261789dd6415052f569869724a5ab38286b484a57295178",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3460362,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "f4b6cd18e5c33165e3a192afb7bf80956a4f2566ee05ae4f9e3a77619cb923cd",
+        "sameRoundedDurationMs": false,
+        "roundedDurationDeltaMs": 1,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 19.037447,
+          "zeroLagCorrelation": 0.9938469,
+          "rmsRatioToGainAdjustedMaster": 0.984763722,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 264600,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996306693
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1859053,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.993617871
+            },
+            {
+              "region": "last-third",
+              "startFrame": 2659707,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995958954
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-archive-interview-plan.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-archive-interview-plan.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-archive-interview-plan",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-archive-interview-plan.wav",
+        "sha256": "1ee94e8af90a3f2bbcfaa1061fcc920b88dc0234e223c42c3d0c8d9689775a5b",
+        "pcmSha256": "b384620c026a8b04aa6521fd48e223ed66191f39ab1342944ced4ed345cb6a00",
+        "bytes": 7258690,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3629323,
+        "durationMs": 164595,
+        "durationExactSeconds": "3629323/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-archive-interview-plan.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 978967,
+      "sha256": "60400c3b1dff5d0e6c1d714826c33335989be149960d4e90e8633615690728de",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47582,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7900880,
+        "playableFramesAt48k": 7900568,
+        "playableDurationMs": 164595,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 167,
+        "packetCount": 8233,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "164.601667",
+      "validation": {
+        "decodedFramesAt48k": 7900568,
+        "decodedPcmAt48kSha256": "31cc40ac59f1061701ac906b6b4ae40b08a8b82cf796ea3e2d24a94d1460ed7b",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3629324,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "c28b0a739e54b2462d8299cbd1546f02b33b119059bdd1ca024ff723149fc81e",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.713312,
+          "zeroLagCorrelation": 0.993369659,
+          "rmsRatioToGainAdjustedMaster": 0.984540698,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 176400,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995942174
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1540524,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996669507
+            },
+            {
+              "region": "last-third",
+              "startFrame": 3125148,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.993529937
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-boathouse-hire.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-boathouse-hire.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-boathouse-hire",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-boathouse-hire.wav",
+        "sha256": "96641d3b2ef171679a07c8708f65a45114183a2653f95bc2a180b17cba1d6f8e",
+        "pcmSha256": "3e689aea81f9b40dd83fd35bd3dc47fc02094268a7b77f2ab954f83d4d8abdb3",
+        "bytes": 6734758,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3367357,
+        "durationMs": 152715,
+        "durationExactSeconds": "3367357/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-boathouse-hire.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 899763,
+      "sha256": "3e7eb79885a9f64e86a5e5569a2bafb08ba7504034e06daefeb73f468c55c44e",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47134,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7330613,
+        "playableFramesAt48k": 7330301,
+        "playableDurationMs": 152715,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 155,
+        "packetCount": 7639,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "152.721104",
+      "validation": {
+        "decodedFramesAt48k": 7330301,
+        "decodedPcmAt48kSha256": "46d42f369946b71a1277d29262b378e13b1258ed83a29d2f64edc4a7506e512f",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3367357,
+        "sourceFrameDelta": 0,
+        "sourceDurationDeltaMs": 0.0,
+        "decodedPcmAtSourceRateSha256": "6b63ef98c0e1037a443af2201a219bc356f2c6e625c639a655048df7aafa3cf7",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 19.001384,
+          "zeroLagCorrelation": 0.993798859,
+          "rmsRatioToGainAdjustedMaster": 0.985131119,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 727650,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.993495527
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1651652,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.991190436
+            },
+            {
+              "region": "last-third",
+              "startFrame": 2818204,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.993673927
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-building-shade.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-building-shade.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-building-shade",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-building-shade.wav",
+        "sha256": "148295228954c2b2b1309688694977ad35c076ecbdacd811b946499221871867",
+        "pcmSha256": "448905998a622c6d476aa3485b9a5789979e502becca63ac3b7b69263b317d50",
+        "bytes": 7499194,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3749575,
+        "durationMs": 170049,
+        "durationExactSeconds": "3749575/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-building-shade.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 1018460,
+      "sha256": "606caabc45c2e7b9fa61c099f896d8fb556c99761ee398baffed163684a0ee76",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47914,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 8162653,
+        "playableFramesAt48k": 8162341,
+        "playableDurationMs": 170049,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 173,
+        "packetCount": 8505,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "170.055271",
+      "validation": {
+        "decodedFramesAt48k": 8162341,
+        "decodedPcmAt48kSha256": "599cc60a2673ff9727b84d3a5f1e37dae390f742bb49f4fe06f54e91ba10e10c",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3749576,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "c08b796eff882f4876a3e71b5bbd2da9fe42576b591d91c4ad7246340d2054fa",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.413962,
+          "zeroLagCorrelation": 0.992894455,
+          "rmsRatioToGainAdjustedMaster": 0.9834481,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 617400,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996261374
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1933408,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.997375934
+            },
+            {
+              "region": "last-third",
+              "startFrame": 3602216,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995411929
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-canteen-survey.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-canteen-survey.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-canteen-survey",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-canteen-survey.wav",
+        "sha256": "7e420ef87f976d5f315ed790809f457d48cc8fc015e9a0429f615fc378797647",
+        "pcmSha256": "50b9d1cd1af987af941f05ba5fcdeb289bd05ed0e43f1c6170b8fccc28b7f54c",
+        "bytes": 7568488,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3784222,
+        "durationMs": 171620,
+        "durationExactSeconds": "3784222/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-canteen-survey.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 1026340,
+      "sha256": "08a9e9084cb6bc1009685030215d3cddf10d4d5baa2ede5a6759894d521d2f24",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47842,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 8238075,
+        "playableFramesAt48k": 8237763,
+        "playableDurationMs": 171620,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 174,
+        "packetCount": 8584,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "171.626563",
+      "validation": {
+        "decodedFramesAt48k": 8237763,
+        "decodedPcmAt48kSha256": "a5d759f18a36cf7376445b85a3c9b11b0f5f7f56840e07e37b5af37c3415006a",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3784223,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "728d4081cc6cba91040ff8d1ed86b1df3d874e0b14d2f8e94c974dcc21a16e80",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.631106,
+          "zeroLagCorrelation": 0.993249517,
+          "rmsRatioToGainAdjustedMaster": 0.983908504,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 1036350,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995022747
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1548057,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994205588
+            },
+            {
+              "region": "last-third",
+              "startFrame": 3294564,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994512288
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-charity-walk-briefing.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-charity-walk-briefing.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-charity-walk-briefing",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-charity-walk-briefing.wav",
+        "sha256": "9668f668cb328173b7fac43967da72456c63efc9d0da3d9ac8f5cf4cdfc2db34",
+        "pcmSha256": "cbc593968954496088c1b6b6dc2fb30edac7c92b8adf21d64457e2487f6d8bf2",
+        "bytes": 6731412,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3365684,
+        "durationMs": 152639,
+        "durationExactSeconds": "3365684/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-charity-walk-briefing.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 909360,
+      "sha256": "6c26149319d6266bcb605ca1d66922c1a02bb873dcd8cbf2c010ba48f888129b",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47661,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7326972,
+        "playableFramesAt48k": 7326660,
+        "playableDurationMs": 152639,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 155,
+        "packetCount": 7635,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "152.645250",
+      "validation": {
+        "decodedFramesAt48k": 7326660,
+        "decodedPcmAt48kSha256": "73dad4c07eebdd4385ffbede3057cae2272c98771c9bdd93aee6cebb5692b67f",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3365685,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "cd5c8c0cfcdcb54c92b661892b4bd63dabdb13fd377ba168cc8e25bc623205bc",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 19.127024,
+          "zeroLagCorrelation": 0.993978872,
+          "rmsRatioToGainAdjustedMaster": 0.984968772,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 485100,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994430704
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1805444,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995926713
+            },
+            {
+              "region": "last-third",
+              "startFrame": 2772989,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996543519
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-collection-catalogue.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-collection-catalogue.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-collection-catalogue",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-collection-catalogue.wav",
+        "sha256": "e4fca99b6440b73d751294185e78e166cd3b1917684b0e268c10678170e989f5",
+        "pcmSha256": "cfa70019c97230018e8d2066955634684d749a752ff28823f079e7dc8e078216",
+        "bytes": 7275514,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3637735,
+        "durationMs": 164977,
+        "durationExactSeconds": "3637735/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-collection-catalogue.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 979973,
+      "sha256": "673fd289a219dd58f0b26bcb24e23dd3258d8eed09242f358b453c2a3e52df39",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47521,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7919191,
+        "playableFramesAt48k": 7918879,
+        "playableDurationMs": 164977,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 167,
+        "packetCount": 8252,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "164.983146",
+      "validation": {
+        "decodedFramesAt48k": 7918879,
+        "decodedPcmAt48kSha256": "95bf22c85b9bad74345e1f49382533fdbe417df7a3995cc63a328eee959e047a",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3637735,
+        "sourceFrameDelta": 0,
+        "sourceDurationDeltaMs": 0.0,
+        "decodedPcmAtSourceRateSha256": "ca9c4c850529a59f1405de285718ed6f9797a540f59969bb769d68413d2a8b1b",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.996254,
+          "zeroLagCorrelation": 0.993796801,
+          "rmsRatioToGainAdjustedMaster": 0.984326743,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 463050,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.99424191
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 2182778,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996772351
+            },
+            {
+              "region": "last-third",
+              "startFrame": 3571756,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994608912
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-cycle-loan.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-cycle-loan.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-cycle-loan",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-cycle-loan.wav",
+        "sha256": "0fdf5f41d75e47b1fbc270a3e3ee35e1295c37d4535bf7c02efc269cb95dae68",
+        "pcmSha256": "44dd1c5bce1620e837e6f19b528846b10b59c7c31361103f9eef5bbf14064aab",
+        "bytes": 7056946,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3528451,
+        "durationMs": 160020,
+        "durationExactSeconds": "3528451/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-cycle-loan.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 949643,
+      "sha256": "fc055d8aa71efda6a338c5f34bca4413cbe3840af24761418440d5f0d6bf619d",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47476,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7681294,
+        "playableFramesAt48k": 7680982,
+        "playableDurationMs": 160020,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 163,
+        "packetCount": 8004,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "160.026958",
+      "validation": {
+        "decodedFramesAt48k": 7680982,
+        "decodedPcmAt48kSha256": "b7d50501f0ba3b602cdb09c7510efa1e6ce3331880cf589bfe051ff426a66e8c",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3528452,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "dda05145b6b963432f4e6cf142bbd7ab9e78fad708860a6d97200674cce7f380",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.734514,
+          "zeroLagCorrelation": 0.993400341,
+          "rmsRatioToGainAdjustedMaster": 0.984595484,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 837900,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.993593944
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 2058150,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.993485049
+            },
+            {
+              "region": "last-third",
+              "startFrame": 3057900,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995466628
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-flat-enquiry.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-flat-enquiry.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-flat-enquiry",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-flat-enquiry.wav",
+        "sha256": "3ec447e4bdcbc9749b75cf357540fe523a2b608d4c0e081178c419847d4fb0a9",
+        "pcmSha256": "8601b05d44858e96e698509b9a6e8c362f5b29041b529382b4ae250fb84c8d27",
+        "bytes": 6743766,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3371861,
+        "durationMs": 152919,
+        "durationExactSeconds": "3371861/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-flat-enquiry.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 902563,
+      "sha256": "297030ac45e3a0f6272e1748183e3caf1e38db9c7f201993228a61c1b0e4f90f",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47218,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7340418,
+        "playableFramesAt48k": 7340106,
+        "playableDurationMs": 152919,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 155,
+        "packetCount": 7649,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "152.925375",
+      "validation": {
+        "decodedFramesAt48k": 7340106,
+        "decodedPcmAt48kSha256": "a09523f644612270044136ad8ae949590e786d496a3c4ae0e6d056623bbcbd3f",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3371862,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "4b6b535e5bcb558949fc0ffb7540635ef7a55b567cc8095d48dfb54c10c3edef",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.940755,
+          "zeroLagCorrelation": 0.993708844,
+          "rmsRatioToGainAdjustedMaster": 0.984569536,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 264600,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.997026053
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1697253,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995194386
+            },
+            {
+              "region": "last-third",
+              "startFrame": 2755057,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995050012
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-gallery-orientation.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-gallery-orientation.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-gallery-orientation",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-gallery-orientation.wav",
+        "sha256": "4e313af8d4bfccfc1532b8c0d4347035da4608f08d1cac2a970ff4a0ce13dd55",
+        "pcmSha256": "a42bbace735fd6923a48d3704121414941e5ccdf019a8ca67057cbf67b294a01",
+        "bytes": 7330624,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3665290,
+        "durationMs": 166226,
+        "durationExactSeconds": "3665290/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-gallery-orientation.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 995529,
+      "sha256": "cc9477af0bb05868fc9d59e88423e54a630e89dddc59de7a5e0be2a5e228bd55",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47912,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7979175,
+        "playableFramesAt48k": 7978863,
+        "playableDurationMs": 166226,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 169,
+        "packetCount": 8314,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "166.232813",
+      "validation": {
+        "decodedFramesAt48k": 7978863,
+        "decodedPcmAt48kSha256": "05a5e668f0df8db35e38396b313cb87ddb54c1598d06f973c70093075bcea6c7",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3665291,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "fc889d35ce7d828f047017fc8762e9defa336122c660f7b5302569337dc7c53a",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 19.207291,
+          "zeroLagCorrelation": 0.994097314,
+          "rmsRatioToGainAdjustedMaster": 0.984588236,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 926100,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995076595
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 2125813,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994311655
+            },
+            {
+              "region": "last-third",
+              "startFrame": 3568076,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995766711
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-heritage-route.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-heritage-route.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-heritage-route",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-heritage-route.wav",
+        "sha256": "a92a7024ac28e4f6f4ac9317648be3ac37c2a2da7c804c409c5549fc0623423e",
+        "pcmSha256": "a35ddfd7f2e2fce9b5e7740451144a5ca518ef44fda0975518d23d2cc93319fb",
+        "bytes": 7022394,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3511175,
+        "durationMs": 159237,
+        "durationExactSeconds": "3511175/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-heritage-route.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 947679,
+      "sha256": "e9d16762bd994ba60693942474071eca6228ce91c2ba1ae30300da3e5a5390e2",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47611,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7643687,
+        "playableFramesAt48k": 7643375,
+        "playableDurationMs": 159237,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 162,
+        "packetCount": 7965,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "159.243479",
+      "validation": {
+        "decodedFramesAt48k": 7643375,
+        "decodedPcmAt48kSha256": "b61daf37256f7b2ec32db78bb55efdd513f5b5ca1fd6b7ceec268ad723c876db",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3511176,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "e9da3d114ab76da41c16deef0e318960491b029b1bdf78700c835f4291e67662",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 19.143387,
+          "zeroLagCorrelation": 0.994005217,
+          "rmsRatioToGainAdjustedMaster": 0.983931038,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 463050,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996348615
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1787791,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996884026
+            },
+            {
+              "region": "last-third",
+              "startFrame": 2737683,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995275008
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-instrument-loan.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-instrument-loan.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-instrument-loan",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-instrument-loan.wav",
+        "sha256": "a4df2d9f5585102935d2a0390b19ad62637caa8e1d0197529118725d23da0ee5",
+        "pcmSha256": "f0ec8f0de0640f0e68dfb9c7b1ebe0847c06a5434ed651c0c705ced72227d00e",
+        "bytes": 6859552,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3429754,
+        "durationMs": 155544,
+        "durationExactSeconds": "3429754/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-instrument-loan.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 923870,
+      "sha256": "1c688d238da30299606c7badf279658c32127232b60657720b02bfacc9a18e79",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47517,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7466444,
+        "playableFramesAt48k": 7466132,
+        "playableDurationMs": 155544,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 158,
+        "packetCount": 7780,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "155.550917",
+      "validation": {
+        "decodedFramesAt48k": 7466132,
+        "decodedPcmAt48kSha256": "6969b0f003cf252052d4bba71669ae970e81990cccfaba41cfd53e619e6b53ba",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3429755,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "dac21f51dd234c1dcdef48e18ce1d794710b63644503b94475375b6f65e95933",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.976265,
+          "zeroLagCorrelation": 0.99375657,
+          "rmsRatioToGainAdjustedMaster": 0.984955969,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 948150,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994042516
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1672451,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995028524
+            },
+            {
+              "region": "last-third",
+              "startFrame": 2925952,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996438897
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-library-registration.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-library-registration.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-library-registration",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-library-registration.wav",
+        "sha256": "632936b2340fa7ed8dab88c8fdb7a034dbaf0c59e818b4ec71f004fba2be1644",
+        "pcmSha256": "923bb6311251f2a9512b148d99dce432cd63906ca6573f861602a09300323f0b",
+        "bytes": 6951574,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3475765,
+        "durationMs": 157631,
+        "durationExactSeconds": "3475765/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-library-registration.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 921196,
+      "sha256": "aa906e3e8b37b1a991919d5b596cc44f38df73d54ea8c1e8022b94b1c8853d48",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 46752,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7566604,
+        "playableFramesAt48k": 7566292,
+        "playableDurationMs": 157631,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 160,
+        "packetCount": 7884,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "157.637583",
+      "validation": {
+        "decodedFramesAt48k": 7566292,
+        "decodedPcmAt48kSha256": "9e2ca4a37ecbf51b45cd853cc84b2fb4ee02f949658f01ceae78dfaa0d6399a4",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3475766,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "2b46f1a3e3464c6ea33f484f3b186d5ee242cced1fa63288ed960f6ad60c4a44",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 19.134968,
+          "zeroLagCorrelation": 0.993961801,
+          "rmsRatioToGainAdjustedMaster": 0.986035386,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 220500,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996740462
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1334988,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994107134
+            },
+            {
+              "region": "last-third",
+              "startFrame": 3088926,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.992332072
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-planetarium-reservation.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-planetarium-reservation.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-planetarium-reservation",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-planetarium-reservation.wav",
+        "sha256": "ba4999c38014e2b61f62d38661c49bd7c573aa079c5f80265f35cc27593b8cd5",
+        "pcmSha256": "5cc1905916ac9fa47c44ca7db6e5fd816412a9b6a374183e8eb47b835ae22336",
+        "bytes": 7444560,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3722258,
+        "durationMs": 168810,
+        "durationExactSeconds": "3722258/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-planetarium-reservation.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 1002291,
+      "sha256": "e3cc0d232253507f70d07f744b233ca9f32774f9176585385452db37bceb7b53",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47499,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 8103187,
+        "playableFramesAt48k": 8102875,
+        "playableDurationMs": 168810,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 171,
+        "packetCount": 8443,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "168.816396",
+      "validation": {
+        "decodedFramesAt48k": 8102875,
+        "decodedPcmAt48kSha256": "2fee8228dbfbe82eb06712cac6da560e9c4ec01a370247ca4044bff91bcd9078",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3722259,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "3b7dda66718add4d7153692c5f3cd917052ac144953f141922b8a23062a22efc",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.786229,
+          "zeroLagCorrelation": 0.993473834,
+          "rmsRatioToGainAdjustedMaster": 0.984678679,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 948150,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996347955
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1814052,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.993373525
+            },
+            {
+              "region": "last-third",
+              "startFrame": 3054805,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996630806
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-podcast-project.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-podcast-project.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-podcast-project",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-podcast-project.wav",
+        "sha256": "6c4fe9780f02007ffefb6218bb8bc618e304fa8135a268a4faae433004ddf2eb",
+        "pcmSha256": "7ef2dd38db94e4b3ee2d408d6b68da78099ef6d67bdd0497840668dae920ace2",
+        "bytes": 7057860,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3528908,
+        "durationMs": 160041,
+        "durationExactSeconds": "3528908/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-podcast-project.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 952518,
+      "sha256": "a43c9b9fe0364fdbe346478be8771a80502710af0e5255b08162ccdbe7960a88",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47614,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7682289,
+        "playableFramesAt48k": 7681977,
+        "playableDurationMs": 160041,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 163,
+        "packetCount": 8005,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "160.047688",
+      "validation": {
+        "decodedFramesAt48k": 7681977,
+        "decodedPcmAt48kSha256": "a64b7333bc0bbf99c6909de04d8f6ec756fc4aec4d3173f3e376c84966e8d1e5",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3528909,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "1a55f8c3d15c22404ee69ac432f33d775aae8781d5eb2ec2f43ddf33d2a96cd3",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.782883,
+          "zeroLagCorrelation": 0.993476233,
+          "rmsRatioToGainAdjustedMaster": 0.984393704,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 926100,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994965728
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1617302,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994635481
+            },
+            {
+              "region": "last-third",
+              "startFrame": 3014105,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994231764
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-recycling-induction.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-recycling-induction.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-recycling-induction",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-recycling-induction.wav",
+        "sha256": "102828d5b6764c8deb7f376fae8c15ba0d8c69da50f763ff15d35dd6a71079a3",
+        "pcmSha256": "11dd2b877b3ae40b562d5fee5894715548983f7098f3366a1ae8490c38d96b12",
+        "bytes": 7754078,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3877017,
+        "durationMs": 175828,
+        "durationExactSeconds": "3877017/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-recycling-induction.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 1030109,
+      "sha256": "9ffe164dd7a04b2167bffccf32048a919c7a158cbe98977dc192a21d4ebc1967",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 46869,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 8440077,
+        "playableFramesAt48k": 8439765,
+        "playableDurationMs": 175828,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 178,
+        "packetCount": 8794,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "175.834938",
+      "validation": {
+        "decodedFramesAt48k": 8439765,
+        "decodedPcmAt48kSha256": "1a7af768bb8994f775d212273a24d687c5820e402c20902161aec34fd8ed958d",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3877017,
+        "sourceFrameDelta": 0,
+        "sourceDurationDeltaMs": 0.0,
+        "decodedPcmAtSourceRateSha256": "2ff9a79aeeea8bcea70328dc7ba90f02cab0e07998bc04e7d6dd14e284399498",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.973424,
+          "zeroLagCorrelation": 0.993753472,
+          "rmsRatioToGainAdjustedMaster": 0.984910692,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 771750,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995043115
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1645139,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.993470602
+            },
+            {
+              "region": "last-third",
+              "startFrame": 3224128,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995441524
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-rock-pool-study.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-rock-pool-study.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-rock-pool-study",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-rock-pool-study.wav",
+        "sha256": "e8fef47f08a8818246a96c8408d20e5ae1355401f6bfed9bbbb1fe997f717e4d",
+        "pcmSha256": "7e5568e58e2b00381de607ca514271910816edf239933261929cff5718c469dd",
+        "bytes": 7484058,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3742007,
+        "durationMs": 169706,
+        "durationExactSeconds": "3742007/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-rock-pool-study.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 1015581,
+      "sha256": "3d007ef043d172dae4e6aa6a13635e7ffb0b3b2970e47cb9ea6d5bfcfc68c349",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47875,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 8146178,
+        "playableFramesAt48k": 8145866,
+        "playableDurationMs": 169706,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 172,
+        "packetCount": 8488,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "169.712042",
+      "validation": {
+        "decodedFramesAt48k": 8145866,
+        "decodedPcmAt48kSha256": "aac885ce4e79fd3ca37bfdd4960d0294ec53a1dc01103818e7432a71443cc479",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3742008,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "0724c48f421238db2e4b766b9ffc0f186cf532b764e72b6d5616a26c21c1fa57",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.80687,
+          "zeroLagCorrelation": 0.993510267,
+          "rmsRatioToGainAdjustedMaster": 0.983847873,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 837900,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995483666
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1644235,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996779944
+            },
+            {
+              "region": "last-third",
+              "startFrame": 2626971,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994435758
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-seed-storage-demonstration.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-seed-storage-demonstration.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-seed-storage-demonstration",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-seed-storage-demonstration.wav",
+        "sha256": "60252335ef34fc81df5d31ffb7a0fd70e67bad844922cf3c29282b74e3a0f85a",
+        "pcmSha256": "2f55e76c61b732d3daa17d52da2a5798fa1940ed5ea9b98badcf1a6efdfd0f44",
+        "bytes": 7764142,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3882049,
+        "durationMs": 176057,
+        "durationExactSeconds": "3882049/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-seed-storage-demonstration.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 1057080,
+      "sha256": "b55ada6f6c857e90ca17d6a47ad389ddc460c6df2f53067cb943f63756f0fc33",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 48034,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 8451031,
+        "playableFramesAt48k": 8450719,
+        "playableDurationMs": 176057,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 179,
+        "packetCount": 8806,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "176.063146",
+      "validation": {
+        "decodedFramesAt48k": 8450719,
+        "decodedPcmAt48kSha256": "37024baeb6c28e5cbbfb30d86c585a7f2d9be6081f869dde1901b1c850bad682",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3882049,
+        "sourceFrameDelta": 0,
+        "sourceDurationDeltaMs": 0.0,
+        "decodedPcmAtSourceRateSha256": "297c4c5333636f29411950f0f97f3707f4eb55a6f62129dde72fb039b2182614",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.62798,
+          "zeroLagCorrelation": 0.993245851,
+          "rmsRatioToGainAdjustedMaster": 0.983220402,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 970200,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995458792
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1404266,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996329562
+            },
+            {
+              "region": "last-third",
+              "startFrame": 2698282,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.993008753
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-stream-sound-investigation.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-stream-sound-investigation.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-stream-sound-investigation",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-stream-sound-investigation.wav",
+        "sha256": "dfae3c8a991ac8698efbced6b982cf645c6b97f99b4e469caff2d1b5ef2fdaee",
+        "pcmSha256": "d36b40c21fd2229a65a38c0ce7cf1c6d06091d918263db5782d3e1d11ecaddb5",
+        "bytes": 7895352,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3947654,
+        "durationMs": 179032,
+        "durationExactSeconds": "3947654/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-stream-sound-investigation.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 1074818,
+      "sha256": "e4df233a2a767c517f974712a9d8de6d0b08f7b0af408d5f9728f55a2f0b98c2",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 48028,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 8593845,
+        "playableFramesAt48k": 8593533,
+        "playableDurationMs": 179032,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 182,
+        "packetCount": 8954,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "179.038438",
+      "validation": {
+        "decodedFramesAt48k": 8593533,
+        "decodedPcmAt48kSha256": "f6038e503644a4de88b0392b7d3b5b7f26896bfc8878d644e6a22f7d7e03ec1c",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3947655,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "aea0618bfd5662528ef4065e8469b4ef1f5cd166c7fe31205fd1fefcf15b6543",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.915624,
+          "zeroLagCorrelation": 0.993690194,
+          "rmsRatioToGainAdjustedMaster": 0.984138504,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 352800,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.99609495
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 1690734,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994926831
+            },
+            {
+              "region": "last-third",
+              "startFrame": 3888619,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996108566
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-study-space-proposal.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-study-space-proposal.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-study-space-proposal",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-study-space-proposal.wav",
+        "sha256": "af78151979e93fb6b60bde595bb737b0903ac74b01e74929e23f9c505901bac7",
+        "pcmSha256": "f748541e25ca2631a7b40884d3d82ec048009cd37c406e6ab7579df0e6881213",
+        "bytes": 7249474,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3624715,
+        "durationMs": 164386,
+        "durationExactSeconds": "3624715/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-study-space-proposal.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 982477,
+      "sha256": "345029ca7391d8c93d9d4fa9942480b09727dc9a43b6b3a08992eae02c3fc7f5",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47813,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 7890849,
+        "playableFramesAt48k": 7890537,
+        "playableDurationMs": 164386,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 167,
+        "packetCount": 8222,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "164.392688",
+      "validation": {
+        "decodedFramesAt48k": 7890537,
+        "decodedPcmAt48kSha256": "98dfe85c0749d10f95bae604fade7b79792416c3c151db62555b3b9770838e9b",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3624716,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "32297b69285e34e1522ebe2059a2ad9c0c7a4b801bd10a3d53877ec8dbc32bcc",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.618581,
+          "zeroLagCorrelation": 0.993212528,
+          "rmsRatioToGainAdjustedMaster": 0.984402585,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 926100,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996961446
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 2090238,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994583395
+            },
+            {
+              "region": "last-third",
+              "startFrame": 2460576,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996433387
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/expansion/listening-v3-textile-reuse-study.wav": {
+      "originalAssetPath": "audio/expansion/listening-v3-textile-reuse-study.wav",
+      "kind": "listening",
+      "sourceId": "listening-v3-textile-reuse-study",
+      "exerciseId": null,
+      "sourceManifest": "tools/content/expansion/listening_work/audio-manifest.json",
+      "source": {
+        "assetPath": "audio/expansion/listening-v3-textile-reuse-study.wav",
+        "sha256": "4b3245e71fe0ac145dbd8cdecadaa6fba45639d16b00039c47ec0ae6b33287f5",
+        "pcmSha256": "ab4b9f36d8e316c0b46eae477752b1a82b94d2558c13740a067fc25632ce3a25",
+        "bytes": 7835608,
+        "sampleRate": 22050,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 3917782,
+        "durationMs": 177677,
+        "durationExactSeconds": "3917782/22050"
+      },
+      "compactAssetPath": "audio/compact/listening/listening-v3-textile-reuse-study.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 1062404,
+      "sha256": "73ca9b11538051b751369d4ef0a0bf12abf7e64328802ae0c2daf8fb65afa9b9",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47835,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 8528818,
+        "playableFramesAt48k": 8528506,
+        "playableDurationMs": 177677,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 180,
+        "packetCount": 8887,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "177.683708",
+      "validation": {
+        "decodedFramesAt48k": 8528506,
+        "decodedPcmAt48kSha256": "5240737cc17cd873f178f1261925872bda107f82f376658ceb39b93f97a6ccdb",
+        "decodedAtSourceSampleRate": 22050,
+        "decodedFramesAtSourceRate": 3917783,
+        "sourceFrameDelta": 1,
+        "sourceDurationDeltaMs": 0.045351474,
+        "decodedPcmAtSourceRateSha256": "a0622877c390930d80bb7fab590102be6c157fa63bff36272aa98d4095f991dc",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 18.638887,
+          "zeroLagCorrelation": 0.99325595,
+          "rmsRatioToGainAdjustedMaster": 0.984158558,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 1102500,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.995575248
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 2298177,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.994132299
+            },
+            {
+              "region": "last-third",
+              "startFrame": 3692304,
+              "frames": 22050,
+              "zeroLagCorrelation": 0.996908026
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/speaking_samples/ielts-speak-a1.wav": {
+      "originalAssetPath": "audio/speaking_samples/ielts-speak-a1.wav",
+      "kind": "speaking_sample",
+      "sourceId": null,
+      "exerciseId": "ielts-speak-a1",
+      "sourceManifest": "docs/content/speaking-audio-manifest.json",
+      "source": {
+        "assetPath": "audio/speaking_samples/ielts-speak-a1.wav",
+        "sha256": "1678aba56df8523201e9c02d96d8b4f3b8b6d288e4c03a5f809d970783cc9193",
+        "pcmSha256": "b42874065ccdd84fb671c0b182d6b90738c57ce677b873e2de043670963f0801",
+        "bytes": 1930670,
+        "sampleRate": 16000,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 965313,
+        "durationMs": 60332,
+        "durationExactSeconds": "965313/16000"
+      },
+      "compactAssetPath": "audio/compact/speaking/ielts-speak-a1.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 363869,
+      "sha256": "12c31e85b0f6feb36e42d6815d10ece8a7747e54ea1bffd5daa24b907bf19995",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 48249,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 2896251,
+        "playableFramesAt48k": 2895939,
+        "playableDurationMs": 60332,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 63,
+        "packetCount": 3019,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "60.338563",
+      "validation": {
+        "decodedFramesAt48k": 2895939,
+        "decodedPcmAt48kSha256": "7941b3114668481214fd98b17fac393c397f80b6ba4216738e57c3f0cc9939cc",
+        "decodedAtSourceSampleRate": 16000,
+        "decodedFramesAtSourceRate": 965313,
+        "sourceFrameDelta": 0,
+        "sourceDurationDeltaMs": 0.0,
+        "decodedPcmAtSourceRateSha256": "f34ace4d102739ef73099b008b4101b6088fe0ef1d3444bea332ee5750d418e4",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 19.803146,
+          "zeroLagCorrelation": 0.994841111,
+          "rmsRatioToGainAdjustedMaster": 0.986742155,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 0,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.995044905
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 513771,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.995838964
+            },
+            {
+              "region": "last-third",
+              "startFrame": 659542,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.994774531
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/speaking_samples/ielts-speak-d1.wav": {
+      "originalAssetPath": "audio/speaking_samples/ielts-speak-d1.wav",
+      "kind": "speaking_sample",
+      "sourceId": null,
+      "exerciseId": "ielts-speak-d1",
+      "sourceManifest": "docs/content/speaking-audio-manifest.json",
+      "source": {
+        "assetPath": "audio/speaking_samples/ielts-speak-d1.wav",
+        "sha256": "9573a64208b71828a11fe2ce4be2bf820967b4c24d491817ca86114ead6ba956",
+        "pcmSha256": "5fb6d69e8f2c97be1d315bbe8ac59744285c10e45917ad3a6cd20389e18e1aaa",
+        "bytes": 1560652,
+        "sampleRate": 16000,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 780304,
+        "durationMs": 48769,
+        "durationExactSeconds": "780304/16000"
+      },
+      "compactAssetPath": "audio/compact/speaking/ielts-speak-d1.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 293407,
+      "sha256": "d1b8ece0b198022903764bd5d2759429b0b680920f5d9412acc6fbb1eff81bf6",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 48130,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 2341224,
+        "playableFramesAt48k": 2340912,
+        "playableDurationMs": 48769,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 51,
+        "packetCount": 2441,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "48.775500",
+      "validation": {
+        "decodedFramesAt48k": 2340912,
+        "decodedPcmAt48kSha256": "1a9aa6bcbde373abf25909378419d065810bce793b1202e31812232a4a5740b8",
+        "decodedAtSourceSampleRate": 16000,
+        "decodedFramesAtSourceRate": 780304,
+        "sourceFrameDelta": 0,
+        "sourceDurationDeltaMs": 0.0,
+        "decodedPcmAtSourceRateSha256": "c1c90135d1a799febc7a0466527285811c9dbaddd305df86dc084f517a063040",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 19.594742,
+          "zeroLagCorrelation": 0.994598018,
+          "rmsRatioToGainAdjustedMaster": 0.987498835,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 208000,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.997102295
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 420101,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.995856097
+            },
+            {
+              "region": "last-third",
+              "startFrame": 744202,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.993326057
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/speaking_samples/ielts-speak-p1.wav": {
+      "originalAssetPath": "audio/speaking_samples/ielts-speak-p1.wav",
+      "kind": "speaking_sample",
+      "sourceId": null,
+      "exerciseId": "ielts-speak-p1",
+      "sourceManifest": "docs/content/speaking-audio-manifest.json",
+      "source": {
+        "assetPath": "audio/speaking_samples/ielts-speak-p1.wav",
+        "sha256": "627b190f3e7dd4d27fc9e0daeafa41abdf853644b8b8aaef233a1eca472fffde",
+        "pcmSha256": "d1fcaa668db9ea198ff05cbcebee703242499503b67da4f50e0b807008427622",
+        "bytes": 1578970,
+        "sampleRate": 16000,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 789463,
+        "durationMs": 49341,
+        "durationExactSeconds": "789463/16000"
+      },
+      "compactAssetPath": "audio/compact/speaking/ielts-speak-p1.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 297813,
+      "sha256": "2daa93ad5e37008d8570c5636b49b6d1242e9a738034903181e6496319abaf4b",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 48286,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 2368701,
+        "playableFramesAt48k": 2368389,
+        "playableDurationMs": 49341,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 52,
+        "packetCount": 2470,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "49.347938",
+      "validation": {
+        "decodedFramesAt48k": 2368389,
+        "decodedPcmAt48kSha256": "ce06236c3035160b2eb89cf1e4ec57cc6ec850ac753a96a1a41febf5fd4ce633",
+        "decodedAtSourceSampleRate": 16000,
+        "decodedFramesAtSourceRate": 789463,
+        "sourceFrameDelta": 0,
+        "sourceDurationDeltaMs": 0.0,
+        "decodedPcmAtSourceRateSha256": "7b65c1b6df768500d09b8274cfe31f645846597f6aa8e32b6b5af212c4e95674",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 19.547356,
+          "zeroLagCorrelation": 0.994528846,
+          "rmsRatioToGainAdjustedMaster": 0.986471728,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 224000,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.995610959
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 503154,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.993167859
+            },
+            {
+              "region": "last-third",
+              "startFrame": 750308,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.996076037
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/speaking_samples/ielts-speak-v3-meal-for-others.wav": {
+      "originalAssetPath": "audio/speaking_samples/ielts-speak-v3-meal-for-others.wav",
+      "kind": "speaking_sample",
+      "sourceId": null,
+      "exerciseId": "ielts-speak-v3-meal-for-others",
+      "sourceManifest": "docs/content/speaking-audio-manifest.json",
+      "source": {
+        "assetPath": "audio/speaking_samples/ielts-speak-v3-meal-for-others.wav",
+        "sha256": "f32cab61b1cd6b39e5ddcc545de00b72de2d08c3de98336d6f64af6f2bf7af50",
+        "pcmSha256": "47dedf351da1be8366bdd1dd2bf26764d5df243feaa04533ae70bd776dd21929",
+        "bytes": 2213060,
+        "sampleRate": 16000,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 1106508,
+        "durationMs": 69157,
+        "durationExactSeconds": "1106508/16000"
+      },
+      "compactAssetPath": "audio/compact/speaking/ielts-speak-v3-meal-for-others.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 416517,
+      "sha256": "f77be630a9f99f1e5a41bbb322ced0989154a576b348786f0d50310de970a85e",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 48182,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 3319836,
+        "playableFramesAt48k": 3319524,
+        "playableDurationMs": 69157,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 72,
+        "packetCount": 3461,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "69.163250",
+      "validation": {
+        "decodedFramesAt48k": 3319524,
+        "decodedPcmAt48kSha256": "1bdf7b6bb789d6094aad4a90d6ff6c36d978fec2e57646fdd8aef98010449d1d",
+        "decodedAtSourceSampleRate": 16000,
+        "decodedFramesAtSourceRate": 1106508,
+        "sourceFrameDelta": 0,
+        "sourceDurationDeltaMs": 0.0,
+        "decodedPcmAtSourceRateSha256": "cb041c606f8bcbb30252f922f771347f8ba91120cff0f3b6326dc8e053efcf8a",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 20.188496,
+          "zeroLagCorrelation": 0.99527632,
+          "rmsRatioToGainAdjustedMaster": 0.98692437,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 240000,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.996494257
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 400836,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.994687791
+            },
+            {
+              "region": "last-third",
+              "startFrame": 1073672,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.994739757
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/speaking_samples/ielts-speak-v3-meaningful-photograph.wav": {
+      "originalAssetPath": "audio/speaking_samples/ielts-speak-v3-meaningful-photograph.wav",
+      "kind": "speaking_sample",
+      "sourceId": null,
+      "exerciseId": "ielts-speak-v3-meaningful-photograph",
+      "sourceManifest": "docs/content/speaking-audio-manifest.json",
+      "source": {
+        "assetPath": "audio/speaking_samples/ielts-speak-v3-meaningful-photograph.wav",
+        "sha256": "81dc3e310ea3ab7c7714413196ba9f401f000bfa9427c68cdcac789a7ba9beb3",
+        "pcmSha256": "46a04e90809fbc562c441f876b69729545d966cbed2a118abece161199fb587f",
+        "bytes": 2064858,
+        "sampleRate": 16000,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 1032407,
+        "durationMs": 64525,
+        "durationExactSeconds": "1032407/16000"
+      },
+      "compactAssetPath": "audio/compact/speaking/ielts-speak-v3-meaningful-photograph.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 389098,
+      "sha256": "6cd6197ffbf8d722724e1491f4855cdd0ac12cf7cd34974f30af6e6773ba3f85",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 48241,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 3097533,
+        "playableFramesAt48k": 3097221,
+        "playableDurationMs": 64525,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 67,
+        "packetCount": 3229,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "64.531938",
+      "validation": {
+        "decodedFramesAt48k": 3097221,
+        "decodedPcmAt48kSha256": "140d912ce42668c72e501a32a5ef28b38baacfd8520201c98af96a9ffc1bcbc8",
+        "decodedAtSourceSampleRate": 16000,
+        "decodedFramesAtSourceRate": 1032407,
+        "sourceFrameDelta": 0,
+        "sourceDurationDeltaMs": 0.0,
+        "decodedPcmAtSourceRateSha256": "cbff2a81d0be8c315b707b2b2e8d7557e9e479d08e0f6b610b7c85ce7e434cda",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 19.88535,
+          "zeroLagCorrelation": 0.994934366,
+          "rmsRatioToGainAdjustedMaster": 0.987761516,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 192000,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.996101883
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 360135,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.99664693
+            },
+            {
+              "region": "last-third",
+              "startFrame": 720271,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.996013745
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    },
+    "audio/speaking_samples/ielts-speak-v3-small-achievement.wav": {
+      "originalAssetPath": "audio/speaking_samples/ielts-speak-v3-small-achievement.wav",
+      "kind": "speaking_sample",
+      "sourceId": null,
+      "exerciseId": "ielts-speak-v3-small-achievement",
+      "sourceManifest": "docs/content/speaking-audio-manifest.json",
+      "source": {
+        "assetPath": "audio/speaking_samples/ielts-speak-v3-small-achievement.wav",
+        "sha256": "f9592d7fcd30fdb41add028dd8713c5b97f9f9171cf65e14ff266dd6b2ef13c7",
+        "pcmSha256": "dd7629723c00ac46f12fe389e7f71959b9a4d8b3126bc43b4f95e78812eae2e9",
+        "bytes": 2180792,
+        "sampleRate": 16000,
+        "channels": 1,
+        "bitsPerSample": 16,
+        "frames": 1090374,
+        "durationMs": 68148,
+        "durationExactSeconds": "1090374/16000"
+      },
+      "compactAssetPath": "audio/compact/speaking/ielts-speak-v3-small-achievement.ogg",
+      "codec": "opus",
+      "container": "ogg",
+      "channels": 1,
+      "decodeClockSampleRate": 48000,
+      "bytes": 405556,
+      "sha256": "d238a916b907e6c23d4563e2659aab8268bb626d28dfa99f0bd215a86788aa5b",
+      "nominalBitrateBitsPerSecond": 48000,
+      "actualContainerBitrateBitsPerSecond": 47609,
+      "opus": {
+        "preSkipSamplesAt48k": 312,
+        "preSkipMs": 6.5,
+        "finalGranulePositionAt48k": 3271434,
+        "playableFramesAt48k": 3271122,
+        "playableDurationMs": 68148,
+        "inputSampleRateHeader": 48000,
+        "outputGainQ7_8": 0,
+        "channelMappingFamily": 0,
+        "streamSerial": 0,
+        "pageCount": 71,
+        "packetCount": 3410,
+        "vendor": "ffmpeg"
+      },
+      "ffprobeReportedDurationSeconds": "68.154875",
+      "validation": {
+        "decodedFramesAt48k": 3271122,
+        "decodedPcmAt48kSha256": "52f2337f8c6147a77d3f93d0b2884f1d1eb35cd1d856950861b929d8945fb66c",
+        "decodedAtSourceSampleRate": 16000,
+        "decodedFramesAtSourceRate": 1090374,
+        "sourceFrameDelta": 0,
+        "sourceDurationDeltaMs": 0.0,
+        "decodedPcmAtSourceRateSha256": "6e8c3df416fd031994067b13eb8e0a848cde409fd6d19fd99f09e2169a628f1c",
+        "sameRoundedDurationMs": true,
+        "roundedDurationDeltaMs": 0,
+        "sourceDurationPreservedWithoutTrimming": true,
+        "noClippedDecodedSamples": true,
+        "waveform": {
+          "referenceLinearGainApplied": 0.85,
+          "snrDb": 19.68699,
+          "zeroLagCorrelation": 0.994708566,
+          "rmsRatioToGainAdjustedMaster": 0.986271049,
+          "anchorChecks": [
+            {
+              "region": "first-third",
+              "startFrame": 32000,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.993893298
+            },
+            {
+              "region": "middle-third",
+              "startFrame": 683458,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.996186359
+            },
+            {
+              "region": "last-third",
+              "startFrame": 726916,
+              "frames": 16000,
+              "zeroLagCorrelation": 0.996426888
+            }
+          ],
+          "metricLimit": "Waveform consistency checks detect gross offset, replacement or missing audio; they are not an intelligibility score or a human listening review."
+        }
+      }
+    }
+  }
+}

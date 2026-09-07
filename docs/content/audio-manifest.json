@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "engine": {
+    "name": "eSpeak NG",
+    "version": "1.52.0",
+    "voice": "en-us",
+    "wordsPerMinute": 155,
+    "deterministic": true,
+    "license": "GPL-3.0-or-later",
+    "source": "https://github.com/espeak-ng/espeak-ng/tree/1.52.0",
+    "buildTimeOnly": true
+  },
+  "reviewStatus": "SYNTHETIC_MACHINE_VALIDATED_EXPERT_LISTENING_REVIEW_PENDING",
+  "clips": {
+    "listening-a-theatre": {
+      "audioAssetPath": "audio/listening-a-theatre.wav",
+      "title": "Community theatre volunteer briefing",
+      "split": "ASSESSMENT",
+      "synthetic": true,
+      "durationMs": 33950,
+      "sampleRate": 22050,
+      "channels": 1,
+      "bitsPerSample": 16,
+      "bytes": 1497250,
+      "sha256": "08f1cbb7ed655452b7d3f0b0e3344ca3ec94c57c1587a35ff866a01e121580a9",
+      "transcriptSegments": [
+        {
+          "startMs": 0,
+          "endMs": 5885,
+          "text": "Thank you for volunteering at the community theatre. This is a synthetic practice recording."
+        },
+        {
+          "startMs": 6235,
+          "endMs": 12750,
+          "text": "The training takes place in the studio, not on the main stage. The stage is being repaired this week."
+        },
+        {
+          "startMs": 13100,
+          "endMs": 19475,
+          "text": "There will be eighteen volunteers. We originally expected twenty, but two people have withdrawn."
+        },
+        {
+          "startMs": 19825,
+          "endMs": 26407,
+          "text": "Your first duty is to check tickets at the door. Later, you will help visitors find their seats."
+        },
+        {
+          "startMs": 26757,
+          "endMs": 33950,
+          "text": "Please wear a black shirt. We will lend you a name badge, and you should return it to the office at the end of the evening."
+        }
+      ],
+      "signal": {
+        "peakAmplitude": 27767,
+        "rmsAmplitude": 2613.74,
+        "clippedSamples": 0
+      }
+    },
+    "listening-d-workshop": {
+      "audioAssetPath": "audio/listening-d-workshop.wav",
+      "title": "Repair workshop announcement",
+      "split": "DIAGNOSTIC",
+      "synthetic": true,
+      "durationMs": 35784,
+      "sampleRate": 22050,
+      "channels": 1,
+      "bitsPerSample": 16,
+      "bytes": 1578116,
+      "sha256": "d9043a9a6d3b7bc4df2b35698662fa6c83a611ab282ad5bf70bd4402d72607fa",
+      "transcriptSegments": [
+        {
+          "startMs": 0,
+          "endMs": 5518,
+          "text": "Welcome to the North Hall repair workshop. This is a synthetic practice recording."
+        },
+        {
+          "startMs": 5868,
+          "endMs": 13764,
+          "text": "Our next session is on Saturday. It was advertised for Friday, but the hall is being used for a concert that evening."
+        },
+        {
+          "startMs": 14114,
+          "endMs": 20257,
+          "text": "The workshop begins at ten in the morning. Please arrive a little earlier so we can check your booking."
+        },
+        {
+          "startMs": 20607,
+          "endMs": 27369,
+          "text": "Bring one small broken item and a notebook. We will provide the tools, so you do not need to bring any."
+        },
+        {
+          "startMs": 27719,
+          "endMs": 35784,
+          "text": "The session costs twelve pounds. Tea is included, but lunch is not. Book at the reception desk before Thursday."
+        }
+      ],
+      "signal": {
+        "peakAmplitude": 26546,
+        "rmsAmplitude": 2787.52,
+        "clippedSamples": 0
+      }
+    },
+    "listening-p-fieldtrip": {
+      "audioAssetPath": "audio/listening-p-fieldtrip.wav",
+      "title": "Wetland field trip briefing",
+      "split": "PRACTICE",
+      "synthetic": true,
+      "durationMs": 37817,
+      "sampleRate": 22050,
+      "channels": 1,
+      "bitsPerSample": 16,
+      "bytes": 1667756,
+      "sha256": "75d68e26a74b9565465ddf648cd98f27d593dfc23c6933986f27bc4464711a7b",
+      "transcriptSegments": [
+        {
+          "startMs": 0,
+          "endMs": 6162,
+          "text": "Here are the arrangements for our wetland field trip. This is a synthetic practice recording."
+        },
+        {
+          "startMs": 6512,
+          "endMs": 14279,
+          "text": "We will meet at the east gate of the science building. Please do not wait at the main entrance, where another group will be gathering."
+        },
+        {
+          "startMs": 14629,
+          "endMs": 20877,
+          "text": "The bus leaves at nine fifteen. The journey takes about forty minutes, depending on traffic."
+        },
+        {
+          "startMs": 21227,
+          "endMs": 28827,
+          "text": "You must bring waterproof boots because the paths may be muddy. We have spare binoculars for anyone who needs them."
+        },
+        {
+          "startMs": 29177,
+          "endMs": 37817,
+          "text": "In the afternoon, we will measure the water depth at three points. Last year we measured temperature, but this year the focus is depth."
+        }
+      ],
+      "signal": {
+        "peakAmplitude": 25659,
+        "rmsAmplitude": 2704.38,
+        "clippedSamples": 0
+      }
+    }
+  }
+}

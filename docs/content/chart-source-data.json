@@ -1,0 +1,104 @@
+{
+  "writing-d-transport": {
+    "title": "Commuting modes at fictional Norvale College",
+    "xLabel": "Year",
+    "yLabel": "Share of surveyed commuters",
+    "unit": "%",
+    "labels": [
+      "2016",
+      "2025"
+    ],
+    "series": [
+      {
+        "name": "Bus",
+        "values": [
+          30.0,
+          45.0
+        ]
+      },
+      {
+        "name": "Car",
+        "values": [
+          50.0,
+          35.0
+        ]
+      },
+      {
+        "name": "Bicycle",
+        "values": [
+          20.0,
+          20.0
+        ]
+      }
+    ]
+  },
+  "writing-p-library": {
+    "title": "Annual visits to fictional Alder Library",
+    "xLabel": "Year",
+    "yLabel": "Visits",
+    "unit": "thousand visits",
+    "labels": [
+      "2019",
+      "2021",
+      "2023",
+      "2025"
+    ],
+    "series": [
+      {
+        "name": "In-person",
+        "values": [
+          120.0,
+          80.0,
+          110.0,
+          130.0
+        ]
+      },
+      {
+        "name": "Online",
+        "values": [
+          40.0,
+          90.0,
+          120.0,
+          150.0
+        ]
+      }
+    ]
+  },
+  "writing-a-energy": {
+    "title": "Electricity generation in fictional Harven",
+    "xLabel": "Year",
+    "yLabel": "Electricity generated",
+    "unit": "GWh",
+    "labels": [
+      "2015",
+      "2020",
+      "2025"
+    ],
+    "series": [
+      {
+        "name": "Gas",
+        "values": [
+          90.0,
+          80.0,
+          60.0
+        ]
+      },
+      {
+        "name": "Solar",
+        "values": [
+          10.0,
+          25.0,
+          50.0
+        ]
+      },
+      {
+        "name": "Wind",
+        "values": [
+          20.0,
+          25.0,
+          40.0
+        ]
+      }
+    ]
+  }
+}

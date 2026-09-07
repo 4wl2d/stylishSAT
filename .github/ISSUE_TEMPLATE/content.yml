@@ -1,0 +1,17 @@
+name: Content correction
+description: Report an exercise, explanation or audio issue
+title: '[Content] '
+body:
+  - type: input
+    id: exercise
+    attributes:
+      label: Exercise ID and app version
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: Issue and proposed correction
+      description: Include your reasoning or a reliable reference.
+    validations:
+      required: true

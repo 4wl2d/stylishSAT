@@ -1,0 +1,12 @@
+title = "StylishSAT public-source secret scan"
+[extend]
+useDefault = true
+
+# Immutable regression fixtures contain SHA-256 digests of answer-key prefixes,
+# not API credentials. Keep this exception limited to that field and two files.
+[[allowlists]]
+description = "Prompt fixture answer-key prefix SHA-256"
+condition = "AND"
+regexTarget = "line"
+paths = ['''app/src/test/resources/prompt-candidates/(manifest|manifest-explicit-comparison-v2)\.json$''']
+regexes = ['''^\s*"keyPrefixSha256": "[0-9a-f]{64}",$''']

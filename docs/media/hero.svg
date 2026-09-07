@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-labelledby="title desc">
+<title id="title">StylishSAT</title><desc id="desc">A little practice. A clearer path. Offline SAT and IELTS practice for Android.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#F4EFFC"/><stop offset="1" stop-color="#E8F1EE"/></linearGradient></defs>
+<rect width="1200" height="400" rx="28" fill="url(#bg)"/>
+<circle cx="1050" cy="50" r="220" fill="#E9E0F6"/>
+<path d="M825 295C830 226 929 286 943 207S1060 197 1080 114" fill="none" stroke="#6750A4" stroke-width="5" stroke-linecap="round"/>
+<g fill="#6750A4"><circle cx="825" cy="295" r="10"/><circle cx="943" cy="207" r="10"/><circle cx="1080" cy="114" r="10"/></g>
+<rect x="800" y="112" width="107" height="44" rx="22" fill="#FFF"/><text x="853" y="140" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#55486C">one step</text>
+<rect x="974" y="284" width="132" height="44" rx="22" fill="#FFF"/><text x="1040" y="312" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#55486C">every day</text>
+<text x="72" y="90" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="3" fill="#6750A4">STYLISHSAT</text>
+<text x="68" y="172" font-family="Arial,sans-serif" font-size="56" font-weight="700" fill="#252030">A little practice.</text>
+<text x="68" y="240" font-family="Arial,sans-serif" font-size="56" font-weight="700" fill="#252030">A clearer path.</text>
+<text x="72" y="310" font-family="Arial,sans-serif" font-size="22" fill="#5E5868">SAT &amp; IELTS Academic · Offline · Android</text>
+</svg>

@@ -1,0 +1,21 @@
+StylishSAT original draft content · full bank
+
+Lessons, passages, tasks, fictional chart values, listening scripts and feedback samples were authored for this project using AI assistance. They have machine validation but no independent human expert review. They are not official SAT or IELTS materials and do not supply calibrated SAT scores or IELTS bands.
+
+Official reference links:
+https://satsuite.collegeboard.org/higher-ed-professionals/sat-validity/content-domains
+https://ielts.org/take-a-test/preparation-resources/writing-test-resources
+https://ielts.org/take-a-test/test-types/ielts-academic-test/ielts-academic-format-speaking
+
+Synthetic Listening and Speaking audio:
+Generated from original scripts using eSpeak NG 1.52.0 formant synthesis. Legacy Listening clips use en-us at155words/minute. Expanded Listening clips use en-us/en-gb at150or170words/minute; Speaking examples use en-us/en-gb/en-gb-scotland at155–165words/minute. Listening recordings announce their synthetic origin; Speaking examples are labeled synthetic in the player. No Apple System Voices, cloned human voices, official recordings or speech-synthesis executable are bundled. The open-source eSpeak NG engine was used only during authoring. New clips are delivered as Ogg/Opus; Reproducibility manifests are included in the public source; duplicate WAV masters remain in the local authoring workspace.
+Engine source and GPL-3.0-or-later licence: https://github.com/espeak-ng/espeak-ng/tree/1.52.0
+
+Optional model downloads:
+Gemma 4 E2B IT is a separate download, not part of the content package. Its use is subject to the Gemma terms shown by the download source:
+https://ai.google.dev/gemma/terms
+https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm
+Do not infer redistribution rights from the content package. Preserve model-source terms and provenance when installing a model.
+
+whisper.cpp native runtime:
+See whisper-LICENSE.txt for the bundled runtime's MIT licence notice. Model files are downloaded separately.

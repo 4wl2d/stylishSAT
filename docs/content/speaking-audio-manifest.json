@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "synthetic": true,
+  "humanVoiceSample": false,
+  "reviewStatus": "SYNTHETIC_MACHINE_VALIDATED_HUMAN_LISTENING_REVIEW_PENDING",
+  "intendedUse": "Illustrative Speaking answer playback after submission only; not an ASR evaluation item or calibrated pronunciation/band exemplar.",
+  "transcriptPolicy": "The exact sampleAnswer string, including any original illustrative-response prefix, is passed unchanged to synthesis. No new spoken disclaimer or punctuation normalization is inserted.",
+  "engine": {
+    "synthesizer": {
+      "name": "eSpeak NG",
+      "version": "1.52.0",
+      "synthesis": "open formant synthesis; no recorded proprietary voices",
+      "license": "GPL-3.0-or-later",
+      "source": "https://github.com/espeak-ng/espeak-ng/tree/1.52.0"
+    },
+    "resampler": {
+      "name": "FFmpeg/libswresample",
+      "version": "9.0.1",
+      "filter": "aresample=16000:resampler=swr:dither_method=0:filter_size=32:phase_shift=10:exact_rational=1:filter_type=kaiser:kaiser_beta=9",
+      "output": "signed16-bit little-endian mono PCM at16000Hz"
+    },
+    "buildTimeOnly": true
+  },
+  "samples": {
+    "ielts-speak-a1": {
+      "exerciseId": "ielts-speak-a1",
+      "assetPath": "audio/speaking_samples/ielts-speak-a1.wav",
+      "synthetic": true,
+      "transcript": "Illustrative Part 2 response: Last autumn, a friend and I decided how to use a free weekend during a short trip. I wanted to visit a science museum, while she preferred walking in the nearby hills. We initially treated it as a choice between two completely different days, so neither of us was very satisfied with the other suggestion.\n\nWe then checked the opening times and the weather forecast together. Rain was expected in the morning, but the afternoon looked clearer. The museum opened early and was close to our accommodation. We decided to spend the morning there and take a shorter walk later. This meant giving up the longest walking route, but it allowed us both to do something we enjoyed.\n\nWhat I learned was that disagreement sometimes becomes easier when people examine practical details instead of repeating their preferences. We did not get everything we first wanted, but the final plan reflected both of our priorities and worked well on the day.",
+      "sourceExerciseVersion": 2,
+      "sourceFile": "app/src/main/assets/content/seed-v1.json",
+      "durationMs": 60332,
+      "sampleRate": 16000,
+      "channels": 1,
+      "bitsPerSample": 16,
+      "frames": 965313,
+      "bytes": 1930670,
+      "sha256": "1678aba56df8523201e9c02d96d8b4f3b8b6d288e4c03a5f809d970783cc9193",
+      "pcmSha256": "b42874065ccdd84fb671c0b182d6b90738c57ce677b873e2de043670963f0801",
+      "signal": {
+        "sampleCount": 965313,
+        "peakAmplitude": 26554,
+        "rmsAmplitude": 2588.957898,
+        "clippedSamples": 0
+      },
+      "synthesisParameters": {
+        "voice": "en-gb",
+        "wordsPerMinute": 155,
+        "pitch": 50,
+        "amplitude": 85,
+        "inputSampleRate": 22050,
+        "inputPcmSha256": "2a0bac278fb846122e644cf6446af28b358d2ba7b69d031f29960dcbc3861f96",
+        "cleanResampledPcmSha256": "b42874065ccdd84fb671c0b182d6b90738c57ce677b873e2de043670963f0801",
+        "resamplingFilter": "aresample=16000:resampler=swr:dither_method=0:filter_size=32:phase_shift=10:exact_rational=1:filter_type=kaiser:kaiser_beta=9",
+        "noise": {
+          "kind": "none"
+        }
+      },
+      "transcriptSha256": "74cbc7f088e1a4099c6d6f0c93aa89cf2831ebaabc64f6a9769fe2e4afe0fde1"
+    },
+    "ielts-speak-d1": {
+      "exerciseId": "ielts-speak-d1",
+      "assetPath": "audio/speaking_samples/ielts-speak-d1.wav",
+      "synthetic": true,
+      "transcript": "Illustrative Part 2 response, not a memorization script: I learned how to repair a bicycle puncture from a neighbor last spring. Before that, I usually took my bike to a shop, even when the problem was small. One weekend the rear tyre went flat just before I planned to visit a friend. My neighbor showed me how to remove the tube, find the hole and attach a patch. I did the repair myself while he explained each step.\n\nAt first I found it difficult to put the tyre back on the wheel, so I had to slow down and try again. A few weeks later, I had another puncture and managed to fix it without help. That made the lesson useful in a very immediate way. More generally, it showed me that a practical skill becomes much easier to remember when I perform the steps rather than only watch someone else do them.",
+      "sourceExerciseVersion": 2,
+      "sourceFile": "app/src/main/assets/content/seed-v1.json",
+      "durationMs": 48769,
+      "sampleRate": 16000,
+      "channels": 1,
+      "bitsPerSample": 16,
+      "frames": 780304,
+      "bytes": 1560652,
+      "sha256": "9573a64208b71828a11fe2ce4be2bf820967b4c24d491817ca86114ead6ba956",
+      "pcmSha256": "5fb6d69e8f2c97be1d315bbe8ac59744285c10e45917ad3a6cd20389e18e1aaa",
+      "signal": {
+        "sampleCount": 780304,
+        "peakAmplitude": 24872,
+        "rmsAmplitude": 2379.399489,
+        "clippedSamples": 0
+      },
+      "synthesisParameters": {
+        "voice": "en-us",
+        "wordsPerMinute": 165,
+        "pitch": 50,
+        "amplitude": 85,
+        "inputSampleRate": 22050,
+        "inputPcmSha256": "238e677a6093d21e6eaa82ce229e6120a6c8dbeb48ed3d46cd5db700f8ae9990",
+        "cleanResampledPcmSha256": "5fb6d69e8f2c97be1d315bbe8ac59744285c10e45917ad3a6cd20389e18e1aaa",
+        "resamplingFilter": "aresample=16000:resampler=swr:dither_method=0:filter_size=32:phase_shift=10:exact_rational=1:filter_type=kaiser:kaiser_beta=9",
+        "noise": {
+          "kind": "none"
+        }
+      },
+      "transcriptSha256": "b3d5c11edbd58f7840677f42cde8c7e482b2423edc5ac64fe3682563f2087896"
+    },
+    "ielts-speak-p1": {
+      "exerciseId": "ielts-speak-p1",
+      "assetPath": "audio/speaking_samples/ielts-speak-p1.wav",
+      "synthetic": true,
+      "transcript": "Illustrative Part 2 response: A small square near my home was redesigned last year. It used to be mostly paving, with a few benches along one edge. People crossed it on the way to the bus stop, but very few stayed there. The council added trees in large planters, moved the benches into shaded areas and left a clear path through the middle.\n\nI now see several different groups using it. Older residents often sit there in the morning, and parents stop with children after school. I also use one of the benches when I have a few minutes before my bus arrives. The change seems successful because it makes the square useful both as a route and as a place to rest. There is still a problem with litter after busy evenings, so I would add another bin near the food shop. Even with that limitation, the square feels much more welcoming than before.",
+      "sourceExerciseVersion": 2,
+      "sourceFile": "app/src/main/assets/content/seed-v1.json",
+      "durationMs": 49341,
+      "sampleRate": 16000,
+      "channels": 1,
+      "bitsPerSample": 16,
+      "frames": 789463,
+      "bytes": 1578970,
+      "sha256": "627b190f3e7dd4d27fc9e0daeafa41abdf853644b8b8aaef233a1eca472fffde",
+      "pcmSha256": "d1fcaa668db9ea198ff05cbcebee703242499503b67da4f50e0b807008427622",
+      "signal": {
+        "sampleCount": 789463,
+        "peakAmplitude": 31371,
+        "rmsAmplitude": 2742.056843,
+        "clippedSamples": 0
+      },
+      "synthesisParameters": {
+        "voice": "en-gb-scotland",
+        "wordsPerMinute": 160,
+        "pitch": 50,
+        "amplitude": 85,
+        "inputSampleRate": 22050,
+        "inputPcmSha256": "27da63689687ea63855250f713f8f4e531be3f56ba2d676e21784131e6cb1e91",
+        "cleanResampledPcmSha256": "d1fcaa668db9ea198ff05cbcebee703242499503b67da4f50e0b807008427622",
+        "resamplingFilter": "aresample=16000:resampler=swr:dither_method=0:filter_size=32:phase_shift=10:exact_rational=1:filter_type=kaiser:kaiser_beta=9",
+        "noise": {
+          "kind": "none"
+        }
+      },
+      "transcriptSha256": "f03c879821a4fbc36f879220783f3a800c3736b98ebfb5c319719eeec6fc2a05"
+    },
+    "ielts-speak-v3-meal-for-others": {
+      "exerciseId": "ielts-speak-v3-meal-for-others",
+      "assetPath": "audio/speaking_samples/ielts-speak-v3-meal-for-others.wav",
+      "synthetic": true,
+      "transcript": "Last winter I prepared dinner for three friends who were helping me move into a new flat. I wanted to thank them without spending the whole evening away from them in the kitchen. I decided to make a vegetable stew with rice because I could prepare most of it before they arrived.\n\nI made a shopping list in the morning and checked that nobody had an ingredient they needed to avoid. The main difficulty was timing. I started the rice too early, so it was ready while the vegetables were still quite firm. Instead of trying to serve everything immediately, I turned down the heat and put some bread on the table.\n\nThat small delay actually gave us time to sit together and talk about the day. By the time the stew was ready, nobody seemed worried about the schedule. We ate from the few bowls I had unpacked, and one friend helped me wash them afterwards.\n\nWhat I learned was that preparing a meal for people involves more than getting a recipe right. Checking their needs and leaving myself some extra time mattered just as much. Next time, I would work backwards from the serving time before starting each part of the meal.",
+      "sourceExerciseVersion": 1,
+      "sourceFile": "tools/content/expansion/ielts_open.json",
+      "durationMs": 69157,
+      "sampleRate": 16000,
+      "channels": 1,
+      "bitsPerSample": 16,
+      "frames": 1106508,
+      "bytes": 2213060,
+      "sha256": "f32cab61b1cd6b39e5ddcc545de00b72de2d08c3de98336d6f64af6f2bf7af50",
+      "pcmSha256": "47dedf351da1be8366bdd1dd2bf26764d5df243feaa04533ae70bd776dd21929",
+      "signal": {
+        "sampleCount": 1106508,
+        "peakAmplitude": 25987,
+        "rmsAmplitude": 2631.42593,
+        "clippedSamples": 0
+      },
+      "synthesisParameters": {
+        "voice": "en-gb",
+        "wordsPerMinute": 155,
+        "pitch": 50,
+        "amplitude": 85,
+        "inputSampleRate": 22050,
+        "inputPcmSha256": "a9f088b91c87a9fdc8a70de961d607050297a5695bd1e4d937e925d79d7bba33",
+        "cleanResampledPcmSha256": "47dedf351da1be8366bdd1dd2bf26764d5df243feaa04533ae70bd776dd21929",
+        "resamplingFilter": "aresample=16000:resampler=swr:dither_method=0:filter_size=32:phase_shift=10:exact_rational=1:filter_type=kaiser:kaiser_beta=9",
+        "noise": {
+          "kind": "none"
+        }
+      },
+      "transcriptSha256": "3957b3dd3cad8c6a7e03f53275d1d964edea20b50028d02c00930294ab7037dd"
+    },
+    "ielts-speak-v3-meaningful-photograph": {
+      "exerciseId": "ielts-speak-v3-meaningful-photograph",
+      "assetPath": "audio/speaking_samples/ielts-speak-v3-meaningful-photograph.wav",
+      "synthetic": true,
+      "transcript": "I keep a photograph of my grandmother and me standing beside a very uneven birthday cake. My brother took it in her kitchen about three years ago. The cake is leaning slightly to one side, and we are both laughing instead of looking at the camera.\n\nI had offered to make dessert because I wanted to contribute something to the family meal. I followed a recipe quite carefully, but I tried to add the filling before the cake had cooled. The layers began to slide, and I thought I had spoiled the whole thing. My grandmother helped me hold it together with a few wooden sticks and said that nobody had requested a professional display.\n\nThe photograph matters because it reminds me of her response to a small mistake. The picture itself shows only a funny-looking cake, but I remember how much more relaxed I felt afterwards. We served it in bowls, and everyone still enjoyed it.\n\nI printed one copy and put it on a shelf near my desk. When I become too concerned about getting a minor detail perfect, it reminds me that the people around me may value the shared experience more than the final appearance.",
+      "sourceExerciseVersion": 1,
+      "sourceFile": "tools/content/expansion/ielts_open.json",
+      "durationMs": 64525,
+      "sampleRate": 16000,
+      "channels": 1,
+      "bitsPerSample": 16,
+      "frames": 1032407,
+      "bytes": 2064858,
+      "sha256": "81dc3e310ea3ab7c7714413196ba9f401f000bfa9427c68cdcac789a7ba9beb3",
+      "pcmSha256": "46a04e90809fbc562c441f876b69729545d966cbed2a118abece161199fb587f",
+      "signal": {
+        "sampleCount": 1032407,
+        "peakAmplitude": 22714,
+        "rmsAmplitude": 2390.229494,
+        "clippedSamples": 0
+      },
+      "synthesisParameters": {
+        "voice": "en-us",
+        "wordsPerMinute": 165,
+        "pitch": 50,
+        "amplitude": 85,
+        "inputSampleRate": 22050,
+        "inputPcmSha256": "d643974a875f51bbf2d5703365e911c46b94b64d66d6b46e0dc929e5dd71f062",
+        "cleanResampledPcmSha256": "46a04e90809fbc562c441f876b69729545d966cbed2a118abece161199fb587f",
+        "resamplingFilter": "aresample=16000:resampler=swr:dither_method=0:filter_size=32:phase_shift=10:exact_rational=1:filter_type=kaiser:kaiser_beta=9",
+        "noise": {
+          "kind": "none"
+        }
+      },
+      "transcriptSha256": "3ccf2ac0719ebb7e8f9fa2f36976e879c75b6b3e24b6fefad060c4c1c6751402"
+    },
+    "ielts-speak-v3-small-achievement": {
+      "exerciseId": "ielts-speak-v3-small-achievement",
+      "assetPath": "audio/speaking_samples/ielts-speak-v3-small-achievement.wav",
+      "synthetic": true,
+      "transcript": "A small achievement I was proud of was giving a short update at a meeting without reading every sentence from my notes. It happened during a volunteer project last spring. I knew the work well, but I usually became nervous when several people looked at me, and I would hide behind a page of writing.\n\nFor this update, I decided to change just one thing. Instead of preparing a complete script, I wrote three headings and one number under each heading. I practised explaining them to a friend, who asked me a question whenever my meaning was unclear. The first attempt was awkward, but I gradually stopped trying to reproduce exactly the same sentences.\n\nAt the meeting, I still looked at my notes, and I paused once to find a word. However, I explained all three points and answered a question afterwards. That was my evidence that I had done what I intended.\n\nIt may sound minor because the update lasted only a few minutes. For me, it was a useful step towards speaking to people rather than reading at them. I did not suddenly become confident in every situation, but I had a method I could practise again at the next meeting.",
+      "sourceExerciseVersion": 1,
+      "sourceFile": "tools/content/expansion/ielts_open.json",
+      "durationMs": 68148,
+      "sampleRate": 16000,
+      "channels": 1,
+      "bitsPerSample": 16,
+      "frames": 1090374,
+      "bytes": 2180792,
+      "sha256": "f9592d7fcd30fdb41add028dd8713c5b97f9f9171cf65e14ff266dd6b2ef13c7",
+      "pcmSha256": "dd7629723c00ac46f12fe389e7f71959b9a4d8b3126bc43b4f95e78812eae2e9",
+      "signal": {
+        "sampleCount": 1090374,
+        "peakAmplitude": 30294,
+        "rmsAmplitude": 2656.763855,
+        "clippedSamples": 0
+      },
+      "synthesisParameters": {
+        "voice": "en-gb-scotland",
+        "wordsPerMinute": 160,
+        "pitch": 50,
+        "amplitude": 85,
+        "inputSampleRate": 22050,
+        "inputPcmSha256": "bd8f4fd914e37549b5f693dcb1836917af7441583e8e4bf69768703dc204befb",
+        "cleanResampledPcmSha256": "dd7629723c00ac46f12fe389e7f71959b9a4d8b3126bc43b4f95e78812eae2e9",
+        "resamplingFilter": "aresample=16000:resampler=swr:dither_method=0:filter_size=32:phase_shift=10:exact_rational=1:filter_type=kaiser:kaiser_beta=9",
+        "noise": {
+          "kind": "none"
+        }
+      },
+      "transcriptSha256": "855f25c42fbfcc16cf70e35b8a18c8bc05b8481876dbc1a451e8dbd547257b9f"
+    }
+  }
+}
