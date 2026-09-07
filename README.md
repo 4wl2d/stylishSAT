@@ -1,9 +1,9 @@
 <p align="center"><img src="docs/media/hero.svg" alt="StylishSAT — A little practice. A clearer path." width="960"></p>
 
 <p align="center">
-  <a href="https://github.com/4wl2d/stylishSAT/releases/latest"><img src="https://img.shields.io/github/v/release/4wl2d/stylishSAT?color=6750A4&label=download" alt="Latest release"></a>
+  <a href="https://github.com/4wl2d/stylishSAT/releases/latest"><img src="https://img.shields.io/github/v/release/4wl2d/stylishSAT?color=285B48&label=download" alt="Latest release"></a>
   <a href="https://github.com/4wl2d/stylishSAT/actions/workflows/ci.yml"><img src="https://github.com/4wl2d/stylishSAT/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-6750A4" alt="MIT license"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-285B48" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/Android-10%2B-38755B" alt="Android 10 or newer">
 </p>
 
@@ -22,6 +22,14 @@ StylishSAT brings short bilingual lessons, English exam-style exercises and your
 | 30 bundled audio recordings/samples | Exact closed-answer checking | Separate SAT and IELTS histories |
 
 
+
+<p align="center">
+  <img src="docs/media/today.png" width="240" alt="StylishSAT Today screen">
+  <img src="docs/media/library.png" width="240" alt="StylishSAT lesson library">
+  <img src="docs/media/practice.png" width="240" alt="StylishSAT practice screen">
+</p>
+
+Screens captured from the signed 0.3.0 release variant on an Android 15 ARM64 emulator.
 
 ## Start in a minute
 

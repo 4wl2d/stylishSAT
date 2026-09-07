@@ -16,7 +16,7 @@ Read README.md and docs/DEVELOPMENT.md first. Inspect current source, keep chang
 - Every distributed APK needs a strictly increasing versionCode, including prereleases. Never reuse a published version, replace an asset or move a tag.
 - Add user-visible changes under Unreleased in CHANGELOG.md. Bump app versions only for a release or when explicitly requested.
 - Content package, exercise and Room schema versions are independent. Changed published content requires new versions; database changes need preserving migrations and tests.
-- A release requires passing CI, a signed non-debuggable release APK, signature/checksum verification and physical release smoke testing. Publish only when authorized by the task.
+- A release requires passing CI, a signed non-debuggable release APK, signature/checksum verification and release installation, UI and persistence smoke testing on a supported Android target (identify emulator versus physical hardware). Publish only when authorized by the task.
 - Never commit signing credentials, private device identifiers, learner data, model weights, APKs, raw logs or generated authoring workspaces. Inspect the staged diff and run tools/release/check_repository.py before pushing.
 - Preserve ignored local work. Do not delete files merely to make the public tree smaller.
 

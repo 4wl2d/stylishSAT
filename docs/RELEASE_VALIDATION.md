@@ -22,6 +22,12 @@ Verify with Android SDK `apksigner verify --verbose --print-certs APK`. The priv
 
 Exact final APK SHA-256, source commit and installation/device results are recorded with [the release assets and notes](https://github.com/4wl2d/stylishSAT/releases/tag/v0.3.0). Intermediate local APKs are not release artifacts.
 
+## Android release checks
+
+The signed 0.3.0 release variant passed all 35 deterministic instrumentation tests on an Android 15 ARM64 emulator in 96.216 seconds. Coverage includes all 30 audio files, full decoding of the 27 Opus derivatives, content migrations, Unicode storage, course replay, draft continuation and timers. The exact APK used in this preparation run had SHA-256 `202eace4ab709dfd065cec6a49d279f3c9779e066d14bf7e60467b39c3c3ae8c`. README screenshots were captured from that release variant. Final artifact identity is recorded in the release assets.
+
+All eight packaged native libraries have ELF LOAD alignment of at least 16 KiB, and APK zip alignment verification passes. This structural check is not a physical 16 KiB-device test. The final release has not been revalidated on a physical phone: the available clean ARM64 phone required user interaction for USB installation; another clean phone used an unsupported 32-bit Android system. Existing development installations were preserved.
+
 ## Evidence boundaries
 
 Bundled material is machine-validated draft content. Independent editorial review, expert AI-quality acceptance and the student pilot remain pending. Native AI timing depends on model/device state and has not been rebenchmarked for this publication. Older development benchmarks are not represented as measurements of the new release APK. 32-bit-only Android systems are unsupported.
