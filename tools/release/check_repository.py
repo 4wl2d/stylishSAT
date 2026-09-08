@@ -71,7 +71,7 @@ def main():
         errors.append('Release tags must be annotated')
     for tag in git('tag', '--list', 'v*').splitlines():
         if git('rev-list', '-n', '1', tag) == git('rev-parse', 'HEAD'):
-            if tag != 'v' + name:
+            if tag != 'v' + name and ref.startswith('refs/tags/'):
                 errors.append('HEAD has a different release tag: ' + tag)
             continue
         try:

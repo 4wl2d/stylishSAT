@@ -4,9 +4,17 @@ Versions follow the [version policy](docs/VERSIONING.md).
 
 ## Unreleased
 
+## 0.3.1 — 2026-09-07
+
+First installable GitHub Release, including all functionality in the 0.3.0 source snapshot.
+
+- Provision pinned Android SDK tools on clean GitHub runners.
+- Restore and verify the remote annotated tag after Actions checkout, which can flatten the triggering tag into a local commit reference.
+- Publish a signed APK, SHA256SUMS and source/signature provenance from the verified release commit.
+
 ## 0.3.0 — 2026-09-07
 
-First public GitHub release, following local 0.2.5-draft builds.
+First public source snapshot, following local 0.2.5-draft builds. The published tag is preserved; its APK release was superseded by 0.3.1 during CI verification.
 
 - Offline SAT and IELTS Academic practice: 810 exercises, 48 bilingual lessons and 30 bundled audio files.
 - Diagnostics, adaptive practice, 28-day courses, spaced review and 2/4/6-hour intensive plans.

@@ -1,6 +1,6 @@
 # Releasing
 
-The first public version is 0.3.0 (Android code 9). Read [VERSIONING.md](VERSIONING.md). Publishing a release is a maintainer operation; a normal CI run cannot access the signing key.
+The first installable GitHub Release is 0.3.1 (Android code 10). The earlier public v0.3.0 source tag is preserved. Read [VERSIONING.md](VERSIONING.md). Publishing a release is a maintainer operation; a normal CI run cannot access the signing key.
 
 1. Finalize CHANGELOG.md, increment both fields in version.properties, update user documentation and run the required checks.
 2. Review the exact staged tree and run `python3 tools/release/check_repository.py`. Scan a clean export with Gitleaks. Commit, push main and wait for its CI workflow to pass.

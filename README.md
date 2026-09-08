@@ -39,7 +39,7 @@ Optional on-device Gemma and Whisper models add text feedback and speech transcr
 
 ## Release scope
 
-**0.3.0 is the first public, signed, installable release.** The learning bank is machine-validated draft content. Independent editorial review, expert AI-quality acceptance and student testing remain pending. StylishSAT does not provide calibrated SAT scores, IELTS bands or pronunciation assessment. Read [content scope](docs/CONTENT.md) and the [release validation record](docs/RELEASE_VALIDATION.md).
+**0.3.1 is the first public, signed, installable release.** The learning bank is machine-validated draft content. Independent editorial review, expert AI-quality acceptance and student testing remain pending. StylishSAT does not provide calibrated SAT scores, IELTS bands or pronunciation assessment. Read [content scope](docs/CONTENT.md) and the [release validation record](docs/RELEASE_VALIDATION.md).
 
 No ads, analytics, automatic uploads or cloud sync. Learning data stays in private app storage; uninstalling removes it. [Privacy](docs/PRIVACY.md).
 

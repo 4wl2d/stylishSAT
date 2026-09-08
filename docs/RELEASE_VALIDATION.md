@@ -1,6 +1,6 @@
 # Release validation
 
-The 0.3.0 release uses a non-debuggable Android release variant and a dedicated RSA-4096 signing certificate. The package script builds an isolated export of the exact Git commit, verifies the APK and emits SHA256SUMS plus provenance.json. Downloaded model weights and private local files are absent from that export.
+The 0.3.1 release uses a non-debuggable Android release variant and a dedicated RSA-4096 signing certificate. The package script builds an isolated export of the exact Git commit, verifies the APK and emits SHA256SUMS plus provenance.json. Downloaded model weights and private local files are absent from that export.
 
 ## Signing identity
 
@@ -20,7 +20,7 @@ Verify with Android SDK `apksigner verify --verbose --print-certs APK`. The priv
 - Gitleaks scanned the public export. The only exclusions are the `keyPrefixSha256` field in two immutable prompt regression fixtures; these are content digests rather than credentials.
 - GitHub CI independently builds from the public checkout. Its status and reports are available in [Actions](https://github.com/4wl2d/stylishSAT/actions/workflows/ci.yml).
 
-Exact final APK SHA-256, source commit and installation/device results are recorded with [the release assets and notes](https://github.com/4wl2d/stylishSAT/releases/tag/v0.3.0). Intermediate local APKs are not release artifacts.
+Exact final APK SHA-256, source commit and installation/device results are recorded with [the release assets and notes](https://github.com/4wl2d/stylishSAT/releases/tag/v0.3.1). Intermediate local APKs are not release artifacts.
 
 ## Android release checks
 
