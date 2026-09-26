@@ -192,6 +192,14 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         mutableState.update { it.copy(settings = it.settings.copy(language = language)) }
         enqueue { settings.language(language) }
     }
+    /** Ends first-run setup. Exam and language were applied live; minutes go through the normal profile save. */
+    fun finishOnboarding(dailyMinutes: Int? = null) {
+        val s = state.value
+        if (s.loading) return
+        if (dailyMinutes != null && dailyMinutes != s.profile.dailyMinutes) saveProfile(s.profile.copy(dailyMinutes = dailyMinutes))
+        mutableState.update { it.copy(settings = it.settings.copy(onboarded = true)) }
+        enqueue { settings.onboarded(true) }
+    }
     fun saveProfile(profile: ExamProfile) {
         mutableState.update { it.copy(profiles = it.profiles + (profile.exam to profile)) }
         persist("profile:${profile.exam}", "profile", profile.exam, profile)
