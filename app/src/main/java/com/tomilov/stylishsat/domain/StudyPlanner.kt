@@ -4,7 +4,7 @@ import kotlin.math.abs
 
 /** Scheduling and level decisions stay in code. All dates are supplied as epoch days. */
 object StudyPlanner {
-    const val CURRENT_PLANNER_VERSION = 2
+    const val CURRENT_PLANNER_VERSION = 3
     val reviewIntervalsDays = listOf(1, 3, 7, 14)
 
     /** Coverage follows the current pack, so an older, shorter diagnostic cannot complete new skills. */
@@ -336,8 +336,10 @@ object StudyPlanner {
         startEpochDay: Long,
         dailyMinutes: Int = 30,
         completedDays: List<PlanDay> = emptyList(),
+        profile: ExamProfile? = null,
+        todayEpochDay: Long = startEpochDay,
     ): StudyPlan {
-        return DurationCoursePlanner.create(pack, exam, states, attempts, startEpochDay, dailyMinutes, completedDays)
+        return DurationCoursePlanner.create(pack, exam, states, attempts, startEpochDay, dailyMinutes, completedDays, profile, todayEpochDay)
     }
 
     fun intensive(

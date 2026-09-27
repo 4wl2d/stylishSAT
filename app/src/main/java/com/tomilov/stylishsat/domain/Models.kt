@@ -278,6 +278,8 @@ data class StudyPlan(
     val blocks: List<PlanBlock> = emptyList(),
     val contentVersion: Int? = null,
     val plannerVersion: Int = 0,
+    /** Course shape from the exam date, goal and known result; absent in plans saved before routes existed. */
+    val route: CourseRoute? = null,
 )
 
 @Serializable

@@ -18,8 +18,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.tomilov.stylishsat.BackupStatus
 import com.tomilov.stylishsat.StudyUiState
 import com.tomilov.stylishsat.StudyViewModel
+import com.tomilov.stylishsat.data.BackupException
 import com.tomilov.stylishsat.ai.*
 import com.tomilov.stylishsat.domain.*
 import com.tomilov.stylishsat.speech.Recording
@@ -53,6 +58,7 @@ fun SettingsScreen(s: StudyUiState, vm: StudyViewModel, back: () -> Unit) {
             ModelsSection(s, vm)
             ContentSection(s, vm)
             RecordingsSection(s, vm)
+            DataSection(s, vm)
             AboutSection(s)
         }
     }
@@ -252,6 +258,89 @@ private fun RecordingsSection(s: StudyUiState, vm: StudyViewModel) {
     }
 }
 
+private const val MIN_PASSPHRASE = 10
+
+/** Encrypted export and restore. No account or cloud: the learner decides where the file goes. */
+@Composable
+private fun DataSection(s: StudyUiState, vm: StudyViewModel) {
+    val l = s.language
+    val c = Study.colors
+    val status by vm.backup.collectAsStateWithLifecycle()
+    // The passphrase is kept only in memory for the file picker round trip and is never saved.
+    var passphrase by remember { mutableStateOf("") }
+    var confirm by remember { mutableStateOf("") }
+    var dialog by remember { mutableStateOf<Boolean?>(null) }
+    var restoreUri by remember { mutableStateOf<Uri?>(null) }
+    var lostPassphrase by remember { mutableStateOf(false) }
+    fun clear() { passphrase = ""; confirm = ""; dialog = null }
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+        if (uri != null && passphrase.length >= MIN_PASSPHRASE) vm.exportBackup(uri, passphrase.toCharArray()) else if (uri != null) lostPassphrase = true
+        clear()
+    }
+    val restoreLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) { restoreUri = uri; vm.clearBackupStatus(); dialog = false }
+    }
+    val working = status is BackupStatus.Working
+    Section(l.label("Your data", "Ваши данные")) {
+        Text(l.label("Everything stays on this device, and uninstalling the app deletes it. Export an encrypted file to keep your own copy: no account and no cloud.",
+            "Всё хранится только на устройстве, и удаление приложения стирает данные. Экспортируйте зашифрованный файл, чтобы сохранить свою копию: без аккаунта и облака."),
+            style = StudyType.Small, color = c.ink)
+        Hint(l.label("Includes answers, drafts, revisions, plans, the mistake notebook, exam sittings and recordings. Downloaded models and app settings are not included.",
+            "Включает ответы, черновики, версии, планы, тетрадь ошибок, пробные экзамены и записи. Скачанные модели и настройки приложения не включаются."))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            StudyButton(l.label("Export encrypted file", "Экспорт в зашифрованный файл"), { vm.clearBackupStatus(); dialog = true }, Modifier.weight(1f), tone = Tone.Quiet, compact = true, enabled = !working)
+            StudyButton(l.label("Restore", "Восстановить"), { restoreLauncher.launch(arrayOf("*/*")) }, tone = Tone.Quiet, compact = true, enabled = !working)
+        }
+        val message = when (val current = status) {
+            BackupStatus.Idle -> if (lostPassphrase) l.label("The passphrase was cleared while choosing the file. Start the export again.", "Пароль сброшен при выборе файла. Начните экспорт снова.") else null
+            is BackupStatus.Working -> if (current.export) l.label("Encrypting…", "Шифрование…") else l.label("Checking the file and restoring…", "Проверка файла и восстановление…")
+            is BackupStatus.Exported -> l.label("Saved ${current.answers} answers and ${current.recordings} recordings. Keep the file and passphrase safe: without the passphrase nobody, including you, can open it.",
+                "Сохранено ответов: ${current.answers}, записей: ${current.recordings}. Храните файл и пароль: без пароля файл не откроет никто, включая вас.")
+            is BackupStatus.Restored -> l.label("Restored ${current.added + current.replacedFresh} items." + if (current.keptLocal > 0) " ${current.keptLocal} items already on this device were newer or different and were kept." else "",
+                "Восстановлено элементов: ${current.added + current.replacedFresh}." + if (current.keptLocal > 0) " Элементов, уже бывших на устройстве и оставленных без изменений: ${current.keptLocal}." else "")
+            is BackupStatus.Failed -> when (current.reason) {
+                BackupException.Reason.WRONG_PASSPHRASE_OR_DAMAGED -> l.label("Wrong passphrase, or the file is damaged. Nothing was restored.", "Неверный пароль или файл повреждён. Ничего не восстановлено.")
+                BackupException.Reason.TRUNCATED -> l.label("The file is incomplete. Nothing was restored.", "Файл неполный. Ничего не восстановлено.")
+                BackupException.Reason.NOT_A_BACKUP -> l.label("This is not a StylishSAT backup file.", "Это не файл резервной копии StylishSAT.")
+                BackupException.Reason.UNSUPPORTED_FORMAT, BackupException.Reason.UNSAFE_ENTRY -> l.label("This file was made by a newer app version or contains unexpected data. Nothing was restored.",
+                    "Файл создан более новой версией приложения или содержит неожиданные данные. Ничего не восстановлено.")
+                null -> l.label("Could not finish: ${current.detail}", "Не удалось завершить: ${current.detail}")
+            }
+        }
+        message?.let { Row(verticalAlignment = Alignment.CenterVertically) {
+            if (working) { CircularProgressIndicator(Modifier.size(16.dp), color = c.ink, strokeWidth = 2.dp); Spacer(Modifier.width(8.dp)) }
+            Text(it, style = StudyType.Small, color = if (status is BackupStatus.Failed) c.bad else c.inkSoft)
+        } }
+    }
+    dialog?.let { exporting ->
+        val tooShort = passphrase.length < MIN_PASSPHRASE
+        val mismatch = exporting && confirm != passphrase
+        AlertDialog(onDismissRequest = { clear(); restoreUri = null }, containerColor = c.paper,
+            title = { Text(if (exporting) l.label("Encrypt your data", "Зашифровать данные") else l.label("Open backup", "Открыть копию"), style = StudyType.Title, color = c.ink) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(if (exporting) l.label("Choose a passphrase of at least $MIN_PASSPHRASE characters. It is not stored anywhere and cannot be recovered.",
+                        "Придумайте пароль не короче $MIN_PASSPHRASE символов. Он нигде не хранится и не может быть восстановлен.")
+                        else l.label("Enter the passphrase used for this file. Work already on this device is kept.", "Введите пароль этого файла. Данные, уже бывшие на устройстве, сохранятся."),
+                        style = StudyType.Small, color = c.inkSoft)
+                    OutlinedTextField(passphrase, { passphrase = it }, Modifier.fillMaxWidth(), label = { Text(l.label("Passphrase", "Пароль")) }, singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false),
+                        shape = RoundedCornerShape(16.dp), colors = studyFieldColors())
+                    if (exporting) OutlinedTextField(confirm, { confirm = it }, Modifier.fillMaxWidth(), label = { Text(l.label("Repeat passphrase", "Повторите пароль")) }, singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false),
+                        shape = RoundedCornerShape(16.dp), colors = studyFieldColors(), isError = confirm.isNotEmpty() && mismatch)
+                }
+            },
+            confirmButton = {
+                TextButton(enabled = !tooShort && !mismatch, onClick = {
+                    if (exporting) { lostPassphrase = false; dialog = null; exportLauncher.launch("stylishsat-backup-${LocalDate.now()}.stylishsat") }
+                    else { restoreUri?.let { vm.restoreBackup(it, passphrase.toCharArray()) }; restoreUri = null; clear() }
+                }) { Text(if (exporting) l.label("Choose where to save", "Выбрать место") else l.label("Restore", "Восстановить"), style = StudyType.Button, color = if (!tooShort && !mismatch) c.ink else c.inkFaint) }
+            },
+            dismissButton = { TextButton(onClick = { clear(); restoreUri = null }) { Text(l.label("Cancel", "Отмена"), style = StudyType.Button, color = c.inkSoft) } })
+    }
+}
+
 @Composable
 private fun AboutSection(s: StudyUiState) {
     val l = s.language
@@ -260,8 +349,8 @@ private fun AboutSection(s: StudyUiState) {
     var licensesValue by remember { mutableStateOf<String?>(null) }
     val version = remember { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() }
     Section(l.label("About", "О приложении")) {
-        Text(l.label("Private by default. Answers, drafts, recordings and feedback stay on this device and are excluded from system backup. Text leaves only when you copy or share it.",
-            "Данные остаются на устройстве. Ответы, черновики, записи и отзывы исключены из системной резервной копии. Текст передаётся только когда вы копируете его или делитесь им."),
+        Text(l.label("Private by default. Answers, drafts, recordings and feedback stay on this device and are excluded from system backup. Text leaves only when you copy or share it, or export an encrypted file.",
+            "Данные остаются на устройстве. Ответы, черновики, записи и отзывы исключены из системной резервной копии. Текст передаётся только когда вы копируете его, делитесь им или экспортируете зашифрованный файл."),
             style = StudyType.Small, color = c.ink)
         Text(l.label("Lessons and tasks are original AI-authored drafts, machine-validated. Expert editorial review and student testing are pending. Accuracy here is a training estimate, not an official SAT score or IELTS band. AI and external feedback never change keys, grades or mastery.",
             "Уроки и задания — оригинальные ИИ-черновики с машинной проверкой. Экспертная редактура и испытания с учениками ожидаются. Точность здесь — учебная оценка, не официальный SAT score или IELTS band. ИИ и внешние отзывы не меняют ключи, оценки и уровень навыков."),

@@ -20,7 +20,7 @@ StylishSAT brings short bilingual lessons, English exam-style exercises and your
 | Learn | Practise | Continue |
 | --- | --- | --- |
 | 48 Russian/English mini-lessons | 884 SAT and IELTS exercises | Saved answers, drafts and progress |
-| Worked examples and staged hints | SAT Reading & Writing / Math; all four IELTS skills; full IELTS sections | Adaptive review and 28-day courses |
+| Worked examples and staged hints | SAT Reading & Writing / Math; all four IELTS skills; full IELTS sections | Adaptive review and routes to your exam date |
 | 30 bundled multi-voice recordings/samples | Exact closed-answer checking | Separate SAT and IELTS histories |
 
 Menus, lessons and explanations support English and Russian. Exam prompts and answers stay in English. Writing includes charts and prepared feedback; Speaking supports recording, playback and editable transcripts.
@@ -28,7 +28,7 @@ Menus, lessons and explanations support English and Russian. Exam prompts and an
 ## The study flow
 
 - **First-run setup:** choose English or Russian, SAT or IELTS Academic, and 15, 30, 45 or 60 minutes a day. Start the diagnostic or choose to look around first. Learners with saved study history skip this setup.
-- **Today:** a single next action, a weekly activity strip, a streak and saved answer time against your daily goal. Open adaptive practice, a timed check or a 2/4/6-hour intensive; return to unfinished drafts or choose a day in the 28-day route.
+- **Today:** a single next action, a weekly activity strip, a streak and saved answer time against your daily goal. Open adaptive practice, a timed check or a 2/4/6-hour intensive; return to unfinished drafts or choose a day in the route. With an exam date, the route runs to that date: a short sprint on your weakest areas when the exam is close, or rules first, mixed practice, harder exam practice and regular full sittings when it is months away. A goal and known result change how long the rules block is. Without a date, the course is 28 days.
 - **Study sessions:** step-by-step progress, an exercise clock, answer choices marked after checking, and actions above the keyboard. Close a session to return to Today, or use **More → Save and end for today**. After completing a practice session, the summary offers another round.
 - **Working tools:** a scientific calculator and the reference sheet on SAT Math, answer elimination, passage highlighting, scratch notes and mark for review in drills and exam modules.
 - **Exam:** uncalibrated papers under exam timing, apart from Today — Digital SAT modules with adaptive second modules, flags and a review page; IELTS Reading (60 minutes), Listening (played once, then transfer time) and Writing (20 + 40 minutes). Results are raw counts and time, never a scaled score or band.
@@ -36,7 +36,7 @@ Menus, lessons and explanations support English and Russian. Exam prompts and an
 - **Progress:** independent answer accuracy, a 17-week activity map, skill progress and saved answer history for the selected exam. Activity and minutes come from saved answers.
 - **Mistake notebook:** wrong and skipped answers reopen the exact question version with the key and explanation; write why it went wrong and queue a fresh question from the same family.
 - **Writing revisions:** check a submitted essay against its own task checklist, mark each point yourself, write new versions and compare them word by word. No band is assigned.
-- **Settings:** daily-minute presets, an exam-date picker, profile goals, optional model downloads, content imports and saved recordings. **About** contains privacy, content-status, grading and license information.
+- **Settings:** daily-minute presets, the exam date, goal and known result that shape the route, optional model downloads, content imports, saved recordings, and an encrypted export and restore of your data. **About** contains privacy, content-status, grading and license information.
 
 The interface uses a paper-and-ink palette, a highlighter accent and a dark theme that follows the Android system setting.
 
@@ -63,7 +63,7 @@ Lessons, exercises, prepared explanations and bundled audio work without model d
 
 The learning bank contains AI-authored, machine-validated draft content. Independent editorial review, expert AI-quality acceptance and student testing remain pending. Closed answers are checked deterministically; accuracy and skill progress are training indicators. StylishSAT does not provide calibrated SAT scores, IELTS bands or pronunciation assessment. Read [content scope](docs/CONTENT.md). The [release validation record](docs/RELEASE_VALIDATION.md) documents 0.3.1 and earlier evidence.
 
-No ads, analytics, automatic uploads or cloud sync. Learning data stays in private app storage and is excluded from Android backup. There is no full progress export; uninstalling removes it. [Privacy](docs/PRIVACY.md).
+No ads, analytics, automatic uploads or cloud sync. Learning data stays in private app storage and is excluded from Android backup; uninstalling removes it. This source adds a passphrase-encrypted export file you keep yourself (no account, no cloud); the published APKs up to 0.4.0 have no export. [Privacy](docs/PRIVACY.md).
 
 ## Build and contribute
 

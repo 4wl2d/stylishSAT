@@ -4,7 +4,6 @@ import java.util.ArrayDeque
 
 /** Packs real lesson/work durations. Long open responses retain a work identity across days. */
 internal object DurationCoursePlanner {
-    private const val DAYS = 28
     private const val REVIEW_MINUTES = 2
 
     private data class Work(
@@ -18,7 +17,7 @@ internal object DurationCoursePlanner {
 
     fun create(
         pack: ContentPack, exam: Exam, states: List<SkillState>, attempts: List<Attempt>,
-        start: Long, budget: Int, completed: List<PlanDay>,
+        start: Long, budget: Int, completed: List<PlanDay>, profile: ExamProfile? = null, today: Long = start,
     ): StudyPlan {
         require(budget in 5..360)
         require(completed.all { it.dayNumber > 0 } && completed.map { it.dayNumber }.distinct().size == completed.size)
@@ -27,6 +26,11 @@ internal object DurationCoursePlanner {
         val byId = pack.exercises.associateBy { it.id }
         val byState = states.associateBy { it.skillId }
         val ranked = StudyPlanner.rankedSkills(pack, exam, states, start)
+        // Length, phases and focus follow the exam date, goal and known result; without a future date this is the original 28 days.
+        val route = CourseRoutes.of(exam, profile, start, today, completed.maxOfOrNull { it.dayNumber } ?: 0, ranked)
+        val courseDays = route.days
+        val newTopics = if (route.focusSkillIds.isEmpty()) ranked else ranked.filter { it.id in route.focusSkillIds }
+        var phase: RoutePhaseKind? = null
         val lessons = pack.lessons.groupBy { it.skillId }
         val completedWork = attempts.mapNotNull { it.workId }.toSet()
         val taught = mutableSetOf<String>()
@@ -44,25 +48,33 @@ internal object DurationCoursePlanner {
             .groupBy { it.skillId }.mapValues { (skill, candidates) ->
                 StudyPlanner.practiceAtLevel(candidates, byState[skill]?.difficulty ?: 1)
             }
+        // Close to the exam, practice moves one level above the learner's current level.
+        val harderPools = pack.exercises.filter { it.exam == exam && it.split == ContentSplit.PRACTICE }
+            .groupBy { it.skillId }.mapValues { (skill, candidates) ->
+                StudyPlanner.practiceAtLevel(candidates, ((byState[skill]?.difficulty ?: 1) + 1).coerceAtMost(3))
+            }
         val coveredCheckSkills = completedActivities.filter { it.kind == ActivityKind.ASSESSMENT && (it.remainingMinutes == 0 || it.workId in completedWork) }.map { it.skillId }.toSet()
         val pendingChecks = completedActivities.groupBy { it.workId }.values.map { it.last() }
             .filter { it.kind == ActivityKind.ASSESSMENT && it.remainingMinutes > 0 && it.workId !in completedWork }.associateBy { it.skillId }
         val remainingSkills = ranked.filter { it.id !in coveredCheckSkills }
         val freshChecks = StudyPlanner.assessment(pack.copy(skills = remainingSkills), exam, attempts, remainingSkills.size).associateBy { it.skillId }
         val checks = remainingSkills.mapNotNull { skill -> pendingChecks[skill.id]?.exerciseSnapshot ?: freshChecks[skill.id] }
-        val checkDays = requiredCheckDays(checks, budget, pendingChecks.mapValues { it.value.remainingMinutes }).coerceIn(1, DAYS)
+        val checkDays = requiredCheckDays(checks, budget, pendingChecks.mapValues { it.value.remainingMinutes }).coerceIn(1, courseDays)
         val startedCheckDay = completed.filter { day -> day.activities.any { it.kind == ActivityKind.ASSESSMENT } }.minOfOrNull { it.dayNumber - 1 }
-        val assessmentStart = minOf(DAYS - checkDays, startedCheckDay ?: DAYS)
+        // Final checks belong just before the exam; when the exam is beyond the planning horizon they are not placed yet.
+        val assessmentStart = if (route.capped) startedCheckDay ?: courseDays else minOf(courseDays - checkDays, startedCheckDay ?: courseDays)
         val reviewSources = (completedActivities.filter { it.kind == ActivityKind.ASSESSMENT }.mapNotNull { it.exerciseSnapshot } + checks).distinctBy { it.id to it.version }
         var checksQueued = false
         var actualReviewStateApplied = false
 
         fun source(skillId: String, excludedToday: Set<String>): Exercise? {
-            val level = byState[skillId]?.difficulty ?: 1
-            val candidates = practicePools[skillId].orEmpty().filter { it.id !in excludedToday }
+            val harder = phase == RoutePhaseKind.EXAM_PRACTICE
+            val level = ((byState[skillId]?.difficulty ?: 1) + if (harder) 1 else 0).coerceAtMost(3)
+            val candidates = (if (harder) harderPools else practicePools)[skillId].orEmpty().filter { it.id !in excludedToday }
             return StudyPlanner.rankPractice(candidates, level, practiceHistory, includePlanned = true).firstOrNull()
         }
         fun needsRule(skill: String): Boolean {
+            if (phase == RoutePhaseKind.FOUNDATION) return true
             val state = byState[skill]
             return state == null || state.difficulty == 1 || state.accuracy < .75f || state.independence < .75f || state.consecutiveErrors > 0
         }
@@ -139,10 +151,11 @@ internal object DurationCoursePlanner {
                 last.kind == ActivityKind.LESSON && last.workId !in completedWork ||
                 last.kind == ActivityKind.REVIEW && last.remainingMinutes > 0
         }
-        val minimumDays = maxOf(DAYS, (completed.maxOfOrNull { it.dayNumber } ?: 0) + if (unresolvedWork || checks.isNotEmpty()) 1 else 0)
+        val minimumDays = maxOf(courseDays, (completed.maxOfOrNull { it.dayNumber } ?: 0) + if (unresolvedWork || checks.isNotEmpty()) 1 else 0)
         val result = mutableListOf<PlanDay>()
         var day = 0
         while (day < minimumDays || queue.isNotEmpty()) {
+            phase = route.phaseOn(day + 1)
             val plannedDay = run {
             frozen[day + 1]?.let { old ->
                 if (old.activities.isEmpty()) {
@@ -217,7 +230,7 @@ internal object DurationCoursePlanner {
                         if (lesson == null) practiceHistory.notePlanned("$id/review-${skill.id}-$day", item)
                     }
                 }
-            } else if (!checksQueued) {
+            } else if (!checksQueued && !route.capped) {
                 // Carry real pending work to completion; never discard a saved partial essay.
                 checks.forEach { item -> if (queue.none { it.exercise.id == item.id }) addWork(item, day, assessment = true) }
                 checksQueued = true
@@ -225,8 +238,8 @@ internal object DurationCoursePlanner {
             var considered = 0
             while (available > 0 && considered++ < 100) {
                 if (queue.isEmpty()) {
-                    if (day >= assessmentStart || ranked.isEmpty()) break
-                    val order = ranked.filter { it.id !in introduced } + List(ranked.size) { ranked[(cursor + it) % ranked.size] }
+                    if (day >= assessmentStart || newTopics.isEmpty()) break
+                    val order = newTopics.filter { it.id !in introduced } + List(newTopics.size) { newTopics[(cursor + it) % newTopics.size] }
                     val skill = order.distinctBy { it.id }.firstOrNull { candidate ->
                         if ((candidate.id in daySkills && (byState[candidate.id]?.difficulty ?: 1) <= 1) ||
                             (daySkills.size >= 3 && candidate.id !in daySkills)) return@firstOrNull false
@@ -236,7 +249,7 @@ internal object DurationCoursePlanner {
                     } ?: break
                     val item = source(skill.id, dayItems) ?: break
                     addWork(item, day)
-                    cursor = (ranked.indexOfFirst { it.id == skill.id } + 1) % ranked.size
+                    cursor = (newTopics.indexOfFirst { it.id == skill.id } + 1) % newTopics.size
                 }
                 val work = queue.peekFirst() ?: break
                 if (day < assessmentStart && work.exercise.skillId !in daySkills && daySkills.size >= 3) break
@@ -259,7 +272,7 @@ internal object DurationCoursePlanner {
             day++
         }
         return StudyPlan(id, exam, PlanMode.COURSE, start, result.sumOf { it.minutes }, ranked.map { it.id }, result,
-            contentVersion = pack.version, plannerVersion = StudyPlanner.CURRENT_PLANNER_VERSION)
+            contentVersion = pack.version, plannerVersion = StudyPlanner.CURRENT_PLANNER_VERSION, route = route)
     }
 
     private fun requiredCheckDays(items: List<Exercise>, budget: Int, remainingBySkill: Map<String, Int>): Int {

@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
+import java.io.File
 import java.time.LocalDate
 import java.time.Clock
 import java.util.UUID
@@ -165,42 +166,68 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         }
         viewModelScope.launch {
             try {
-                val initialSettings = settings.flow.first()
-                val pack = contentRepository.initialize()
-                val records = database.dao().records()
-                withContext(Dispatchers.Default) {
-                fun <T> decode(kind: String, block: (String) -> T) = records.filter { it.kind == kind }.map { block(it.payload) }
-                val attempts = decode("attempt") { storageJson.decodeFromString<Attempt>(it) }
-                val profiles = decode("profile") { storageJson.decodeFromString<ExamProfile>(it) }.map { it.copy(diagnosticCompleted = StudyPlanner.diagnosticComplete(pack, it.exam, attempts)) }
-                val sessions = decode("session") { storageJson.decodeFromString<StudySession>(it) }
-                val dailyPlans = decode("course_plan") { storageJson.decodeFromString<StudyPlan>(it) }
-                val courses = decode("course_progress") { storageJson.decodeFromString<CourseProgress>(it) }
-                val drafts = decode("draft") { storageJson.decodeFromString<StudyDraft>(it) }
-                val plans = decode("plan") { storageJson.decodeFromString<StudyPlan>(it) }
-                val paperParts = decode("paper_parts") { storageJson.decodeFromString<PaperPartsRecord>(it) }.associateBy { it.runId }
-                // Early sittings stored their parts inline; later ones keep them in a separate record.
-                val papers = decode("paper") { storageJson.decodeFromString<PaperRun>(it) }.map { run -> paperParts[run.id]?.let { run.copy(parts = it.parts) } ?: run }
-                val revisions = decode("revision") { storageJson.decodeFromString<WritingRevision>(it) }
-                val notebook = decode("notebook") { storageJson.decodeFromString<NotebookEntry>(it) }
-                val marks = decode("mark") { storageJson.decodeFromString<ReviewMark>(it) }
-                mutableState.update { it.copy(
-                    pack = pack, settings = initialSettings,
-                    profiles = it.profiles + profiles.associateBy { p -> p.exam },
-                    sessions = sessions.associateBy { s -> s.exam }, plans = plans.associateBy { p -> p.exam },
-                    courseProgress = courses.associateBy { c -> c.exam },
-                    dailyPlans = dailyPlans.associateBy { p -> p.exam },
-                    attempts = attempts, drafts = drafts.groupBy { draft -> draft.key }.mapValues { (_, versions) -> versions.maxWith(compareBy<StudyDraft>({ it.updatedAt }, { it.submitted })) },
-                    feedback = decode("feedback") { storageJson.decodeFromString<Feedback>(it) },
-                    papers = papers.associateBy { run -> run.id },
-                    revisions = revisions.associateBy { revision -> revision.id },
-                    notebook = notebook.associateBy { entry -> entry.attemptId },
-                    marks = marks.associateBy { mark -> mark.workId },
-                ) }
-                }
+                loadAll()
                 Exam.entries.forEach { refreshStoredCourse(it) }
                 mutableState.update { it.copy(loading = false) }
             } catch (cancelled: CancellationException) { throw cancelled
             } catch (e: Exception) { mutableState.update { it.copy(loading = false, error = e.message ?: "Content could not be loaded") } }
+        }
+    }
+    /**
+     * Reads every private record into state; used at start and after a restore. After a restore, only the record keys the restore
+     * wrote ([restored]) replace what is in memory; anything else in memory wins, so edits made while the file was being restored are kept.
+     */
+    private suspend fun loadAll(restored: Set<String>? = null) {
+        val initialSettings = settings.flow.first()
+        val pack = contentRepository.initialize()
+        val records = database.dao().records()
+        withContext(Dispatchers.Default) {
+        fun <T> decode(kind: String, block: (String) -> T) = records.filter { it.kind == kind }.map { block(it.payload) }
+        val attempts = decode("attempt") { storageJson.decodeFromString<Attempt>(it) }
+        val profiles = decode("profile") { storageJson.decodeFromString<ExamProfile>(it) }.map { it.copy(diagnosticCompleted = StudyPlanner.diagnosticComplete(pack, it.exam, attempts)) }
+        val sessions = decode("session") { storageJson.decodeFromString<StudySession>(it) }
+        val dailyPlans = decode("course_plan") { storageJson.decodeFromString<StudyPlan>(it) }
+        val courses = decode("course_progress") { storageJson.decodeFromString<CourseProgress>(it) }
+        val drafts = decode("draft") { storageJson.decodeFromString<StudyDraft>(it) }
+        val plans = decode("plan") { storageJson.decodeFromString<StudyPlan>(it) }
+        val paperParts = decode("paper_parts") { storageJson.decodeFromString<PaperPartsRecord>(it) }.associateBy { it.runId }
+        // Early sittings stored their parts inline; later ones keep them in a separate record.
+        val papers = decode("paper") { storageJson.decodeFromString<PaperRun>(it) }.map { run -> paperParts[run.id]?.let { run.copy(parts = it.parts) } ?: run }
+        val revisions = decode("revision") { storageJson.decodeFromString<WritingRevision>(it) }
+        val notebook = decode("notebook") { storageJson.decodeFromString<NotebookEntry>(it) }
+        val marks = decode("mark") { storageJson.decodeFromString<ReviewMark>(it) }
+        val loaded = StudyUiState(
+            pack = pack, settings = initialSettings,
+            profiles = profiles.associateBy { p -> p.exam },
+            sessions = sessions.associateBy { s -> s.exam }, plans = plans.associateBy { p -> p.exam },
+            courseProgress = courses.associateBy { c -> c.exam },
+            dailyPlans = dailyPlans.associateBy { p -> p.exam },
+            attempts = attempts, drafts = drafts.groupBy { draft -> draft.key }.mapValues { (_, versions) -> versions.maxWith(compareBy<StudyDraft>({ it.updatedAt }, { it.submitted })) },
+            feedback = decode("feedback") { storageJson.decodeFromString<Feedback>(it) },
+            papers = papers.associateBy { run -> run.id },
+            revisions = revisions.associateBy { revision -> revision.id },
+            notebook = notebook.associateBy { entry -> entry.attemptId },
+            marks = marks.associateBy { mark -> mark.workId },
+        )
+        mutableState.update { current ->
+            if (restored == null) loaded.copy(profiles = current.profiles + loaded.profiles, pendingWrites = current.pendingWrites,
+                error = current.error, loading = current.loading)
+            else {
+                // Keys match the record keys: "profile:SAT", "draft:<draft key>", "paper:<id>", "revision:<id>" and so on.
+                fun <K, V> pick(stored: Map<K, V>, live: Map<K, V>, kind: String, name: (K) -> String = { it.toString() }) =
+                    live + stored.filterKeys { key -> "$kind:${name(key)}" in restored || key !in live }
+                val attemptIds = loaded.attempts.map { it.id }.toSet()
+                val feedbackIds = loaded.feedback.map { it.id }.toSet()
+                current.copy(pack = loaded.pack,
+                    profiles = pick(loaded.profiles, current.profiles, "profile") { it.name }, sessions = pick(loaded.sessions, current.sessions, "session") { it.name },
+                    plans = pick(loaded.plans, current.plans, "plan") { it.name }, courseProgress = pick(loaded.courseProgress, current.courseProgress, "course_progress") { it.name },
+                    dailyPlans = pick(loaded.dailyPlans, current.dailyPlans, "course_plan") { it.name },
+                    attempts = loaded.attempts + current.attempts.filter { it.id !in attemptIds },
+                    drafts = pick(loaded.drafts, current.drafts, "draft"), feedback = loaded.feedback + current.feedback.filter { it.id !in feedbackIds },
+                    papers = pick(loaded.papers, current.papers, "paper"), revisions = pick(loaded.revisions, current.revisions, "revision"),
+                    notebook = pick(loaded.notebook, current.notebook, "notebook"), marks = pick(loaded.marks, current.marks, "mark"))
+            }
+        }
         }
     }
     private fun enqueue(write: suspend () -> Unit) {
@@ -248,12 +275,14 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         val pack = s.pack ?: return
         val selectedPlan = s.plans[exam]
         val old = selectedPlan?.takeIf { it.mode == PlanMode.COURSE } ?: s.dailyPlans[exam] ?: return
-        if (!force && old.contentVersion == pack.version && old.plannerVersion == StudyPlanner.CURRENT_PLANNER_VERSION) return
+        // A dated route is re-planned once per calendar day so the remaining days always end at the exam.
+        val dated = old.route?.examDateEpochDay != null && old.route.computedOnEpochDay != today()
+        if (!force && !dated && old.contentVersion == pack.version && old.plannerVersion == StudyPlanner.CURRENT_PLANNER_VERSION) return
         if (s.sessions[exam]?.let { !it.finished && it.courseDay != null } == true) return
         val progress = s.courseProgress[exam]?.takeIf { it.planId == old.id }
         val completed = old.days.filter { it.dayNumber in progress?.completedDays.orEmpty() }
         val refreshed = StudyPlanner.course(pack, exam, s.skillStates, s.attempts, old.createdEpochDay,
-            s.profiles.getValue(exam).dailyMinutes, completed)
+            s.profiles.getValue(exam).dailyMinutes, completed, s.profiles.getValue(exam), today())
         val updateSelected = selectedPlan?.mode == PlanMode.COURSE
         mutableState.update { it.copy(dailyPlans = it.dailyPlans + (exam to refreshed),
             plans = if (updateSelected) it.plans + (exam to refreshed) else it.plans) }
@@ -641,7 +670,8 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
                 ) })
             } else intensive
         } else {
-            val fresh = StudyPlanner.course(s.pack!!, s.exam, s.skillStates, s.attempts, oldCourse?.createdEpochDay ?: today(), profile.dailyMinutes, completedDays = oldCourse?.days?.filter { progress?.planId == oldCourse.id && it.dayNumber in progress.completedDays }.orEmpty())
+            val fresh = StudyPlanner.course(s.pack!!, s.exam, s.skillStates, s.attempts, oldCourse?.createdEpochDay ?: today(), profile.dailyMinutes, completedDays = oldCourse?.days?.filter { progress?.planId == oldCourse.id && it.dayNumber in progress.completedDays }.orEmpty(),
+                profile = profile, todayEpochDay = today())
             fresh.copy(days = fresh.days.map { day ->
                 if (progress?.planId == fresh.id && day.dayNumber in progress.completedDays) oldCourse?.days?.find { it.dayNumber == day.dayNumber } ?: day else day
             })
@@ -682,7 +712,8 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         }
         val oldCourse = s.plan?.takeIf { it.mode == PlanMode.COURSE } ?: s.dailyPlans[s.exam]
         val completion = s.courseProgress[s.exam]?.takeIf { it.planId == oldCourse?.id }
-        val plan = if (hours == null) StudyPlanner.course(pack, s.exam, s.skillStates, s.attempts, oldCourse?.createdEpochDay ?: today(), s.profile.dailyMinutes, completedDays = oldCourse?.days?.filter { it.dayNumber in completion?.completedDays.orEmpty() }.orEmpty())
+        val plan = if (hours == null) StudyPlanner.course(pack, s.exam, s.skillStates, s.attempts, oldCourse?.createdEpochDay ?: today(), s.profile.dailyMinutes, completedDays = oldCourse?.days?.filter { it.dayNumber in completion?.completedDays.orEmpty() }.orEmpty(),
+            profile = s.profile, todayEpochDay = today())
         else StudyPlanner.intensive(pack, s.exam, s.skillStates, today(), hours)
         if (plan.mode == PlanMode.COURSE) {
             mutableState.update { it.copy(dailyPlans = it.dailyPlans + (s.exam to plan)) }
@@ -1151,4 +1182,114 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
             } catch (e: Exception) { mutableState.update { it.copy(error = e.message ?: "Invalid package") } }
         }
     }
+
+    private val mutableBackup = MutableStateFlow<BackupStatus>(BackupStatus.Idle)
+    val backup = mutableBackup.asStateFlow()
+    private val recordingsDirectory get() = File(getApplication<Application>().noBackupFilesDir, "recordings")
+    fun clearBackupStatus() { if (mutableBackup.value !is BackupStatus.Working) mutableBackup.value = BackupStatus.Idle }
+
+    /** Writes every private record, older content versions and recordings to [uri], encrypted with [passphrase]. Runs after pending saves. */
+    fun exportBackup(uri: Uri, passphrase: CharArray) {
+        if (mutableBackup.value is BackupStatus.Working) return
+        mutableBackup.value = BackupStatus.Working(export = true)
+        enqueue {
+            mutableBackup.value = try {
+                withContext(Dispatchers.IO) {
+                    val app = getApplication<Application>()
+                    val records = database.dao().records()
+                    val packs = database.dao().packs()
+                    val recordings = recordingsDirectory.listFiles().orEmpty().filter { it.isFile && it.name.endsWith(".wav") }.sortedBy { it.name }
+                    val version = runCatching { app.packageManager.getPackageInfo(app.packageName, 0).versionName }.getOrNull().orEmpty()
+                    val manifest = BackupManifest(createdAtEpochMillis = now(), appVersion = version, recordingsDirectory = recordingsDirectory.absolutePath,
+                        records = records.size, packs = packs.size, recordings = recordings.size)
+                    try {
+                        requireNotNull(app.contentResolver.openOutputStream(uri, "wt")) { "The file could not be opened" }.use { file ->
+                            // The final authenticated frame is written only after the whole archive, so a failed export never looks complete.
+                            val sealed = BackupCrypto.encrypt(file.buffered(), passphrase, manifest.createdAtEpochMillis)
+                            BackupArchive.write(sealed, manifest, records, packs, recordings)
+                            sealed.close()
+                        }
+                    } catch (error: Exception) {
+                        runCatching { android.provider.DocumentsContract.deleteDocument(app.contentResolver, uri) }
+                        throw error
+                    }
+                    BackupStatus.Exported(records.count { it.kind == "attempt" }, recordings.size)
+                }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (error: Exception) { BackupStatus.Failed(null, error.message.orEmpty())
+            } finally { passphrase.fill('\u0000') }
+        }
+    }
+
+    /**
+     * Restores a backup made by this app. Every frame is authenticated and every record decoded before anything is written;
+     * then missing work is added, newer local work is kept, and recordings go back into private storage.
+     */
+    fun restoreBackup(uri: Uri, passphrase: CharArray) {
+        if (mutableBackup.value is BackupStatus.Working) return
+        mutableBackup.value = BackupStatus.Working(export = false)
+        enqueue {
+            val app = getApplication<Application>()
+            val scratch = File(app.noBackupFilesDir, "restore-${now()}")
+            mutableBackup.value = try {
+                val result = withContext(Dispatchers.IO) {
+                    val contents = requireNotNull(app.contentResolver.openInputStream(uri)) { "The file could not be opened" }.use { file ->
+                        BackupCrypto.decrypt(file.buffered(), passphrase).use { BackupArchive.read(it, scratch) }
+                    }
+                    contents.records.forEach { record ->
+                        val decoder = backupKinds[record.kind] ?: throw BackupException(BackupException.Reason.UNSUPPORTED_FORMAT)
+                        try { decoder(record.payload) } catch (error: IllegalArgumentException) { throw BackupException(BackupException.Reason.UNSUPPORTED_FORMAT, error) }
+                    }
+                    val installed = database.dao().packHeaders()
+                    val active = installed.maxByOrNull { it.version }
+                    // Older content versions come back so earlier answers reopen exactly; a newer package must be imported on its own.
+                    val packs = contents.packs.filter { active != null && it.id == active.id && it.version < active.version }
+                    packs.forEach { storageJson.decodeFromString<ContentPack>(it.payload) }
+                    recordingsDirectory.mkdirs()
+                    val merge = BackupMerge.plan(database.dao().records(), contents.records, installed.map { it.id to it.version }.toSet(), packs,
+                        contents.manifest.recordingsDirectory, recordingsDirectory.absolutePath)
+                    contents.recordings.forEach { (name, file) ->
+                        val target = File(recordingsDirectory, name)
+                        if (!target.exists() && !file.renameTo(target)) file.copyTo(target)
+                    }
+                    database.withTransaction {
+                        merge.put.forEach { database.dao().put(it) }
+                        merge.packs.forEach { database.dao().insertPack(it) }
+                    }
+                    merge
+                }
+                loadAll(restored = result.put.map { it.key }.toSet())
+                Exam.entries.forEach { refreshStoredCourse(it) }
+                BackupStatus.Restored(result.added, result.replacedFresh, result.keptLocal)
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (error: BackupException) { BackupStatus.Failed(error.reason, "")
+            } catch (error: Exception) { BackupStatus.Failed(null, error.message.orEmpty())
+            } finally { passphrase.fill('\u0000'); scratch.deleteRecursively() }
+        }
+    }
+
+    /** Every record kind this version writes; a backup with anything else came from a newer app and is refused whole. */
+    private val backupKinds: Map<String, (String) -> Any> = mapOf(
+        "attempt" to { it: String -> storageJson.decodeFromString<Attempt>(it) },
+        "profile" to { it: String -> storageJson.decodeFromString<ExamProfile>(it) },
+        "session" to { it: String -> storageJson.decodeFromString<StudySession>(it) },
+        "course_plan" to { it: String -> storageJson.decodeFromString<StudyPlan>(it) },
+        "plan" to { it: String -> storageJson.decodeFromString<StudyPlan>(it) },
+        "course_progress" to { it: String -> storageJson.decodeFromString<CourseProgress>(it) },
+        "draft" to { it: String -> storageJson.decodeFromString<StudyDraft>(it) },
+        "paper" to { it: String -> storageJson.decodeFromString<PaperRun>(it) },
+        "paper_parts" to { it: String -> storageJson.decodeFromString<PaperPartsRecord>(it) },
+        "revision" to { it: String -> storageJson.decodeFromString<WritingRevision>(it) },
+        "notebook" to { it: String -> storageJson.decodeFromString<NotebookEntry>(it) },
+        "mark" to { it: String -> storageJson.decodeFromString<ReviewMark>(it) },
+        "feedback" to { it: String -> storageJson.decodeFromString<Feedback>(it) },
+    )
+}
+
+sealed interface BackupStatus {
+    data object Idle : BackupStatus
+    data class Working(val export: Boolean) : BackupStatus
+    data class Exported(val answers: Int, val recordings: Int) : BackupStatus
+    data class Restored(val added: Int, val replacedFresh: Int, val keptLocal: Int) : BackupStatus
+    data class Failed(val reason: BackupException.Reason?, val detail: String) : BackupStatus
 }

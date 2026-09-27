@@ -179,8 +179,10 @@ private fun Hero(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, Stri
             }
             plan == null -> {
                 Label(l.label("Next", "Дальше"))
-                Title(l.label("Your 28-day route", "Маршрут на 28 дней"))
-                Detail(l.label("${s.profile.dailyMinutes} min a day. Lessons, practice, reviews and fresh checks.", "${s.profile.dailyMinutes} мин в день. Уроки, практика, повторение и проверки."))
+                val left = s.profile.examDateEpochDay?.let { it - LocalDate.now().toEpochDay() }?.takeIf { it > 0 }
+                Title(if (left != null) l.label("Your route to exam day", "Маршрут до дня экзамена") else l.label("Your 28-day route", "Маршрут на 28 дней"))
+                Detail(if (left != null) l.label("$left days · ${s.profile.dailyMinutes} min a day, shaped by your date, goal and known result.", "$left дн. · ${s.profile.dailyMinutes} мин в день с учётом даты, цели и известного результата.")
+                    else l.label("${s.profile.dailyMinutes} min a day. Set an exam date in Settings to fit the route to it.", "${s.profile.dailyMinutes} мин в день. Укажите дату экзамена в настройках, чтобы подстроить маршрут."))
                 Go(l.label("Build route", "Составить маршрут")) { vm.makePlan() }
             }
             else -> {
@@ -352,9 +354,16 @@ private fun Route(s: StudyUiState, plan: StudyPlan, openDay: (Int) -> Unit) {
     val c = Study.colors
     val done = s.courseProgress[s.exam]?.takeIf { it.planId == plan.id }?.completedDays.orEmpty()
     val next = plan.days.firstOrNull { it.dayNumber !in done }?.dayNumber
+    val route = plan.route
+    var allWeeks by rememberSaveable(plan.id) { mutableStateOf(false) }
+    val weeks = plan.days.chunked(7)
+    val currentWeek = weeks.indexOfFirst { week -> week.any { it.dayNumber == next } }.coerceAtLeast(0)
+    // Long routes show the current month; the rest opens on request.
+    val shown = if (allWeeks || weeks.size <= 5) weeks else weeks.drop(currentWeek).take(5)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SectionLabel(l.label("Route", "Маршрут"), Modifier.padding(bottom = 4.dp), "${done.size} / ${plan.days.size}")
-        plan.days.chunked(7).forEach { week ->
+        if (route != null) RouteSummary(s, plan, route, next)
+        shown.forEach { week ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 week.forEach { day ->
                     val completed = day.dayNumber in done
@@ -365,9 +374,15 @@ private fun Route(s: StudyUiState, plan: StudyPlan, openDay: (Int) -> Unit) {
                         day.contentExhausted -> Color.Transparent to c.inkFaint
                         else -> c.sunken to c.inkSoft
                     }
+                    val sitting = route?.sittingDays?.contains(day.dayNumber) == true
                     Box(Modifier.weight(1f).aspectRatio(1f)
-                        .tapSurface(RoundedCornerShape(10.dp), fill, border = if (day.contentExhausted) BorderStroke(1.dp, c.line) else null) { openDay(day.dayNumber) }
-                        .semantics { contentDescription = l.label("Day ${day.dayNumber}", "День ${day.dayNumber}") + if (completed) l.label(", done", ", пройден") else "" },
+                        .tapSurface(RoundedCornerShape(10.dp), fill, border = when {
+                            day.contentExhausted -> BorderStroke(1.dp, c.line)
+                            sitting && !completed -> BorderStroke(2.dp, c.ink)
+                            else -> null
+                        }) { openDay(day.dayNumber) }
+                        .semantics { contentDescription = l.label("Day ${day.dayNumber}", "День ${day.dayNumber}") + (if (completed) l.label(", done", ", пройден") else "") +
+                            if (sitting) l.label(", full sitting suggested", ", рекомендуется полный пробный экзамен") else "" },
                         contentAlignment = Alignment.Center) {
                         if (completed) GlyphIcon(Glyph.Check, tint = content, size = 16.dp)
                         else Text("${day.dayNumber}", style = StudyType.Mono.copy(fontSize = 13.sp), color = content)
@@ -376,8 +391,70 @@ private fun Route(s: StudyUiState, plan: StudyPlan, openDay: (Int) -> Unit) {
                 repeat(7 - week.size) { Spacer(Modifier.weight(1f)) }
             }
         }
-        if (plan.days.size > 28) Text(l.label("+${plan.days.size - 28} catch-up days keep unfinished work within your daily time.", "+${plan.days.size - 28} доп. дн. сохраняют незавершённую работу в пределах дневного лимита."),
+        if (shown.size < weeks.size) Text(l.label("Show all ${plan.days.size} days", "Показать все ${plan.days.size} дн."),
+            Modifier.tapSurface(RoundedCornerShape(50), c.paper) { allWeeks = true }.padding(vertical = 8.dp), style = StudyType.Button.copy(fontSize = 14.sp), color = c.ink)
+        val planned = route?.days ?: 28
+        if (plan.days.size > planned) Text(l.label("+${plan.days.size - planned} catch-up days keep unfinished work within your daily time.", "+${plan.days.size - planned} доп. дн. сохраняют незавершённую работу в пределах дневного лимита."),
             style = StudyType.Small, color = c.inkSoft)
+    }
+}
+
+/** What the exam date, goal and known result did to the route, in plain words. Nothing here is a predicted score. */
+@Composable
+private fun RouteSummary(s: StudyUiState, plan: StudyPlan, route: CourseRoute, next: Int?) {
+    val l = s.language
+    val c = Study.colors
+    val pack = s.pack ?: return
+    val skillName = { id: String -> pack.skills.find { it.id == id }?.title?.text(l) ?: id }
+    val checksFrom = plan.days.firstOrNull { day -> day.activities.any { it.kind == ActivityKind.ASSESSMENT } }?.dayNumber
+    val unit = if (s.exam == Exam.SAT) l.label("points", "баллов") else l.label("band", "балла")
+    fun number(value: Double) = if (value % 1.0 == 0.0) value.toInt().toString() else value.toString()
+    val lines = buildList {
+        when (route.pace) {
+            RoutePace.OPEN -> add(if (route.datePassed) l.label("Your exam date has passed, so this is the standard 28-day course. Set a new date in Settings to plan to it.",
+                "Дата экзамена прошла, поэтому это стандартный курс на 28 дней. Укажите новую дату в настройках.")
+                else l.label("No exam date: the standard 28-day course. Set a date in Settings to fit the route to it.", "Дата экзамена не указана: стандартный курс на 28 дней. Укажите дату в настройках."))
+            RoutePace.SPRINT -> add(l.label("${route.daysLeft} days left: a short route with no separate rules block.", "Осталось ${route.daysLeft} дн.: короткий маршрут без отдельного блока правил."))
+            RoutePace.STEADY -> add(l.label("${route.daysLeft} days left: rules first, then mixed practice, then harder exam practice.", "Осталось ${route.daysLeft} дн.: сначала правила, затем смешанная практика и более трудная экзаменационная."))
+            RoutePace.LONG -> add(l.label("${route.daysLeft} days left: a longer rules-first block, mixed practice, then harder exam practice with regular full sittings.",
+                "Осталось ${route.daysLeft} дн.: длинный блок правил, смешанная практика, затем более трудная практика и регулярные пробные экзамены."))
+        }
+        if (route.capped) add(l.label("The next ${CourseRoutes.MAX_DAYS} days are planned; the route extends as you complete days, and harder practice and final checks stay timed to the exam date.",
+            "Спланированы ближайшие ${CourseRoutes.MAX_DAYS} дн.; маршрут продлится по мере прохождения, а трудная практика и финальные проверки привязаны к дате экзамена."))
+        if (route.focusSkillIds.isNotEmpty()) add(l.label("New work stays on your weakest areas: ", "Новая работа — только по самым слабым темам: ") + route.focusSkillIds.joinToString(", ") { skillName(it) } + ".")
+        val gap = route.gap
+        if (gap != null && route.target != null && route.known != null) add(if (route.targetMet)
+            l.label("Your known result (${number(route.known)}) already meets the goal (${number(route.target)}), so the route keeps you exam-ready: less new material, more timed work.",
+                "Известный результат (${number(route.known)}) уже достигает цели (${number(route.target)}): меньше нового материала, больше работы на время.")
+            else l.label("Goal ${number(route.target)} · known ${number(route.known)} · gap ${number(gap)} $unit. The gap only sizes the route; it is not a prediction.",
+                "Цель ${number(route.target)} · известно ${number(route.known)} · разница ${number(gap)} $unit. Разница лишь задаёт маршрут и не является прогнозом."))
+        else if (route.pace != RoutePace.OPEN && (s.profile.target.isNotBlank() || s.profile.knownResult.isNotBlank()) && (route.target == null || route.known == null))
+            add(l.label("Add both a goal and a known result as ${if (s.exam == Exam.SAT) "SAT totals such as 1350" else "IELTS bands such as 6.5"} to size the gap.",
+                "Укажите цель и известный результат как ${if (s.exam == Exam.SAT) "итог SAT, например 1350" else "балл IELTS, например 6.5"}, чтобы учесть разницу."))
+    }
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(c.raised).padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        next?.let { day ->
+            val phase = when {
+                checksFrom != null && day >= checksFrom -> l.label("Final skill checks", "Финальные проверки навыков")
+                else -> when (route.phaseOn(day)) {
+                    RoutePhaseKind.FOUNDATION -> l.label("Rules first: a short lesson before each new topic", "Сначала правила: короткий урок перед каждой новой темой")
+                    RoutePhaseKind.EXAM_PRACTICE -> l.label("Exam practice: items one level above your current level", "Экзаменационная практика: задания на уровень выше текущего")
+                    RoutePhaseKind.BUILD -> l.label("Mixed practice and reviews", "Смешанная практика и повторение")
+                    null -> null
+                }
+            }
+            phase?.let { Text(l.label("Day $day · ", "День $day · ") + it, style = StudyType.Strong, color = c.ink) }
+        }
+        lines.forEach { Text(it, style = StudyType.Small, color = c.inkSoft) }
+        route.sittingDays.firstOrNull { next == null || it >= next }?.let { day ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                GlyphIcon(Glyph.Sheet, size = 16.dp)
+                Spacer(Modifier.width(8.dp))
+                Text(if (day == next) l.label("Suggested today: a full sitting in the Exam tab, outside your daily minutes. Raw counts only.", "Сегодня рекомендуется полный пробный экзамен во вкладке «Экзамен», сверх дневного лимита. Только число верных ответов.")
+                    else l.label("Next full sitting: day $day (Exam tab, outside your daily minutes).", "Следующий полный пробный экзамен: день $day (вкладка «Экзамен», сверх дневного лимита)."),
+                    style = StudyType.Small, color = c.ink)
+            }
+        }
     }
 }
 
