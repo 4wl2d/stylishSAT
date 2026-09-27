@@ -48,7 +48,7 @@ import java.time.LocalDate
 
 @Composable
 fun TodayScreen(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, String?) -> Unit, plannedDay: (Int) -> Unit, openPaper: (String) -> Unit,
-    continueRevision: (String) -> Unit, resume: () -> Unit) {
+    continueRevision: (String) -> Unit, followUps: () -> Unit, resume: () -> Unit) {
     val rhythm = rememberRhythm(s)
     var intensiveSheet by rememberSaveable { mutableStateOf(false) }
     var dayDetail by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -61,6 +61,7 @@ fun TodayScreen(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, Strin
         QuickRow(s, vm, begin) { intensiveSheet = true }
         Drafts(s, vm, resume)
         RevisionDrafts(s, continueRevision)
+        FollowUps(s, followUps)
         if (plan?.mode == PlanMode.INTENSIVE) {
             IntensiveTimeline(s, vm, plan)
             IntensiveSupport(s, vm, begin)
@@ -301,6 +302,25 @@ private fun Drafts(s: StudyUiState, vm: StudyViewModel, resume: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+/** Fresh questions queued from the mistake notebook. */
+@Composable
+private fun FollowUps(s: StudyUiState, practise: () -> Unit) {
+    val pending = remember(s.notebook, s.attempts, s.exam) { Notebook.pending(s.notebook.values, s.attempts, s.exam) }
+    if (pending.isEmpty()) return
+    val l = s.language
+    val c = Study.colors
+    Row(Modifier.fillMaxWidth().tapSurface(RoundedCornerShape(20.dp), c.raised, enabled = s.session?.finished != false, onClick = practise).padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        GlyphIcon(Glyph.Bulb, size = 22.dp)
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(l.label("${pending.size} follow-up(s) from your notebook", "Из тетради ошибок: ${pending.size}"), style = StudyType.Strong, color = c.ink)
+            Text(l.label("Fresh questions from the families you missed", "Новые задания из семей, где были ошибки"), style = StudyType.Small, color = c.inkSoft)
+        }
+        GlyphIcon(Glyph.ArrowRight, tint = c.inkSoft, size = 18.dp)
     }
 }
 

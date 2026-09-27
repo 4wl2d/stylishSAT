@@ -33,7 +33,7 @@ import java.time.LocalDate
 private const val HeatmapWeeks = 17
 
 @Composable
-fun ProgressScreen(s: StudyUiState, openRevision: (String) -> Unit) {
+fun ProgressScreen(s: StudyUiState, openRevision: (String) -> Unit, openAttempt: (String) -> Unit, openNotebook: () -> Unit) {
     val l = s.language
     val c = Study.colors
     val pack = s.pack ?: return
@@ -88,9 +88,21 @@ fun ProgressScreen(s: StudyUiState, openRevision: (String) -> Unit) {
             }
             Hairline()
         }
+        item {
+            val mistakes = remember(s.attempts, s.exam) { Notebook.mistakes(s.attempts, s.exam) }
+            val open = mistakes.count { s.notebook[it.id]?.resolved != true }
+            Row(Modifier.fillMaxWidth().padding(top = 28.dp).tapSurface(RoundedCornerShape(18.dp), c.raised, onClick = openNotebook).padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(l.label("Mistake notebook", "Тетрадь ошибок"), style = StudyType.Strong, color = c.ink)
+                    Text(l.label("$open open of ${mistakes.size} wrong or skipped", "Открыто $open из ${mistakes.size} неверных или пропущенных"), style = StudyType.Small, color = c.inkSoft)
+                }
+                GlyphIcon(Glyph.ChevronRight, tint = c.inkSoft, size = 18.dp)
+            }
+        }
         item { SectionLabel(l.label("Recent answers", "Последние ответы"), Modifier.padding(top = 28.dp, bottom = 4.dp), "${history.size}") }
         if (history.isEmpty()) item { Text(l.label("Nothing yet.", "Пока пусто."), style = StudyType.Body, color = c.inkSoft) }
-        items(if (allHistoryValue) history else history.take(12), key = { it.id }) { attempt -> HistoryRow(s, attempt, openRevision) }
+        items(if (allHistoryValue) history else history.take(12), key = { it.id }) { attempt -> HistoryRow(s, attempt, openRevision, openAttempt) }
         if (history.size > 12) item {
             StudyButton(if (allHistoryValue) l.label("Show recent only", "Только последние") else l.label("Show all ${history.size}", "Показать все: ${history.size}"),
                 { allHistoryValue = !allHistoryValue }, Modifier.fillMaxWidth().padding(top = 12.dp), tone = Tone.Quiet, compact = true)
@@ -137,7 +149,7 @@ private fun Heatmap(rhythm: Rhythm, l: Language) {
 }
 
 @Composable
-private fun HistoryRow(s: StudyUiState, attempt: Attempt, openRevision: (String) -> Unit) {
+private fun HistoryRow(s: StudyUiState, attempt: Attempt, openRevision: (String) -> Unit, openAttempt: (String) -> Unit) {
     val l = s.language
     val c = Study.colors
     var openValue by rememberSaveable(attempt.id) { mutableStateOf(false) }
@@ -145,7 +157,7 @@ private fun HistoryRow(s: StudyUiState, attempt: Attempt, openRevision: (String)
     val feedback = remember(s.feedback, attempt.id) { s.feedback.filter { it.attemptId == attempt.id } }
     val writing = attempt.skillId == "ielts_writing" && attempt.correct == null && attempt.answer.isNotBlank()
     val versions = remember(s.revisions, attempt.workId) { s.revisions.values.count { it.saved && it.workId == (attempt.workId ?: "attempt:${attempt.id}") } }
-    val expandable = recordings.isNotEmpty() || feedback.isNotEmpty() || attempt.answer.length > 60 || writing
+    val expandable = true
     Column {
         Row(Modifier.fillMaxWidth().tapSurface(RoundedCornerShape(12.dp), c.paper, enabled = expandable) { openValue = !openValue }.padding(vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically) {
@@ -165,6 +177,7 @@ private fun HistoryRow(s: StudyUiState, attempt: Attempt, openRevision: (String)
             }
         }
         if (openValue) Column(Modifier.padding(start = 34.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            StudyButton(l.label("Open question, key and explanation", "Открыть задание, ключ и объяснение"), { openAttempt(attempt.id) }, tone = Tone.Quiet, compact = true, arrow = true)
             if (writing) StudyButton(if (versions > 1) l.label("Revisions · $versions versions", "Доработка · версий: $versions") else l.label("Check and revise", "Проверить и доработать"),
                 { openRevision(attempt.id) }, tone = Tone.Quiet, compact = true, arrow = true)
             if (recordings.isNotEmpty()) {

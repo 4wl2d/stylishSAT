@@ -10,6 +10,7 @@ Versions follow the [version policy](docs/VERSIONING.md).
 - Seven new Task 1 visuals: line graph, pie charts, tables, a process diagram and before/after maps, drawn in the app with a values table for accessibility.
 - Writing revision loop: after submitting, check your own response against a list written for that exact task (both views, your position, the overview, the main comparisons and the required figures), mark each point Yes/Partly/No, note what to change, then write and save new versions. Compare any two versions word by word with your marks side by side. Open it from the result, from Progress history or from Today while a new version is in progress. Writing still saves as "needs review"; no band is given.
 - Content package 6: all 31 Writing tasks carry a 4–6 point task checklist (new exercise versions; prompts and visuals unchanged).
+- Mistake notebook (Progress → Mistake notebook): every wrong or skipped answer reopens the exact question version you answered, with passage or audio, your answer, the key, the explanation and evidence. Record why it went wrong in your own words, tag a cause, mark it resolved, and queue a fresh unanswered question from the same family (or a similar unseen one in the skill); queued follow-ups appear on Today. Any history row now opens its question, key and explanation. Notes never change results, keys or skill levels.
 
 ## 0.4.0 — 2026-09-27
 

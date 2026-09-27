@@ -444,7 +444,7 @@ private fun ResultBar(result: AnswerResult, exercise: Exercise, session: StudySe
 }
 
 @Composable
-private fun Explanation(exercise: Exercise, l: Language) {
+internal fun Explanation(exercise: Exercise, l: Language) {
     val c = Study.colors
     SelectionContainer { Text(exercise.explanation.text(l), style = StudyType.Body, color = c.ink) }
     exercise.evidence?.let { MarginNote(rule = c.inkSoft) { Meta(l.label("Evidence", "Подтверждение")); Text(it, style = StudyType.Reading.copy(fontSize = 16.sp, lineHeight = 25.sp), color = c.ink) } }

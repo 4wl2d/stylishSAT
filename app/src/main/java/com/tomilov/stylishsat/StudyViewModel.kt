@@ -95,6 +95,7 @@ data class StudyUiState(
     val drafts: Map<String, StudyDraft> = emptyMap(),
     val papers: Map<String, PaperRun> = emptyMap(),
     val revisions: Map<String, WritingRevision> = emptyMap(),
+    val notebook: Map<String, NotebookEntry> = emptyMap(),
 ) {
     val exam get() = settings.exam
     val language get() = settings.language
@@ -156,6 +157,7 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
                 val plans = decode("plan") { storageJson.decodeFromString<StudyPlan>(it) }
                 val papers = decode("paper") { storageJson.decodeFromString<PaperRun>(it) }
                 val revisions = decode("revision") { storageJson.decodeFromString<WritingRevision>(it) }
+                val notebook = decode("notebook") { storageJson.decodeFromString<NotebookEntry>(it) }
                 mutableState.update { it.copy(
                     pack = pack, settings = initialSettings,
                     profiles = it.profiles + profiles.associateBy { p -> p.exam },
@@ -166,6 +168,7 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
                     feedback = decode("feedback") { storageJson.decodeFromString<Feedback>(it) },
                     papers = papers.associateBy { run -> run.id },
                     revisions = revisions.associateBy { revision -> revision.id },
+                    notebook = notebook.associateBy { entry -> entry.attemptId },
                 ) }
                 }
                 Exam.entries.forEach { refreshStoredCourse(it) }
@@ -859,6 +862,72 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         val previous = Revisions.saved(s.revisions.values, workId).lastOrNull()
         if (draft.text.isBlank() || draft.text == previous?.text) return false
         saveRevision(draft.copy(saved = true, updatedAt = now()))
+        return true
+    }
+
+    private fun notebookEntry(attemptId: String): NotebookEntry? {
+        val s = state.value
+        s.notebook[attemptId]?.let { return it }
+        val attempt = s.attempts.firstOrNull { it.id == attemptId } ?: return null
+        return NotebookEntry(attempt.id, attempt.exam, attempt.exerciseId, attempt.exerciseVersion, updatedAt = now())
+    }
+
+    private fun saveNotebook(entry: NotebookEntry) {
+        mutableState.update { it.copy(notebook = it.notebook + (entry.attemptId to entry)) }
+        persist("notebook:${entry.attemptId}", "notebook", entry.exam, entry)
+    }
+
+    /** The learner's own explanation of a mistake. Compose owns the editor; this follows it. */
+    fun notebookNote(attemptId: String, note: String) {
+        val entry = notebookEntry(attemptId) ?: return
+        if (entry.note != note) saveNotebook(entry.copy(note = note, updatedAt = now()))
+    }
+
+    fun notebookCause(attemptId: String, cause: MistakeCause?) {
+        val entry = notebookEntry(attemptId) ?: return
+        if (entry.cause != cause) saveNotebook(entry.copy(cause = cause, updatedAt = now()))
+    }
+
+    fun resolveMistake(attemptId: String, resolved: Boolean) {
+        val entry = notebookEntry(attemptId) ?: return
+        if (entry.resolved != resolved) saveNotebook(entry.copy(resolved = resolved, updatedAt = now()))
+    }
+
+    /** Queues an unanswered question from the same family (or, failing that, a similar fresh one in the skill). */
+    fun queueFollowUp(attemptId: String, source: Exercise): Boolean {
+        val s = state.value
+        if (s.loading) return false
+        val pack = s.pack ?: return false
+        val entry = notebookEntry(attemptId) ?: return false
+        if (entry.exerciseId != source.id || entry.exerciseVersion != source.version) return false
+        val queued = Notebook.pending(s.notebook.values, s.attempts, entry.exam).mapNotNull { it.queuedExerciseId }.toSet()
+        val fresh = Notebook.freshItem(pack, source, s.attempts, queued)
+        if (fresh == null) {
+            mutableState.update { it.copy(error = if (it.language == Language.RU)
+                "Новых заданий этой семьи и похожих заданий навыка не осталось. Запись в тетради сохранена."
+                else "No unanswered question from this family or a similar one in the skill remains. The notebook entry is saved.") }
+            return false
+        }
+        saveNotebook(entry.copy(queuedExerciseId = fresh.exercise.id, queuedExerciseVersion = fresh.exercise.version,
+            queuedFromFamily = fresh.fromFamily, queuedAt = now(), updatedAt = now()))
+        return true
+    }
+
+    /** Practise every queued follow-up for the selected exam as one short session. */
+    fun startFollowUps(): Boolean {
+        var s = state.value
+        if (s.loading) return false
+        val pack = s.pack ?: return false
+        if (s.session?.let { !it.finished } == true) {
+            if (!finishForNow()) return false
+            s = state.value
+        }
+        val exercises = Notebook.pending(s.notebook.values, s.attempts, s.exam).mapNotNull { entry ->
+            pack.exercises.firstOrNull { it.id == entry.queuedExerciseId && it.version == entry.queuedExerciseVersion }
+                ?: pack.exercises.firstOrNull { it.id == entry.queuedExerciseId }
+        }.distinctBy { it.id }
+        if (exercises.isEmpty()) return false
+        saveSession(restoreStep(StudySession(exam = s.exam, mode = ContentSplit.PRACTICE, exercises = exercises)))
         return true
     }
 

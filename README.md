@@ -32,6 +32,7 @@ Menus, lessons and explanations support English and Russian. Exam prompts and an
 - **Study sessions:** step-by-step progress, an exercise clock, answer choices marked after checking, and actions above the keyboard. Close a session to return to Today, or use **More → Save and end for today**. After completing a practice session, the summary offers another round.
 - **Library:** search skills and lesson text, open a skill page, read its lessons and launch focused practice. IELTS Reading and Listening pages list full sections: every question for one passage or recording on one page, as practice or under exam conditions (a clock for Reading; one play for Listening).
 - **Progress:** independent answer accuracy, a 17-week activity map, skill progress and saved answer history for the selected exam. Activity and minutes come from saved answers.
+- **Mistake notebook:** wrong and skipped answers reopen the exact question version with the key and explanation; write why it went wrong and queue a fresh question from the same family.
 - **Writing revisions:** check a submitted essay against its own task checklist, mark each point yourself, write new versions and compare them word by word. No band is assigned.
 - **Settings:** daily-minute presets, an exam-date picker, profile goals, optional model downloads, content imports and saved recordings. **About** contains privacy, content-status, grading and license information.
 
