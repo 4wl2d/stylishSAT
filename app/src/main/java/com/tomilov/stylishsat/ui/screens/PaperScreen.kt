@@ -229,7 +229,14 @@ private fun ColumnScope.SheetView(run: PaperRun, part: PaperPart, vm: StudyViewM
             val playerPath = if (run.strict) currentAudio ?: audio.lastOrNull() else items.firstNotNullOfOrNull { it.audioAssetPath }
             playerPath?.let { path ->
                 if (audio.size > 1) Meta(l.label("Recording ${audio.indexOf(path) + 1} of ${audio.size}", "Запись ${audio.indexOf(path) + 1} из ${audio.size}"), color = c.ink)
-                key(path) { SectionAudio(path, run.audio[path] ?: AudioProgress(), run.strict, l) { position, completed -> vm.paperAudio(run.id, path, position, completed) } }
+                key(path) {
+                    if (run.strict) SectionAudio(path, run.audio[path] ?: AudioProgress(), true, l) { position, completed -> vm.paperAudio(run.id, path, position, completed) }
+                    else {
+                        // Practice keeps one saved playback position and adds speed and loop; the transcript waits until marking.
+                        val clip = rememberClipPlayer(path, run.audio[path]?.positionMs ?: 0) { position, completed -> vm.paperAudio(run.id, path, position, completed) }
+                        PracticePlayer(clip, l, l.label("Pause, rewind, slow down or loop while you practise.", "Ставьте на паузу, перематывайте, замедляйте или повторяйте во время практики."))
+                    }
+                }
                 if (run.phase == PaperPhase.TRANSFER) Text(l.label("All recordings have finished. Use the check time to complete and review your answers in every part.",
                     "Все записи прозвучали. Используйте время на проверку, чтобы дописать и проверить ответы во всех частях."), style = StudyType.Small, color = c.inkSoft)
             }
@@ -507,9 +514,14 @@ private fun PartResult(s: StudyUiState, run: PaperRun, part: PaperPart, items: L
                 }
             }
         }
-        part.exercises.mapNotNull { it.transcript }.distinct().forEachIndexed { index, transcript ->
-            Disclosure(if (part.audioPaths.size > 1) l.label("Transcript · part ${index + 1}", "Транскрипт · часть ${index + 1}") else l.label("Audio transcript", "Транскрипт аудио"), null) {
-                SelectionContainer { Text(transcript, style = StudyType.Reading.copy(fontSize = 16.sp, lineHeight = 25.sp), color = c.ink) }
+        // After marking, each recording can be replayed with speed, loop and clickable transcript times.
+        part.audioPaths.forEachIndexed { index, path ->
+            val item = part.exercises.first { it.audioAssetPath == path }
+            Disclosure(if (part.audioPaths.size > 1) l.label("Replay and transcript · part ${index + 1}", "Повтор и транскрипт · часть ${index + 1}") else l.label("Replay and transcript", "Повтор и транскрипт"), null) {
+                val clip = rememberClipPlayer(path)
+                PracticePlayer(clip, l, l.label("Tap a time to replay that part.", "Нажмите на время, чтобы переслушать фрагмент."))
+                if (item.transcriptSegments.isNotEmpty()) TranscriptTimes(clip, item.transcriptSegments, l)
+                else item.transcript?.let { SelectionContainer { Text(it, style = StudyType.Reading.copy(fontSize = 16.sp, lineHeight = 25.sp), color = c.ink) } }
             }
         }
     }

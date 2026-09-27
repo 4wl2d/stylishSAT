@@ -36,6 +36,22 @@ class ContentBankTest {
         }
     }
 
+    @Test fun everyRecordingNamesItsSpeakersAndConversationsAlternateVoices() {
+        val pack = content()
+        assertEquals(7, pack.version)
+        val recordings = Sections.of(pack, Exam.IELTS, skillId = "ielts_listening")
+        assertEquals(24, recordings.size)
+        recordings.forEach { section ->
+            section.exercises.forEach { item ->
+                assertTrue(item.id, item.audioAssetPath!!.startsWith("audio/compact/listening-voices/"))
+                assertTrue(item.id, item.transcriptSegments.all { !it.speaker.isNullOrBlank() })
+            }
+        }
+        // Conversations and discussions are voiced by different speakers, not one voice reading every part.
+        assertTrue(recordings.count { it.speakers > 1 } >= 9)
+        assertTrue(pack.exercises.filter { it.sampleAudioAssetPath != null }.all { it.sampleAudioAssetPath!!.startsWith("audio/compact/speaking-voices/") })
+    }
+
     @Test fun fullLengthPassagesCoverTheMissingFormatsAndStayReservedForSittings() {
         val pack = content()
         val long = Sections.of(pack, Exam.IELTS, skillId = "ielts_reading").filter { it.exercises.size >= StudyPlanner.PAPER_SOURCE_MINIMUM }

@@ -7,7 +7,12 @@ https://satsuite.collegeboard.org/higher-ed-professionals/sat-validity/content-d
 https://ielts.org/take-a-test/preparation-resources/writing-test-resources
 https://ielts.org/take-a-test/test-types/ielts-academic-test/ielts-academic-format-speaking
 
-Synthetic Listening and Speaking audio:
+Synthetic Listening and Speaking audio (content package 7 and later):
+All 24 Listening recordings and 6 Speaking samples were re-recorded from the unchanged original scripts with Piper neural text-to-speech (piper-tts 1.8.0, GPL-3.0-or-later, used only during authoring and not bundled). Conversations use a different voice for each speaker; recordings mix British and American English voices: Cori (en_GB), John, Norman, Kristin and LJ Speech (en_US), from the rhasspy/piper-voices catalog (MIT repository licence, revision c10ece1aade47bb51c153c893d14e5bf8e5b7117). Their model cards list public-domain training recordings (LibriVox; the LJ Speech dataset). No voice model is bundled. Machine transcription checks passed; human listening review is pending.
+https://github.com/OHF-voice/piper1-gpl
+https://huggingface.co/rhasspy/piper-voices
+
+Earlier eSpeak NG audio (content packages up to 6, kept so earlier answers reopen with the audio they used):
 Generated from original scripts using eSpeak NG 1.52.0 formant synthesis. Legacy Listening clips use en-us at155words/minute. Expanded Listening clips use en-us/en-gb at150or170words/minute; Speaking examples use en-us/en-gb/en-gb-scotland at155–165words/minute. Listening recordings announce their synthetic origin; Speaking examples are labeled synthetic in the player. No Apple System Voices, cloned human voices, official recordings or speech-synthesis executable are bundled. The open-source eSpeak NG engine was used only during authoring. New clips are delivered as Ogg/Opus; Reproducibility manifests are included in the public source; duplicate WAV masters remain in the local authoring workspace.
 Engine source and GPL-3.0-or-later licence: https://github.com/espeak-ng/espeak-ng/tree/1.52.0
 

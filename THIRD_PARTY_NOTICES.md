@@ -9,7 +9,9 @@ StylishSAT code, documentation and project-authored materials are offered under 
 | Kotlin, kotlinx.coroutines, kotlinx.serialization | Apache-2.0, [JetBrains](https://github.com/JetBrains/kotlin) |
 | LiteRT-LM and LiteRT | Apache-2.0, [Google AI Edge](https://github.com/google-ai-edge/LiteRT-LM) |
 | Gradle wrapper | Apache-2.0, [Gradle](https://github.com/gradle/gradle) |
-| eSpeak NG 1.52.0 (authoring tool; executable not bundled) | [GPL-3.0-or-later](https://github.com/espeak-ng/espeak-ng/tree/1.52.0); synthetic output uses original project scripts |
+| Piper TTS, piper-tts 1.8.0 (authoring tool; not bundled) | [GPL-3.0-or-later](https://github.com/OHF-voice/piper1-gpl); current Listening and Speaking audio uses original project scripts |
+| Piper voices Cori, John, Norman, Kristin, LJ Speech (used at authoring time; models not bundled) | [rhasspy/piper-voices](https://huggingface.co/rhasspy/piper-voices/tree/c10ece1aade47bb51c153c893d14e5bf8e5b7117) (MIT repository licence); model cards list public-domain training data (LibriVox, LJ Speech) |
+| eSpeak NG 1.52.0 (authoring tool; executable not bundled) | [GPL-3.0-or-later](https://github.com/espeak-ng/espeak-ng/tree/1.52.0); audio for content packages up to 6, kept for earlier exercise versions |
 | Gemma 4 E2B IT (optional separate download) | [Gemma terms](https://ai.google.dev/gemma/terms), [model source](https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm) |
 | Whisper base.en (optional separate download) | [MIT](https://github.com/openai/whisper/blob/main/LICENSE), [converted model source](https://huggingface.co/ggerganov/whisper.cpp) |
 

@@ -309,7 +309,11 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
                 }
             }
         }
-        exercise.audioAssetPath?.let { ListeningPlayer(it, l) }
+        // Speed, loop and transcript times are practice aids: timed checks and the diagnostic keep the plain player until marked.
+        val practiceAudio = session.mode == ContentSplit.PRACTICE || result != null
+        val clip = exercise.audioAssetPath?.takeIf { practiceAudio }?.let { rememberClipPlayer(it) }
+        clip?.let { PracticePlayer(it, l, if (result == null) null else l.label("Tap a time in the transcript below to replay that part.", "Нажмите на время в транскрипте ниже, чтобы переслушать фрагмент.")) }
+        if (!practiceAudio) exercise.audioAssetPath?.let { ListeningPlayer(it, l) }
         exercise.chart?.let { Chart(it, l) }
         exercise.figure?.let { FigureView(it) }
         exercise.group?.let { group ->
@@ -374,8 +378,8 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
             if (session.continuedWithoutTimeLimit) Text(l.label("You continued past the limit. The full working time is saved.", "Вы продолжили после лимита. Полное время работы сохранено."), style = StudyType.Small, color = c.inkSoft)
             exercise.transcript?.let { transcript ->
                 Disclosure(l.label("Audio transcript", "Транскрипт аудио"), null) {
-                    SelectionContainer { Text(transcript, style = StudyType.Reading.copy(fontSize = 16.sp, lineHeight = 25.sp), color = c.ink) }
-                    exercise.transcriptSegments.forEach { Text("${it.startMs / 1000}–${it.endMs / 1000}s · ${it.text}", style = StudyType.Small, color = c.inkSoft) }
+                    if (exercise.transcriptSegments.isNotEmpty()) TranscriptTimes(clip, exercise.transcriptSegments, l)
+                    else SelectionContainer { Text(transcript, style = StudyType.Reading.copy(fontSize = 16.sp, lineHeight = 25.sp), color = c.ink) }
                 }
             }
             if (exercise.type == ExerciseType.WRITING) {

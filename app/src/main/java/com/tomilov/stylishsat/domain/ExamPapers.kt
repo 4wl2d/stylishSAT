@@ -119,9 +119,16 @@ object ExamPapers {
 
     /** Four unseen recordings, each played once, then ten minutes to transfer and check. */
     fun ieltsListening(pack: ContentPack, attempts: List<Attempt>): PaperPart? {
-        val chosen = freshSections(pack, attempts, "ielts_listening").filter { it.listening }
-            .sortedWith(compareBy<SourceSection>({ it.split != ContentSplit.ASSESSMENT }, { it.sourceId })).take(IELTS_LISTENING_RECORDINGS)
+        val fresh = freshSections(pack, attempts, "ielts_listening").filter { it.listening }
+        // Reserved assessment recordings first; any gap is filled with conversations until the paper has two, as in IELTS.
+        val chosen = fresh.filter { it.split == ContentSplit.ASSESSMENT }.sortedBy { it.sourceId }.take(IELTS_LISTENING_RECORDINGS).toMutableList()
+        while (chosen.size < IELTS_LISTENING_RECORDINGS) {
+            val needConversation = chosen.count { it.speakers > 1 } < 2
+            chosen += fresh.filter { it !in chosen }.minWithOrNull(compareBy<SourceSection>({ needConversation && it.speakers < 2 }, { it.sourceId })) ?: break
+        }
         if (chosen.isEmpty()) return null
+        // IELTS order: everyday conversation, everyday monologue, academic discussion, lecture.
+        chosen.sortWith(compareBy<SourceSection>({ section -> section.exercises.maxOf { it.difficulty } >= 3 }, { it.speakers < 2 }, { it.sourceId }))
         return PaperPart("LISTENING", "Listening", chosen.flatMap { it.exercises }, transferSeconds = IELTS_LISTENING_TRANSFER_SECONDS, stage = "LISTENING",
             shortfall = (IELTS_LISTENING_RECORDINGS - chosen.size).coerceAtLeast(0) * 10)
     }

@@ -1,6 +1,7 @@
 package com.tomilov.stylishsat.domain
 
 import java.io.File
+import kotlinx.serialization.json.*
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -98,6 +99,33 @@ class ExamModeTest {
         val run = PaperRun("l", Exam.IELTS, PaperKind.IELTS_LISTENING, true, listOf(listening), phase = PaperPhase.TRANSFER,
             transferElapsedSeconds = mapOf(listening.id to 600), startedAt = 0)
         assertTrue(run.timeUp(listening))
+    }
+
+    @Test fun ieltsListeningOpensWithAConversationAndUsesMoreThanOneAccent() {
+        val listening = requireNotNull(ExamPapers.ieltsListening(pack, emptyList()))
+        val recordings = listening.audioPaths.map { path -> listening.exercises.first { it.audioAssetPath == path } }
+        val speakers = recordings.map { item -> item.transcriptSegments.map { requireNotNull(it.speaker) }.distinct() }
+        // IELTS Part 1 is an everyday conversation; lectures come last.
+        assertTrue(speakers.first().size > 1)
+        assertEquals(recordings.map { it.difficulty }.sorted(), recordings.map { it.difficulty })
+        val manifest = Json.parseToJsonElement(listOf(File("../docs/content/listening-voices-manifest.json"), File("docs/content/listening-voices-manifest.json"))
+            .first { it.isFile }.readText()).jsonObject["clips"]!!.jsonObject
+        val accents = recordings.flatMap { item -> manifest[item.sourceId]!!.jsonObject["speakers"]!!.jsonArray.map { it.jsonObject["accent"]!!.jsonPrimitive.content } }.toSet()
+        assertTrue(accents.toString(), accents.size > 1)
+    }
+
+    @Test fun ieltsListeningFillsUsedAssessmentRecordingsWithConversationsFirst() {
+        val assessment = Sections.of(pack, Exam.IELTS, skillId = "ielts_listening").filter { it.split == ContentSplit.ASSESSMENT }
+        // Two held-back recordings (the conversation and one monologue) were already used: both gaps are filled with conversations.
+        val used = (assessment.filter { it.speakers > 1 }.take(1) + assessment.filter { it.speakers < 2 }.take(1)).flatMap { section ->
+            section.exercises.map { Attempt("seen-${it.id}", it.id, it.version, Exam.IELTS, it.skillId, "x", false, 5, familyId = it.familyId, sourceId = it.sourceId) }
+        }
+        assertTrue(used.isNotEmpty())
+        val listening = requireNotNull(ExamPapers.ieltsListening(pack, used))
+        val recordings = listening.audioPaths.map { path -> listening.exercises.first { it.audioAssetPath == path } }
+        assertEquals(4, recordings.size)
+        assertEquals(2, recordings.count { item -> item.transcriptSegments.mapNotNull { it.speaker }.distinct().size > 1 })
+        assertTrue(listening.exercises.none { item -> used.any { it.exerciseId == item.id } })
     }
 
     @Test fun ieltsWritingGivesTwentyMinutesForAVisualTaskAndFortyForAnEssay() {

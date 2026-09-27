@@ -50,11 +50,11 @@ class FullBankDeviceTest {
                 "Preserved essay with English and русский текст.\nSecond paragraph.", workId = "pilot-test-work", elapsedSeconds = 321)
             db.dao().put(StoredRecord("draft:${draft.key}", "draft", exercise.exam.name, storageJson.encodeToString(draft)))
             val current = repository.initialize()
-            assertEquals(6, current.version)
+            assertEquals(7, current.version)
             assertEquals(3, current.schemaVersion)
             assertEquals(884, current.exercises.size)
             assertEquals(48, current.lessons.size)
-            assertEquals(listOf(2, 3, 6), db.dao().packs().map { it.version }.sorted())
+            assertEquals(listOf(2, 3, 7), db.dao().packs().map { it.version }.sorted())
             assertTrue(repository.allExercises().containsAll(old.exercises))
             assertTrue(repository.allExercises().containsAll(previousFull.exercises))
             assertEquals(draft, storageJson.decodeFromString<StudyDraft>(db.dao().records().single().payload))
@@ -72,7 +72,14 @@ class FullBankDeviceTest {
         val expectedDurations = manifest.keys().asSequence().associate { key ->
             val item = manifest.getJSONObject(key)
             item.getString("compactAssetPath") to item.getJSONObject("source").getLong("durationMs")
+        }.toMutableMap()
+        // Package7 multi-voice recordings and samples: every current path is listed here with its decoded length.
+        val voices = instrumentation.context.assets.open("listening-voices-manifest.json").bufferedReader().use { JSONObject(it.readText()) }
+        listOf("clips", "samples").forEach { group ->
+            val items = voices.getJSONObject(group)
+            items.keys().forEach { key -> items.getJSONObject(key).let { expectedDurations[it.getString("compactAssetPath")] = it.getLong("decodedDurationMs") } }
         }
+        assertTrue(paths.all { it in expectedDurations })
         paths.forEach { path ->
             val player = MediaPlayer()
             try {

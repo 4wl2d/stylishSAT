@@ -38,7 +38,7 @@ def canonical_sha(item):
     return hashlib.sha256(json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
 
 
-PACKAGE_VERSION = 6
+PACKAGE_VERSION = 7
 SCHEMA_VERSION = 3
 ORIGINAL_EXERCISES = 810
 LONG_READING = {'PRACTICE': 2, 'ASSESSMENT': 3}
@@ -49,6 +49,7 @@ FORMATS = {'TRUE_FALSE_NOT_GIVEN', 'YES_NO_NOT_GIVEN', 'MATCHING_HEADINGS', 'MAT
 CHECK_KINDS = {'TASK_PART', 'VIEW', 'POSITION', 'SUPPORT', 'OVERVIEW', 'COMPARISON', 'DATA', 'ACCURACY'}
 LIST_FORMATS = {'MATCHING_HEADINGS', 'MATCHING_INFORMATION', 'MATCHING_FEATURES', 'SUMMARY_COMPLETION', 'MAP_LABEL'}
 GAP = re.compile(r'\[\[([^\]]+)\]\]')
+MAX_ASR_WER = 0.12
 
 
 def figure_refs(figure, where):
@@ -111,6 +112,13 @@ def validate(path):
     listening = read(ROOT / 'tools/content/expansion/listening_work/audio-manifest.json')['clips']
     compact = read(ROOT / 'docs/content/compact-audio-manifest.json')['assets']
     spoken = read(ROOT / 'docs/content/speaking-audio-manifest.json')['samples']
+    # Package7: every Listening recording and spoken sample uses the multi-voice Piper audio described here.
+    voices = read(ROOT / 'docs/content/listening-voices-manifest.json')
+    require(voices['synthetic'] is True and voices['reviewStatus'].endswith('REVIEW_PENDING'), 'Synthetic voices must stay marked as unreviewed')
+    require(all(not v['distributed'] and len(v['modelSha256']) == 64 and v['modelCard'].startswith('https://') for v in voices['voices'].values()), 'Voice provenance')
+    for name, media in [*voices['clips'].items(), *voices['samples'].items()]:
+        require(media['asr']['newWer'] <= MAX_ASR_WER, name + ': machine transcription check')
+        require(abs(media['decodedDurationMs'] - media['durationMs']) < 100, name + ': decoded duration')
     groups = {key: defaultdict(set) for key in ['familyId', 'sourceId', 'passage', 'audioAssetPath']}
     for item in items:
         key = item['id']; fields(item, EX_FIELDS | {'sampleAudioAssetPath', 'format', 'group', 'figure', 'sourceTitle', 'taskChecklist'}, key)
@@ -160,20 +168,27 @@ def validate(path):
         if item['skillId'] == 'ielts_reading':
             require(item.get('evidence') and item['evidence'] in item['passage'], key + ': passage evidence')
         if item['skillId'] == 'ielts_listening':
-            clip = listening[item['sourceId']]
-            master = clip['audioAssetPath']
-            require(item['audioAssetPath'] == compact.get(master, {}).get('compactAssetPath', master), key + ': audio mapping')
-            require(item['transcriptSegments'] == clip['transcriptSegments'] and item['split'] == clip['split'], key + ': timings/split')
+            clip = voices['clips'][item['sourceId']]
+            previous = listening[item['sourceId']]
+            require(item['audioAssetPath'] == clip['compactAssetPath'] and item['split'] == clip['split'] == previous['split'], key + ': audio mapping/split')
+            require(item['transcriptSegments'] == clip['segments'], key + ': timings')
             require(item['transcript'] == ' '.join(s['text'] for s in item['transcriptSegments']), key + ': transcript')
+            # Re-voicing never edits the script: the same sentences, in the same order, as the published recording.
+            require([s['text'] for s in item['transcriptSegments']] == [s['text'] for s in previous['transcriptSegments']], key + ': script changed')
+            require(hashlib.sha256(item['transcript'].encode()).hexdigest() == clip['transcriptSha256'], key + ': transcript hash')
             require(item['evidence'] in item['transcript'], key + ': transcript evidence')
+            labels = {s['label'] for s in clip['speakers']}
             end = 0
             for segment in item['transcriptSegments']:
-                require(end <= segment['startMs'] < segment['endMs'] <= clip['durationMs'], key + ': timing outside audio')
+                fields(segment, {'startMs', 'endMs', 'text', 'speaker'}, key)
+                require(end <= segment['startMs'] < segment['endMs'] <= clip['decodedDurationMs'], key + ': timing outside audio')
+                require(segment.get('speaker') in labels, key + ': every segment names its speaker')
                 end = segment['endMs']
         if item.get('sampleAudioAssetPath'):
-            require(item['type'] == 'SPEAKING' and key in spoken, key + ': sample role')
+            require(item['type'] == 'SPEAKING' and key in spoken and key in voices['samples'], key + ': sample role')
             require(spoken[key]['transcript'] == item['sampleAnswer'], key + ': spoken sample transcript')
-            require(compact[spoken[key]['assetPath']]['compactAssetPath'] == item['sampleAudioAssetPath'], key + ': spoken sample mapping')
+            require(hashlib.sha256(item['sampleAnswer'].encode()).hexdigest() == voices['samples'][key]['transcriptSha256'], key + ': spoken sample hash')
+            require(voices['samples'][key]['compactAssetPath'] == item['sampleAudioAssetPath'], key + ': spoken sample mapping')
         if item.get('chart'):
             chart = item['chart']; fields(chart, {'title','xLabel','yLabel','unit','labels','series','kind'}, key)
             require(all(chart[k] for k in ['title', 'xLabel', 'yLabel', 'unit', 'labels', 'series']), key + ': chart metadata')
@@ -230,8 +245,18 @@ def validate(path):
     require(sum(bool(e.get('sampleAnswer')) for e in writing[:24]) == 12, '12 written samples')
     require(sum(bool(e.get('sampleAudioAssetPath')) for e in items) == 6, '6 spoken samples')
     paths = {e[field] for e in items for field in ['audioAssetPath', 'sampleAudioAssetPath'] if e.get(field)}
+    require(len(paths) == 30 and all('-voices/' in p for p in paths), 'Every current recording uses the Piper voices')
+    # Exam mode plays only reserved assessment recordings: they must include a conversation and more than one accent.
+    exam_clips = [c for c in voices['clips'].values() if c['split'] == 'ASSESSMENT']
+    require(any(len(c['speakers']) > 1 for c in exam_clips), 'Assessment Listening needs a multi-speaker recording')
+    exam_accents = {s['accent'] for c in exam_clips for s in c['speakers']}
+    require(len(exam_accents) > 1, 'Assessment Listening needs more than one accent')
     media_hashes = {value['compactAssetPath']: value['sha256'] for value in compact.values()}
     media_hashes.update({c['audioAssetPath']: c['sha256'] for c in read(ROOT / 'docs/content/audio-manifest.json')['clips'].values()})
+    # Earlier exercise versions keep playing their original eSpeak files, so those stay bundled and unchanged.
+    for relative, digest in list(media_hashes.items()):
+        require((ASSETS / relative).is_file() and sha(ASSETS / relative) == digest, 'Earlier-version audio missing or changed: ' + relative)
+    media_hashes.update({m['compactAssetPath']: m['sha256'] for m in [*voices['clips'].values(), *voices['samples'].values()]})
     for relative in paths:
         media = ASSETS / relative
         require(relative.startswith('audio/') and '..' not in Path(relative).parts and media.is_file(), 'Missing/unsafe audio: ' + relative)
@@ -267,11 +292,24 @@ def validate(path):
         if canonical_sha(after) != before['sha256']:
             changed5.append(before['id'])
             require(after['version'] > before['version'], 'Changed package5 item must increment its version: ' + before['id'])
+    package6 = read(ROOT / 'tools/content/pilot/package6-index.json')
+    require(package6['contentVersion'] == 6 and [e['id'] for e in package6['exercises']] == [e['id'] for e in items], 'Package6 index')
+    changed6 = []
+    for before in package6['exercises']:
+        after = by_id[before['id']]
+        if canonical_sha(after) != before['sha256']:
+            changed6.append(before['id'])
+            require(after['version'] > before['version'], 'Changed package6 item must increment its version: ' + before['id'])
+    revoiced = {e['id'] for e in items if e['skillId'] == 'ielts_listening' or e.get('sampleAudioAssetPath')}
+    require(set(changed6) == revoiced, 'Package7 changes only the re-voiced Listening items and spoken samples')
     return {'schemaVersion': 1, 'contentVersion': pack['version'], 'sha256': sha(path), 'reviewStatus': pack['reviewStatus'],
         'counts': {'exercises': len(items), 'lessons': len(pack['lessons']), 'sat': 288, 'readingSources': 24 + len(long_sources),
             'readingQuestions': 240 + len(long_reading), 'longReadingPassages': len(long_sources), 'listeningSources': 24, 'listeningQuestions': 240,
             'writingTask1': 12 + len(new_task1), 'writingTask2': 12, 'speakingSets': 18, 'writtenSamples': 12, 'spokenAudioSamples': 6,
-            'bundledAudioFiles': len(paths), 'changedSincePackage4': len(changed), 'changedSincePackage5': len(changed5),
+            'bundledAudioFiles': len(paths), 'changedSincePackage4': len(changed), 'changedSincePackage5': len(changed5), 'changedSincePackage6': len(changed6),
+            'multiSpeakerRecordings': sum(len(c['speakers']) > 1 for c in voices['clips'].values()),
+            'recordingAccents': sorted({s['accent'] for c in voices['clips'].values() for s in c['speakers']}),
+            'assessmentRecordingAccents': sorted(exam_accents),
             'writingTaskChecklists': sum(bool(e.get('taskChecklist')) for e in writing)},
         'readingFormats': dict(sorted(Counter(e.get('format', 'UNLABELLED') for e in items if e['skillId'] == 'ielts_reading').items())),
         'task1Visuals': dict(sorted(Counter((e.get('chart') or {}).get('kind', 'BAR') if e.get('chart') else e['figure']['kind'] for e in writing if e.get('chart') or e.get('figure')).items())),

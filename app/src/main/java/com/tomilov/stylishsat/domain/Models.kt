@@ -36,8 +36,9 @@ data class Lesson(
     val estimatedMinutes: Int = 8,
 )
 
+/** One timed stretch of a recording; [speaker] names who is talking in multi-voice recordings (schema 3). */
 @Serializable
-data class TranscriptSegment(val startMs: Long, val endMs: Long, val text: String)
+data class TranscriptSegment(val startMs: Long, val endMs: Long, val text: String, val speaker: String? = null)
 
 @Serializable
 data class ChartSeries(val name: String, val values: List<Double>)

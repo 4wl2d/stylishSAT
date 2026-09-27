@@ -93,6 +93,9 @@ object ContentPackCodec {
                 require(path.startsWith("audio/") && ".." !in path.split('/')) { "Unsafe sample audio path" }
             }
             require(item.transcriptSegments.all { it.startMs >= 0 && it.endMs > it.startMs && it.text.isNotBlank() }) { "Invalid transcript timings for ${item.id}" }
+            require(item.transcriptSegments.zipWithNext().all { (a, b) -> b.startMs >= a.endMs }) { "Overlapping transcript timings for ${item.id}" }
+            require(item.transcriptSegments.none { it.speaker != null } || pack.schemaVersion >= 3 && item.transcriptSegments.all { !it.speaker.isNullOrBlank() }) {
+                "Speaker labels need schema 3 and must cover every segment of ${item.id}" }
             item.chart?.let { chart ->
                 require(chart.labels.isNotEmpty() && chart.series.isNotEmpty()) { "Empty chart for ${item.id}" }
                 require(chart.series.all { it.values.size == chart.labels.size && it.values.all(Double::isFinite) }) { "Chart values mismatch for ${item.id}" }

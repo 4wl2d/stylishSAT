@@ -14,6 +14,8 @@ data class SourceSection(
     val passage: String? get() = exercises.firstNotNullOfOrNull { it.passage }
     val audioAssetPath: String? get() = exercises.firstNotNullOfOrNull { it.audioAssetPath }
     val listening: Boolean get() = audioAssetPath != null
+    /** Distinct labelled voices in the recording; unlabelled transcripts count as zero. */
+    val speakers: Int get() = exercises.firstOrNull { it.audioAssetPath != null }?.transcriptSegments.orEmpty().mapNotNull { it.speaker }.distinct().size
     val words: Int get() = passage?.let(AnswerChecker::wordCount) ?: 0
 }
 

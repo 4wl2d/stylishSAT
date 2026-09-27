@@ -141,7 +141,8 @@ fun AttemptReviewScreen(s: StudyUiState, vm: StudyViewModel, attemptId: String, 
                     SelectionContainer { Text(passage, style = StudyType.Reading.copy(fontSize = 16.sp, lineHeight = 26.sp), color = c.ink) }
                 }
             }
-            exercise.audioAssetPath?.let { ListeningPlayer(it, l) }
+            val clip = exercise.audioAssetPath?.let { rememberClipPlayer(it) }
+            clip?.let { PracticePlayer(it, l, l.label("Replay freely; tap a transcript time to jump.", "Слушайте сколько нужно; нажмите на время в транскрипте для перехода.")) }
             exercise.chart?.let { Chart(it, l) }
             exercise.figure?.let { FigureView(it) }
             exercise.group?.let { GroupContext(it, mapOf(exercise.id to 1)) }
@@ -152,12 +153,13 @@ fun AttemptReviewScreen(s: StudyUiState, vm: StudyViewModel, attemptId: String, 
             Explanation(exercise, l)
             exercise.transcript?.let { transcript ->
                 Disclosure(l.label("Audio transcript", "Транскрипт аудио"), null) {
-                    SelectionContainer { Text(transcript, style = StudyType.Reading.copy(fontSize = 16.sp, lineHeight = 25.sp), color = c.ink) }
+                    if (exercise.transcriptSegments.isNotEmpty()) TranscriptTimes(clip, exercise.transcriptSegments, l)
+                    else SelectionContainer { Text(transcript, style = StudyType.Reading.copy(fontSize = 16.sp, lineHeight = 25.sp), color = c.ink) }
                 }
             }
             if (exercise.type == ExerciseType.WRITING && attempt.answer.isNotBlank())
                 StudyButton(l.label("Check and revise", "Проверить и доработать"), { openRevision(attempt.id) }, Modifier.fillMaxWidth(), tone = Tone.Quiet, compact = true, arrow = true)
-            if (marked) StudyButton(l.label("Marked for review · unmark", "Отмечено для повторения · снять отметку"), { attempt.workId?.let(vm::toggleMark) },
+            if (marked) StudyButton(l.label("Marked for review · unmark", "Отмечено для повторения · снять отметку"), { vm.toggleMark(attempt.workId) },
                 Modifier.fillMaxWidth(), tone = Tone.Quiet, compact = true, glyph = Glyph.Bookmark)
             if (mistake) NotebookTools(s, vm, attempt, exercise, entry)
         }

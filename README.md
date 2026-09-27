@@ -21,7 +21,7 @@ StylishSAT brings short bilingual lessons, English exam-style exercises and your
 | --- | --- | --- |
 | 48 Russian/English mini-lessons | 884 SAT and IELTS exercises | Saved answers, drafts and progress |
 | Worked examples and staged hints | SAT Reading & Writing / Math; all four IELTS skills; full IELTS sections | Adaptive review and 28-day courses |
-| 30 bundled audio recordings/samples | Exact closed-answer checking | Separate SAT and IELTS histories |
+| 30 bundled multi-voice recordings/samples | Exact closed-answer checking | Separate SAT and IELTS histories |
 
 Menus, lessons and explanations support English and Russian. Exam prompts and answers stay in English. Writing includes charts and prepared feedback; Speaking supports recording, playback and editable transcripts.
 
