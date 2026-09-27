@@ -94,6 +94,7 @@ data class StudyUiState(
     val feedback: List<Feedback> = emptyList(),
     val drafts: Map<String, StudyDraft> = emptyMap(),
     val papers: Map<String, PaperRun> = emptyMap(),
+    val revisions: Map<String, WritingRevision> = emptyMap(),
 ) {
     val exam get() = settings.exam
     val language get() = settings.language
@@ -154,6 +155,7 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
                 val drafts = decode("draft") { storageJson.decodeFromString<StudyDraft>(it) }
                 val plans = decode("plan") { storageJson.decodeFromString<StudyPlan>(it) }
                 val papers = decode("paper") { storageJson.decodeFromString<PaperRun>(it) }
+                val revisions = decode("revision") { storageJson.decodeFromString<WritingRevision>(it) }
                 mutableState.update { it.copy(
                     pack = pack, settings = initialSettings,
                     profiles = it.profiles + profiles.associateBy { p -> p.exam },
@@ -163,6 +165,7 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
                     attempts = attempts, drafts = drafts.groupBy { draft -> draft.key }.mapValues { (_, versions) -> versions.maxWith(compareBy<StudyDraft>({ it.updatedAt }, { it.submitted })) },
                     feedback = decode("feedback") { storageJson.decodeFromString<Feedback>(it) },
                     papers = papers.associateBy { run -> run.id },
+                    revisions = revisions.associateBy { revision -> revision.id },
                 ) }
                 }
                 Exam.entries.forEach { refreshStoredCourse(it) }
@@ -343,9 +346,13 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         return current.takeUnless { it.submitted }
     }
 
-    private suspend fun exerciseForDraft(draft: StudyDraft): Exercise? {
-        fun Exercise.matches() = exam == draft.exam && id == draft.exerciseId && version == draft.exerciseVersion
+    private suspend fun exerciseForDraft(draft: StudyDraft): Exercise? = findExercise(draft.exam, draft.exerciseId, draft.exerciseVersion)
+
+    /** The exact exercise version a saved response answered: current pack, open work, plan snapshots, then archived packs. */
+    suspend fun findExercise(exam: Exam, exerciseId: String, exerciseVersion: Int): Exercise? {
+        fun Exercise.matches() = this.exam == exam && id == exerciseId && version == exerciseVersion
         val s = state.value
+        s.papers.values.asSequence().flatMap { it.exercises.asSequence() }.firstOrNull { it.matches() }?.let { return it }
         s.pack?.exercises?.firstOrNull { it.matches() }?.let { return it }
         s.sessions.values.asSequence().flatMap { it.exercises.asSequence() }.firstOrNull { it.matches() }?.let { return it }
         (s.plans.values + s.dailyPlans.values).asSequence().flatMap { it.days.asSequence() }
@@ -796,6 +803,63 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
     fun abandonPaper(runId: String) {
         val run = livePaper(runId) ?: return
         savePaper(run.copy(abandoned = true))
+    }
+
+    private fun saveRevision(revision: WritingRevision) {
+        mutableState.update { it.copy(revisions = it.revisions + (revision.id to revision)) }
+        persist("revision:${revision.id}", "revision", revision.exam, revision)
+    }
+
+    /** Opens the revision thread of a submitted written answer; its text becomes version 1. Returns the thread's work id. */
+    fun beginRevision(attemptId: String): String? {
+        val s = state.value
+        if (s.loading) return null
+        val attempt = s.attempts.firstOrNull { it.id == attemptId && it.correct == null && it.answer.isNotBlank() } ?: return null
+        val original = Revisions.original(attempt)
+        if (Revisions.thread(s.revisions.values, original.workId).isEmpty()) saveRevision(original)
+        return original.workId
+    }
+
+    /** The learner's own mark against one check of a saved version; null clears it. */
+    fun markCheck(workId: String, number: Int, checkId: String, mark: CheckMark?) {
+        val revision = state.value.revisions[WritingRevision.revisionId(workId, number)]?.takeIf { it.saved } ?: return
+        val checks = if (mark == null) revision.checks - checkId else revision.checks + (checkId to mark)
+        if (checks != revision.checks) saveRevision(revision.copy(checks = checks, updatedAt = now()))
+    }
+
+    fun revisionPlan(workId: String, number: Int, text: String) {
+        val revision = state.value.revisions[WritingRevision.revisionId(workId, number)] ?: return
+        if (revision.plan != text) saveRevision(revision.copy(plan = text, updatedAt = now()))
+    }
+
+    /** Starts the next version from the latest saved text, or keeps the draft already in progress. */
+    fun startNextVersion(workId: String) {
+        val s = state.value
+        if (Revisions.draft(s.revisions.values, workId) != null) return
+        val latest = Revisions.saved(s.revisions.values, workId).lastOrNull() ?: return
+        saveRevision(latest.copy(number = latest.number + 1, checks = emptyMap(), plan = "", saved = false,
+            attemptId = null, createdAt = now(), updatedAt = now(), elapsedSeconds = 0))
+    }
+
+    /** Compose owns the editor; this only follows it. */
+    fun revisionDraft(workId: String, text: String) {
+        val draft = Revisions.draft(state.value.revisions.values, workId) ?: return
+        if (draft.text != text) saveRevision(draft.copy(text = text, updatedAt = now()))
+    }
+
+    fun revisionTick(workId: String) {
+        val draft = Revisions.draft(state.value.revisions.values, workId) ?: return
+        saveRevision(draft.copy(elapsedSeconds = draft.elapsedSeconds + 1))
+    }
+
+    /** Saves the draft as a new version. It is never marked or converted into a band; only the learner's checks attach to it. */
+    fun saveVersion(workId: String): Boolean {
+        val s = state.value
+        val draft = Revisions.draft(s.revisions.values, workId) ?: return false
+        val previous = Revisions.saved(s.revisions.values, workId).lastOrNull()
+        if (draft.text.isBlank() || draft.text == previous?.text) return false
+        saveRevision(draft.copy(saved = true, updatedAt = now()))
+        return true
     }
 
     fun importContent(uri: Uri) {

@@ -84,6 +84,12 @@ data class FigureNode(
 
 @Serializable data class GroupOption(val key: String, val text: String)
 
+/** What a task check asks the learner to confirm about their own response. */
+@Serializable enum class CheckKind { TASK_PART, VIEW, POSITION, SUPPORT, OVERVIEW, COMPARISON, DATA, ACCURACY }
+
+/** One yes/no question about the learner's response to this exact task, e.g. "Did you explain view B?". */
+@Serializable data class TaskCheck(val id: String, val kind: CheckKind, val text: LocalizedText)
+
 /** Shared context for several questions: an instruction, a lettered list, a gapped text or a figure.
  * Gaps and figure labels refer to member questions as [[exercise-id]]. */
 @Serializable
@@ -129,6 +135,7 @@ data class Exercise(
     val group: QuestionGroup? = null,
     val figure: Figure? = null,
     val sourceTitle: String? = null,
+    val taskChecklist: List<TaskCheck> = emptyList(),
 ) {
     /** Exact identity of the answered version. */
     val versionKey: String get() = "$id@$version"

@@ -8,6 +8,8 @@ Versions follow the [version policy](docs/VERSIONING.md).
 - Full sections: every question for one IELTS Reading passage or Listening recording on one page, with one clock and one saved playback position. Exam conditions add a clock (90 seconds a question for Reading) and play a recording once, then give two minutes to check. Short drills remain the practice mode. Answers given together in one sitting are not counted as repeats of each other.
 - Content package 5 (schema 3): five full-length Academic passages of 864–891 words with 13–14 questions each, in formats the bank lacked — True/False/Not Given, Yes/No/Not Given, matching headings, matching information and features, summary completion from a word box, sentence and table completion, and diagram labelling. The three assessment passages (40 questions) are held back from single-item timed checks.
 - Seven new Task 1 visuals: line graph, pie charts, tables, a process diagram and before/after maps, drawn in the app with a values table for accessibility.
+- Writing revision loop: after submitting, check your own response against a list written for that exact task (both views, your position, the overview, the main comparisons and the required figures), mark each point Yes/Partly/No, note what to change, then write and save new versions. Compare any two versions word by word with your marks side by side. Open it from the result, from Progress history or from Today while a new version is in progress. Writing still saves as "needs review"; no band is given.
+- Content package 6: all 31 Writing tasks carry a 4–6 point task checklist (new exercise versions; prompts and visuals unchanged).
 
 ## 0.4.0 — 2026-09-27
 

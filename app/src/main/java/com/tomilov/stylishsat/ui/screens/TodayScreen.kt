@@ -47,7 +47,8 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 
 @Composable
-fun TodayScreen(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, String?) -> Unit, plannedDay: (Int) -> Unit, openPaper: (String) -> Unit, resume: () -> Unit) {
+fun TodayScreen(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, String?) -> Unit, plannedDay: (Int) -> Unit, openPaper: (String) -> Unit,
+    continueRevision: (String) -> Unit, resume: () -> Unit) {
     val rhythm = rememberRhythm(s)
     var intensiveSheet by rememberSaveable { mutableStateOf(false) }
     var dayDetail by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -59,6 +60,7 @@ fun TodayScreen(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, Strin
         TodayMeter(s, rhythm)
         QuickRow(s, vm, begin) { intensiveSheet = true }
         Drafts(s, vm, resume)
+        RevisionDrafts(s, continueRevision)
         if (plan?.mode == PlanMode.INTENSIVE) {
             IntensiveTimeline(s, vm, plan)
             IntensiveSupport(s, vm, begin)
@@ -297,6 +299,28 @@ private fun Drafts(s: StudyUiState, vm: StudyViewModel, resume: () -> Unit) {
                     StudyButton(l.label("Continue", "Продолжить"), { if (vm.resumeDraft(draft.key)) resume() }, Modifier.fillMaxWidth(),
                         tone = Tone.Quiet, compact = true, enabled = !active && withinPriorities && !s.loading)
                 }
+            }
+        }
+    }
+}
+
+/** Unsaved next versions of written answers. */
+@Composable
+private fun RevisionDrafts(s: StudyUiState, open: (String) -> Unit) {
+    val drafts = remember(s.revisions, s.exam) { s.revisions.values.filter { it.exam == s.exam && !it.saved }.sortedByDescending { it.updatedAt } }
+    if (drafts.isEmpty()) return
+    val l = s.language
+    val c = Study.colors
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        SectionLabel(l.label("Revisions in progress", "Доработка ответов"), trailing = "${drafts.size}")
+        drafts.forEach { draft ->
+            val prompt = s.pack?.exercises?.firstOrNull { it.id == draft.exerciseId }?.prompt.orEmpty()
+            Row(Modifier.fillMaxWidth().tapSurface(RoundedCornerShape(20.dp), c.raised) { open(draft.workId) }.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Meta(l.label("Version ${draft.number} · ${AnswerChecker.wordCount(draft.text)} words", "Версия ${draft.number} · ${AnswerChecker.wordCount(draft.text)} слов"))
+                    Text(prompt, style = StudyType.Small, color = c.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
+                GlyphIcon(Glyph.ChevronRight, tint = c.inkSoft, size = 18.dp)
             }
         }
     }

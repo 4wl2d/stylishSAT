@@ -38,7 +38,7 @@ def canonical_sha(item):
     return hashlib.sha256(json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
 
 
-PACKAGE_VERSION = 5
+PACKAGE_VERSION = 6
 SCHEMA_VERSION = 3
 ORIGINAL_EXERCISES = 810
 LONG_READING = {'PRACTICE': 2, 'ASSESSMENT': 3}
@@ -46,6 +46,7 @@ NEW_TASK1 = {'LINE': 1, 'PIE': 1, 'TABLE': 2, 'PROCESS': 1, 'MAP': 2}
 FORMATS = {'TRUE_FALSE_NOT_GIVEN', 'YES_NO_NOT_GIVEN', 'MATCHING_HEADINGS', 'MATCHING_INFORMATION', 'MATCHING_FEATURES',
     'SUMMARY_COMPLETION', 'SENTENCE_COMPLETION', 'NOTE_COMPLETION', 'TABLE_COMPLETION', 'DIAGRAM_LABEL', 'MAP_LABEL',
     'MULTIPLE_CHOICE', 'SHORT_ANSWER'}
+CHECK_KINDS = {'TASK_PART', 'VIEW', 'POSITION', 'SUPPORT', 'OVERVIEW', 'COMPARISON', 'DATA', 'ACCURACY'}
 LIST_FORMATS = {'MATCHING_HEADINGS', 'MATCHING_INFORMATION', 'MATCHING_FEATURES', 'SUMMARY_COMPLETION', 'MAP_LABEL'}
 GAP = re.compile(r'\[\[([^\]]+)\]\]')
 
@@ -102,7 +103,7 @@ def validate(path):
     additions = items[ORIGINAL_EXERCISES:]
     long_reading = [e for e in additions if e['skillId'] == 'ielts_reading']
     new_task1 = [e for e in additions if e['skillId'] == 'ielts_writing']
-    require(len(additions) == len(long_reading) + len(new_task1), 'Only long Reading passages and Task 1 visuals are added in package5')
+    require(len(additions) == len(long_reading) + len(new_task1), 'Only long Reading passages and Task 1 visuals are added after package4')
     require(len(by_id) == len(items), 'Exercise ids must be unique')
     require(Counter(e['skillId'] for e in items[:ORIGINAL_EXERCISES]) == {
         **{key: 36 for key, s in skills.items() if s['exam'] == 'SAT'},
@@ -112,7 +113,22 @@ def validate(path):
     spoken = read(ROOT / 'docs/content/speaking-audio-manifest.json')['samples']
     groups = {key: defaultdict(set) for key in ['familyId', 'sourceId', 'passage', 'audioAssetPath']}
     for item in items:
-        key = item['id']; fields(item, EX_FIELDS | {'sampleAudioAssetPath', 'format', 'group', 'figure', 'sourceTitle'}, key)
+        key = item['id']; fields(item, EX_FIELDS | {'sampleAudioAssetPath', 'format', 'group', 'figure', 'sourceTitle', 'taskChecklist'}, key)
+        if item['type'] == 'WRITING':
+            # Package6: every Writing task carries its own self-check list; nothing in it is a score.
+            checks = item.get('taskChecklist') or []
+            require(4 <= len(checks) <= 6 and len({c['id'] for c in checks}) == len(checks), key + ': task checklist size')
+            for check in checks:
+                fields(check, {'id', 'kind', 'text'}, key); bilingual(check['text'], key + '.taskChecklist')
+                require(check['kind'] in CHECK_KINDS and check['text']['en'].rstrip().endswith('?'), key + ': check kind/question')
+                require(not re.search(r'\b(band|score)\b', check['text']['en'], re.I), key + ': a check never names a band or score')
+            kinds = {c['kind'] for c in checks}
+            if item.get('chart') or item.get('figure'):
+                require({'OVERVIEW', 'COMPARISON', 'DATA', 'ACCURACY'} <= kinds, key + ': Task 1 checks')
+            else:
+                require('SUPPORT' in kinds and kinds & {'POSITION', 'TASK_PART'}, key + ': Task 2 checks')
+        else:
+            require('taskChecklist' not in item, key + ': checklists belong to Writing')
         require(item['exam'] == skills[item['skillId']]['exam'], key + ': exam mismatch')
         require(item['split'] in SPLITS and item['type'] in TYPES, key + ': enum')
         require(item['version'] > 0 and item['difficulty'] in [1, 2, 3] and item['expectedSeconds'] > 0, key + ': metadata')
@@ -242,11 +258,21 @@ def validate(path):
         if canonical_sha(after) != before['sha256']:
             changed.append(before['id'])
             require(after['version'] > before['version'], 'Changed package4 item must increment its version: ' + before['id'])
+    # Package5 was built on this branch; any later change to one of its items also needs a newer exercise version.
+    package5 = read(ROOT / 'tools/content/pilot/package5-index.json')
+    require(package5['contentVersion'] == 5 and len(package5['exercises']) == ORIGINAL_EXERCISES + len(additions), 'Package5 index')
+    changed5 = []
+    for before in package5['exercises']:
+        after = by_id[before['id']]
+        if canonical_sha(after) != before['sha256']:
+            changed5.append(before['id'])
+            require(after['version'] > before['version'], 'Changed package5 item must increment its version: ' + before['id'])
     return {'schemaVersion': 1, 'contentVersion': pack['version'], 'sha256': sha(path), 'reviewStatus': pack['reviewStatus'],
         'counts': {'exercises': len(items), 'lessons': len(pack['lessons']), 'sat': 288, 'readingSources': 24 + len(long_sources),
             'readingQuestions': 240 + len(long_reading), 'longReadingPassages': len(long_sources), 'listeningSources': 24, 'listeningQuestions': 240,
             'writingTask1': 12 + len(new_task1), 'writingTask2': 12, 'speakingSets': 18, 'writtenSamples': 12, 'spokenAudioSamples': 6,
-            'bundledAudioFiles': len(paths), 'changedSincePackage4': len(changed)},
+            'bundledAudioFiles': len(paths), 'changedSincePackage4': len(changed), 'changedSincePackage5': len(changed5),
+            'writingTaskChecklists': sum(bool(e.get('taskChecklist')) for e in writing)},
         'readingFormats': dict(sorted(Counter(e.get('format', 'UNLABELLED') for e in items if e['skillId'] == 'ielts_reading').items())),
         'task1Visuals': dict(sorted(Counter((e.get('chart') or {}).get('kind', 'BAR') if e.get('chart') else e['figure']['kind'] for e in writing if e.get('chart') or e.get('figure')).items())),
         'bySkill': {skill: dict(Counter(e['split'] for e in items if e['skillId'] == skill)) for skill in skills},

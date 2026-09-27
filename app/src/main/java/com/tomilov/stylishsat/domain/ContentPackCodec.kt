@@ -99,6 +99,11 @@ object ContentPackCodec {
                 require(chart.kind == ChartKind.BAR || pack.schemaVersion >= 3) { "Chart kinds require schema 3" }
                 if (chart.kind == ChartKind.PIE) require(chart.series.all { series -> series.values.all { it >= 0 } && series.values.sum() > 0 }) { "Pie shares must be non-negative for ${item.id}" }
             }
+            if (item.taskChecklist.isNotEmpty()) {
+                require(pack.schemaVersion >= 3 && item.type == ExerciseType.WRITING) { "Task checklists belong to schema 3 writing tasks: ${item.id}" }
+                require(item.taskChecklist.map { it.id }.distinct().size == item.taskChecklist.size &&
+                    item.taskChecklist.all { it.id.isNotBlank() && it.text.en.isNotBlank() && it.text.ru.isNotBlank() }) { "Invalid task checklist for ${item.id}" }
+            }
             if (item.format != null || item.group != null || item.figure != null || item.sourceTitle != null) {
                 require(pack.schemaVersion >= 3) { "Formats, groups and figures require schema 3" }
             }

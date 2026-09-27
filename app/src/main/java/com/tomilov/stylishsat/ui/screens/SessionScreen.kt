@@ -72,7 +72,7 @@ private fun StudySession.kind(): StepKind = when {
 private fun StudySession.phase(): String = "$id:$index:${kind()}"
 
 @Composable
-fun SessionScreen(s: StudyUiState, vm: StudyViewModel, modifier: Modifier, close: () -> Unit, again: () -> Unit) {
+fun SessionScreen(s: StudyUiState, vm: StudyViewModel, modifier: Modifier, openRevision: (String) -> Unit, close: () -> Unit, again: () -> Unit) {
     val session = s.session ?: return
     val exercise = session.exercise ?: return
     val l = s.language
@@ -126,7 +126,7 @@ fun SessionScreen(s: StudyUiState, vm: StudyViewModel, modifier: Modifier, close
                 StepKind.Finished -> FinishedStep(s, current, close, again)
                 StepKind.Review -> ReviewStep(s, vm, current)
                 StepKind.Lesson -> LessonStep(s, vm, current)
-                StepKind.Exercise -> ExerciseStep(s, vm, current, if (live) answerState else null, recording)
+                StepKind.Exercise -> ExerciseStep(s, vm, current, if (live) answerState else null, recording, openRevision)
             }
         }
     }
@@ -216,7 +216,7 @@ private fun ReviewStep(s: StudyUiState, vm: StudyViewModel, session: StudySessio
 }
 
 @Composable
-private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySession, answerState: TextFieldState?, recording: Boolean) {
+private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySession, answerState: TextFieldState?, recording: Boolean, openRevision: (String) -> Unit) {
     val l = s.language
     val c = Study.colors
     val exercise = session.exercise ?: return
@@ -354,6 +354,15 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
                 Disclosure(l.label("Audio transcript", "Транскрипт аудио"), null) {
                     SelectionContainer { Text(transcript, style = StudyType.Reading.copy(fontSize = 16.sp, lineHeight = 25.sp), color = c.ink) }
                     exercise.transcriptSegments.forEach { Text("${it.startMs / 1000}–${it.endMs / 1000}s · ${it.text}", style = StudyType.Small, color = c.inkSoft) }
+                }
+            }
+            if (exercise.type == ExerciseType.WRITING) {
+                val attempt = s.attempts.lastOrNull { it.exam == session.exam && it.workId == session.workId && it.exerciseId == exercise.id }
+                if (attempt != null) Block(color = c.sunken) {
+                    Text(l.label("Check it against this task", "Сверьте ответ с этим заданием"), style = StudyType.Title, color = c.ink)
+                    Text(l.label("Mark each point of the task yourself, then write a new version and compare it with this one. No band is given.",
+                        "Отметьте каждый пункт задания сами, затем напишите новую версию и сравните её с этой. Band не выставляется."), style = StudyType.Small, color = c.ink)
+                    StudyButton(l.label("Check and revise", "Проверить и доработать"), { openRevision(attempt.id) }, Modifier.fillMaxWidth(), tone = Tone.Ink, compact = true, arrow = true)
                 }
             }
             exercise.sampleAnswer?.let { SampleAnswer(it, l) }

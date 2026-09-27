@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "id": "stylishsat-original-pilot",
-  "version": 5,
+  "version": 6,
   "title": {
     "en": "StylishSAT · full original draft bank",
     "ru": "StylishSAT · полный авторский банк, редакционная проверка ожидается"
@@ -4580,7 +4580,7 @@
     },
     {
       "id": "ielts-write-d1",
-      "version": 2,
+      "version": 3,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -4665,11 +4665,45 @@
             ]
           }
         ]
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-bus-overtakes-car",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview say that the bus replaced the car as the most common commuting mode, while the bicycle share did not change?",
+            "ru": "Говорится ли в вашем обзоре (overview), что автобус сменил автомобиль как самый распространённый способ добираться до колледжа, а доля велосипеда не изменилась?"
+          }
+        },
+        {
+          "id": "car-bus-swap",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare the car and the bus directly (the car fell from first place to second while the bus rose from second to first) and note that the bicycle was the least used mode in both years?",
+            "ru": "Сравниваете ли вы автомобиль и автобус напрямую (автомобиль опустился с первого места на второе, а автобус поднялся со второго на первое) и отмечаете ли, что велосипед в оба года был наименее популярным способом?"
+          }
+        },
+        {
+          "id": "mode-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report bus 30% → 45%, car 50% → 35% and bicycle 20% in both 2016 and 2025, each attached to the correct mode and year?",
+            "ru": "Приводите ли вы данные: автобус 30% → 45%, автомобиль 50% → 35%, велосипед 20% и в 2016, и в 2025 году — каждое значение с правильным способом и годом?"
+          }
+        },
+        {
+          "id": "shares-not-people",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you describe the figures as shares of surveyed commuters (the bus and car each changed by 15 percentage points), without inventing numbers of students or reasons such as fuel prices?",
+            "ru": "Описываете ли вы значения как доли опрошенных (у автобуса и автомобиля изменение на 15 процентных пунктов), не придумывая число студентов или причины вроде цен на бензин?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-p1",
-      "version": 2,
+      "version": 3,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -4753,11 +4787,53 @@
             ]
           }
         ]
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-online-overtakes",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that online visits rose steadily and had overtaken in-person visits by 2021, while in-person visits dipped in 2021 and then recovered?",
+            "ru": "Говорится ли в вашем обзоре (overview), что онлайн-посещения стабильно росли и к 2021 году обогнали очные, а очные посещения просели в 2021 году и затем восстановились?"
+          }
+        },
+        {
+          "id": "online-vs-in-person",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare the two types at key points: online was a third of in-person in 2019 (40 vs 120 thousand), ahead in 2021 (90 vs 80 thousand) and further ahead in 2025 (150 vs 130 thousand)?",
+            "ru": "Сравниваете ли вы два вида посещений в ключевых точках: в 2019 году онлайн-посещений была треть от очных (40 против 120 тыс.), в 2021-м их стало больше (90 против 80 тыс.), а в 2025-м отрыв вырос (150 против 130 тыс.)?"
+          }
+        },
+        {
+          "id": "in-person-dip-recovery",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you give the in-person figures for the dip and recovery: 120 thousand in 2019, a low of 80 thousand in 2021, then 110 thousand in 2023 and 130 thousand in 2025, above the 2019 level?",
+            "ru": "Приводите ли вы цифры очных посещений для спада и восстановления: 120 тыс. в 2019 году, минимум 80 тыс. в 2021-м, затем 110 тыс. в 2023-м и 130 тыс. в 2025-м — выше уровня 2019 года?"
+          }
+        },
+        {
+          "id": "online-growth",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report that online visits grew from 40 thousand in 2019 to 150 thousand in 2025, almost four times the starting level?",
+            "ru": "Указываете ли вы, что онлайн-посещения выросли с 40 тыс. в 2019 году до 150 тыс. в 2025-м — почти в четыре раза?"
+          }
+        },
+        {
+          "id": "thousands-of-visits",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you write the figures as thousands of visits (e.g., 120,000, not 120), call them visits rather than visitors, and avoid giving reasons for the 2021 dip that the chart does not show?",
+            "ru": "Записываете ли вы значения в тысячах посещений (например, 120 000, а не 120), называете ли их посещениями, а не посетителями, и обходитесь ли без причин спада 2021 года, которых на графике нет?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-a1",
-      "version": 2,
+      "version": 3,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -4846,11 +4922,53 @@
             ]
           }
         ]
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-gas-leads-renewables",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that gas generation fell but remained the largest source in every year, while solar and wind both grew, with solar growing fastest?",
+            "ru": "Говорится ли в вашем обзоре (overview), что выработка на газе снизилась, но осталась крупнейшим источником во все годы, а солнечная и ветровая выросли, причём солнечная — быстрее всех?"
+          }
+        },
+        {
+          "id": "solar-overtakes-wind",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare solar with wind: solar was below wind in 2015 (10 vs 20 GWh), level with it in 2020 (25 GWh each) and ahead in 2025 (50 vs 40 GWh)?",
+            "ru": "Сравниваете ли вы солнечную энергию с ветровой: в 2015 году солнечная была ниже (10 против 20 ГВт·ч), в 2020-м они сравнялись (по 25 ГВт·ч), а в 2025-м солнечная вышла вперёд (50 против 40 ГВт·ч)?"
+          }
+        },
+        {
+          "id": "gas-solar-gap",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you show how the gap between gas and solar narrowed from 80 GWh in 2015 to only 10 GWh in 2025?",
+            "ru": "Показываете ли вы, как разрыв между газом и солнечной энергией сократился с 80 ГВт·ч в 2015 году до всего 10 ГВт·ч в 2025-м?"
+          }
+        },
+        {
+          "id": "source-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report gas 90 → 80 → 60 GWh, solar 10 → 25 → 50 GWh (a fivefold rise) and wind 20 → 25 → 40 GWh (a doubling) for 2015, 2020 and 2025?",
+            "ru": "Приводите ли вы данные за 2015, 2020 и 2025 годы: газ 90 → 80 → 60 ГВт·ч, солнце 10 → 25 → 50 ГВт·ч (рост в пять раз) и ветер 20 → 25 → 40 ГВт·ч (вдвое больше)?"
+          }
+        },
+        {
+          "id": "gwh-no-invented-total",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you keep the unit as GWh of electricity generated, and avoid calling the sum of these three sources Harven's total electricity or giving reasons such as government policy that the chart does not show?",
+            "ru": "Сохраняете ли вы единицу ГВт·ч выработанной электроэнергии и избегаете ли называть сумму этих трёх источников всей электроэнергией Харвена или приводить причины вроде государственной политики, которых на графике нет?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-d2",
-      "version": 2,
+      "version": 3,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -4902,11 +5020,45 @@
           "ru": "Грамматика: сочетайте формы предложений, проверяя границы, согласование и время."
         }
       ],
-      "sampleAnswer": "Allowing students to choose homework may increase their interest, but teachers also have a responsibility to ensure that essential skills are practised. In my view, students should have a limited choice within a set of tasks designed by the teacher.\n\nSupporters of unrestricted choice argue that learners know which topics interest them. A student who enjoys environmental issues might willingly spend longer researching a local river than completing a general worksheet. Choice can also develop planning skills, because the learner has to decide what to study and how to present the result. However, interest alone does not reveal every learning need. Students may repeatedly avoid a difficult but necessary skill.\n\nTeacher-selected homework can address that problem. A teacher who has reviewed classroom work can identify common weaknesses and assign a focused activity. This makes it easier to check whether the whole class understands an important idea before moving on. Nevertheless, a single identical task may be too easy for some learners and too demanding for others, which can reduce its value.\n\nA balanced approach combines these advantages. For example, after a lesson on evidence, a teacher could offer three short texts on different subjects while requiring every student to support the same kind of argument. Learners would choose a topic, but the underlying skill would remain consistent. The teacher could then give additional targeted practice where needed. This approach preserves meaningful student choice while ensuring that homework contributes to the course rather than merely reflecting existing preferences. Such flexibility also helps students explain why a task matters."
+      "sampleAnswer": "Allowing students to choose homework may increase their interest, but teachers also have a responsibility to ensure that essential skills are practised. In my view, students should have a limited choice within a set of tasks designed by the teacher.\n\nSupporters of unrestricted choice argue that learners know which topics interest them. A student who enjoys environmental issues might willingly spend longer researching a local river than completing a general worksheet. Choice can also develop planning skills, because the learner has to decide what to study and how to present the result. However, interest alone does not reveal every learning need. Students may repeatedly avoid a difficult but necessary skill.\n\nTeacher-selected homework can address that problem. A teacher who has reviewed classroom work can identify common weaknesses and assign a focused activity. This makes it easier to check whether the whole class understands an important idea before moving on. Nevertheless, a single identical task may be too easy for some learners and too demanding for others, which can reduce its value.\n\nA balanced approach combines these advantages. For example, after a lesson on evidence, a teacher could offer three short texts on different subjects while requiring every student to support the same kind of argument. Learners would choose a topic, but the underlying skill would remain consistent. The teacher could then give additional targeted practice where needed. This approach preserves meaningful student choice while ensuring that homework contributes to the course rather than merely reflecting existing preferences. Such flexibility also helps students explain why a task matters.",
+      "taskChecklist": [
+        {
+          "id": "view-students-choose",
+          "kind": "VIEW",
+          "text": {
+            "en": "Do you explain the view that secondary-school students should choose all their own homework tasks, with at least one reason (e.g., stronger motivation or time spent on their own weak areas)?",
+            "ru": "Объясняете ли вы точку зрения, что учащиеся средней школы должны сами выбирать все домашние задания, хотя бы с одной причиной (например, выше мотивация или время на собственные слабые места)?"
+          }
+        },
+        {
+          "id": "view-teachers-decide",
+          "kind": "VIEW",
+          "text": {
+            "en": "Do you explain the view that teachers should decide the homework, with at least one reason (e.g., teachers know what the syllabus requires and can make sure no key topic is skipped)?",
+            "ru": "Объясняете ли вы точку зрения, что домашние задания должен определять учитель, хотя бы с одной причиной (например, учитель знает требования программы и следит, чтобы важные темы не пропускались)?"
+          }
+        },
+        {
+          "id": "own-opinion",
+          "kind": "POSITION",
+          "text": {
+            "en": "Do you state your own opinion on who should decide homework (students, teachers or a specific mix) and keep the same opinion in your final sentence?",
+            "ru": "Высказываете ли вы собственное мнение о том, кто должен определять домашние задания (ученики, учитель или конкретное сочетание), и сохраняется ли оно до последнего предложения?"
+          }
+        },
+        {
+          "id": "homework-example",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Is your opinion backed by a reason or a concrete homework example (e.g., choosing between two reading tasks on the same topic), rather than only repeating the two views?",
+            "ru": "Подкреплено ли ваше мнение причиной или конкретным примером домашнего задания (например, выбор между двумя заданиями на чтение по одной теме), а не простым повтором двух точек зрения?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-p2",
-      "version": 2,
+      "version": 3,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -4958,11 +5110,53 @@
           "ru": "Грамматика: сочетайте формы предложений, проверяя границы, согласование и время."
         }
       ],
-      "sampleAnswer": "Publicly supported repair workshops can help residents extend the life of household items. Although such programmes require money and careful organization, I believe their advantages outweigh the disadvantages when they focus on useful skills and operate within a clear budget.\n\nThe main benefit is that repair can reduce avoidable waste. A broken handle or loose connection may cause someone to discard an otherwise usable object. In a supervised workshop, the owner can learn a practical method and apply it again later. The value therefore extends beyond the single repaired item. Workshops may also help residents who cannot easily afford replacements, particularly when tools are shared and attendance is inexpensive.\n\nThere are, however, real costs. A city must provide suitable space, equipment and competent supervision. Some repairs could also be unsafe if inexperienced participants work without guidance. These concerns are especially serious for electrical appliances. Public funding should not support activities simply because they are popular; authorities need a credible explanation of the likely benefits and the resources required.\n\nThe drawbacks can be reduced by defining the programme carefully. A city could begin with a small monthly workshop for low-risk repairs such as clothing and simple furniture. Trained staff could explain which items require a qualified specialist instead. Attendance, completed repairs and participants’ later use of the skills could then inform a decision about expansion.\n\nOverall, the opportunity to reduce waste and teach reusable skills justifies modest public support. The strongest policy would combine accessible instruction with clear safety limits and regular evaluation, rather than treating every household repair as suitable for a community session."
+      "sampleAnswer": "Publicly supported repair workshops can help residents extend the life of household items. Although such programmes require money and careful organization, I believe their advantages outweigh the disadvantages when they focus on useful skills and operate within a clear budget.\n\nThe main benefit is that repair can reduce avoidable waste. A broken handle or loose connection may cause someone to discard an otherwise usable object. In a supervised workshop, the owner can learn a practical method and apply it again later. The value therefore extends beyond the single repaired item. Workshops may also help residents who cannot easily afford replacements, particularly when tools are shared and attendance is inexpensive.\n\nThere are, however, real costs. A city must provide suitable space, equipment and competent supervision. Some repairs could also be unsafe if inexperienced participants work without guidance. These concerns are especially serious for electrical appliances. Public funding should not support activities simply because they are popular; authorities need a credible explanation of the likely benefits and the resources required.\n\nThe drawbacks can be reduced by defining the programme carefully. A city could begin with a small monthly workshop for low-risk repairs such as clothing and simple furniture. Trained staff could explain which items require a qualified specialist instead. Attendance, completed repairs and participants’ later use of the skills could then inform a decision about expansion.\n\nOverall, the opportunity to reduce waste and teach reusable skills justifies modest public support. The strongest policy would combine accessible instruction with clear safety limits and regular evaluation, rather than treating every household repair as suitable for a community session.",
+      "taskChecklist": [
+        {
+          "id": "workshop-advantages",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you explain specific advantages of publicly funded repair workshops, such as residents saving money, less waste sent to landfill or people learning practical skills?",
+            "ru": "Объясняете ли вы конкретные преимущества ремонтных мастерских за счёт городского бюджета — например, экономию денег жителей, меньше отходов на свалках или освоение практических навыков?"
+          }
+        },
+        {
+          "id": "workshop-disadvantages",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you explain specific disadvantages, such as the cost to taxpayers, money taken from other city services, low attendance or competition with local repair businesses?",
+            "ru": "Объясняете ли вы конкретные недостатки — например, расходы налогоплательщиков, деньги, отнятые у других городских служб, малую посещаемость или конкуренцию с местными ремонтными мастерскими?"
+          }
+        },
+        {
+          "id": "outweigh-judgement",
+          "kind": "POSITION",
+          "text": {
+            "en": "Do you say clearly whether the advantages outweigh the disadvantages, and does your conclusion give the same judgement?",
+            "ru": "Говорите ли вы прямо, перевешивают ли преимущества недостатки, и приходите ли вы к тому же выводу в заключении?"
+          }
+        },
+        {
+          "id": "public-funds-focus",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Is your discussion about spending public funds on these workshops, not only about whether mending household items is a good habit?",
+            "ru": "Обсуждаете ли вы именно трату общественных денег на такие мастерские, а не только то, полезна ли привычка чинить вещи?"
+          }
+        },
+        {
+          "id": "reasons-examples",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Is each main point developed with a reason and a relevant example, such as a resident learning to repair a toaster or a torn coat instead of replacing it?",
+            "ru": "Развит ли каждый главный довод причиной и уместным примером — скажем, житель научился чинить тостер или порванное пальто вместо покупки нового?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-a2",
-      "version": 2,
+      "version": 3,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -5014,7 +5208,49 @@
           "ru": "Грамматика: сочетайте формы предложений, проверяя границы, согласование и время."
         }
       ],
-      "sampleAnswer": "Museums increasingly provide online collections and interactive digital experiences. These services can reach audiences who cannot visit in person, but physical exhibitions offer qualities that a screen cannot fully reproduce. I believe museums should protect the quality of their physical collections while funding digital access as a complementary service.\n\nThe argument for making digital access the main priority rests on reach. A student living far from a major museum may be able to examine a high-resolution image at home without the cost of travel. Digital material can also be enlarged, translated or organized into different learning routes. A well-designed online exhibition may therefore serve people whose needs are not met by a conventional visit. These are substantial benefits, especially for institutions with a geographically dispersed audience.\n\nSupporters of physical exhibitions emphasize the objects themselves. Seeing the scale, surface and arrangement of an artifact can change a visitor’s understanding in ways that a flat image may not capture. Physical collections also require conservation and secure storage whether or not their images are available online. If funding moves away from these responsibilities, the museum may weaken the very collection on which its digital service depends.\n\nA sensible allocation should consider both purposes. For instance, a museum could conserve a fragile textile and display it for limited periods while providing detailed digital views throughout the year. The digital version would improve access without removing the need to preserve the original.\n\nFor these reasons, physical collections should remain a central funding responsibility. Digital services deserve sustained investment where they widen access or explain the collection more effectively, but they should be developed alongside conservation and carefully planned exhibitions, rather than replacing them."
+      "sampleAnswer": "Museums increasingly provide online collections and interactive digital experiences. These services can reach audiences who cannot visit in person, but physical exhibitions offer qualities that a screen cannot fully reproduce. I believe museums should protect the quality of their physical collections while funding digital access as a complementary service.\n\nThe argument for making digital access the main priority rests on reach. A student living far from a major museum may be able to examine a high-resolution image at home without the cost of travel. Digital material can also be enlarged, translated or organized into different learning routes. A well-designed online exhibition may therefore serve people whose needs are not met by a conventional visit. These are substantial benefits, especially for institutions with a geographically dispersed audience.\n\nSupporters of physical exhibitions emphasize the objects themselves. Seeing the scale, surface and arrangement of an artifact can change a visitor’s understanding in ways that a flat image may not capture. Physical collections also require conservation and secure storage whether or not their images are available online. If funding moves away from these responsibilities, the museum may weaken the very collection on which its digital service depends.\n\nA sensible allocation should consider both purposes. For instance, a museum could conserve a fragile textile and display it for limited periods while providing detailed digital views throughout the year. The digital version would improve access without removing the need to preserve the original.\n\nFor these reasons, physical collections should remain a central funding responsibility. Digital services deserve sustained investment where they widen access or explain the collection more effectively, but they should be developed alongside conservation and carefully planned exhibitions, rather than replacing them.",
+      "taskChecklist": [
+        {
+          "id": "view-digital-funding",
+          "kind": "VIEW",
+          "text": {
+            "en": "Do you explain why some people think digital access should receive most of the funding, for example to reach people who live far away or cannot visit in person?",
+            "ru": "Объясняете ли вы, почему некоторые считают, что основное финансирование должно идти на цифровой доступ, — например, чтобы охватить людей, которые живут далеко или не могут прийти лично?"
+          }
+        },
+        {
+          "id": "view-physical-priority",
+          "kind": "VIEW",
+          "text": {
+            "en": "Do you explain why others believe physical exhibitions should remain the priority, for example seeing real objects at their true size or conserving and displaying the collection?",
+            "ru": "Объясняете ли вы, почему другие считают приоритетом физические выставки, — например, возможность увидеть подлинные предметы в натуральную величину или сохранение и показ коллекции?"
+          }
+        },
+        {
+          "id": "own-opinion",
+          "kind": "POSITION",
+          "text": {
+            "en": "Do you state your own opinion on how museum funding should be divided between digital and physical provision, and keep it consistent through to the conclusion?",
+            "ru": "Высказываете ли вы собственное мнение о том, как делить финансирование музея между цифровыми и физическими форматами, и остаётся ли оно неизменным до заключения?"
+          }
+        },
+        {
+          "id": "funding-priority-focus",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you discuss funding priority (which side should receive most of the money) rather than only which experience visitors enjoy more?",
+            "ru": "Обсуждаете ли вы приоритет финансирования (на что должна идти большая часть денег), а не только то, какой формат больше нравится посетителям?"
+          }
+        },
+        {
+          "id": "museum-examples",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Do you support your points with relevant museum examples, such as an online 3D tour of a collection or a school class visiting a gallery?",
+            "ru": "Подкрепляете ли вы свои доводы уместными примерами из жизни музеев — например, онлайн-3D-экскурсией по коллекции или посещением галереи школьным классом?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-speak-d1",
@@ -45966,7 +46202,7 @@
     },
     {
       "id": "ielts-write-v3-task1-fruit-sales",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 1,
@@ -46058,11 +46294,45 @@
             ]
           }
         ]
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-plums-replace-apples",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that plums replaced apples as the largest category, with apples falling to the smallest share by 2024?",
+            "ru": "Говорится ли в вашем обзоре (overview), что сливы сменили яблоки как крупнейшую категорию, а яблоки к 2024 году стали самой малой долей?"
+          }
+        },
+        {
+          "id": "category-changes",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare the three changes: plums rose, apples fell sharply, and pears fell only slightly and stayed second in both years?",
+            "ru": "Сравниваете ли вы три изменения: сливы выросли, яблоки резко снизились, а груши снизились лишь немного и в оба года оставались на втором месте?"
+          }
+        },
+        {
+          "id": "fruit-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you support this with plums 25% → 45%, apples 40% → 25% and pears 35% → 30% for 2018 and 2024?",
+            "ru": "Подтверждаете ли вы это цифрами за 2018 и 2024 годы: сливы 25% → 45%, яблоки 40% → 25%, груши 35% → 30%?"
+          }
+        },
+        {
+          "id": "mass-shares-points",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you treat the figures as shares of the mass of fruit sold (not of customers), give changes in percentage points (plums +20, apples −15, pears −5), and avoid claiming that total fruit sales rose or fell?",
+            "ru": "Трактуете ли вы значения как доли массы проданных фруктов (а не покупателей), указываете ли изменения в процентных пунктах (сливы +20, яблоки −15, груши −5) и воздерживаетесь ли от утверждений, что общий объём продаж вырос или упал?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task1-pool-admissions",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -46154,11 +46424,53 @@
           }
         ]
       },
-      "sampleAnswer": "The chart compares annual admissions to indoor and outdoor pools run by Bellis Leisure at four points between 2018 and 2024. Figures are given in thousands of admissions. Overall, indoor admissions increased throughout the period and remained higher than outdoor admissions. The outdoor figure rose initially, then declined, although it finished above its starting level.\n\nIndoor pools recorded 60 thousand admissions in 2018. This increased to 65 thousand in 2020 and 70 thousand in 2022, before reaching 90 thousand in 2024. The final two-year increase, at 20 thousand, was larger than either of the earlier increases.\n\nOutdoor admissions started at 30 thousand and climbed to a peak of 45 thousand in 2020. They then fell to 40 thousand in 2022 and 35 thousand in the final year. Consequently, the gap between the two categories narrowed from 30 thousand in 2018 to 20 thousand in 2020, before widening to 55 thousand by 2024.\n\nAcross the whole period, indoor admissions rose by 30 thousand, compared with a net increase of only 5 thousand outdoors. These are admission counts rather than numbers of different swimmers, so repeated visits may contribute to either series."
+      "sampleAnswer": "The chart compares annual admissions to indoor and outdoor pools run by Bellis Leisure at four points between 2018 and 2024. Figures are given in thousands of admissions. Overall, indoor admissions increased throughout the period and remained higher than outdoor admissions. The outdoor figure rose initially, then declined, although it finished above its starting level.\n\nIndoor pools recorded 60 thousand admissions in 2018. This increased to 65 thousand in 2020 and 70 thousand in 2022, before reaching 90 thousand in 2024. The final two-year increase, at 20 thousand, was larger than either of the earlier increases.\n\nOutdoor admissions started at 30 thousand and climbed to a peak of 45 thousand in 2020. They then fell to 40 thousand in 2022 and 35 thousand in the final year. Consequently, the gap between the two categories narrowed from 30 thousand in 2018 to 20 thousand in 2020, before widening to 55 thousand by 2024.\n\nAcross the whole period, indoor admissions rose by 30 thousand, compared with a net increase of only 5 thousand outdoors. These are admission counts rather than numbers of different swimmers, so repeated visits may contribute to either series.",
+      "taskChecklist": [
+        {
+          "id": "overview-indoor-up-outdoor-peak",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that indoor admissions rose at every date shown while outdoor admissions peaked in 2020 and then declined, with indoor pools higher throughout?",
+            "ru": "Говорится ли в вашем обзоре (overview), что посещения крытых бассейнов непрерывно росли, а открытых достигли пика в 2020 году и затем снижались, причём крытые всё время были впереди?"
+          }
+        },
+        {
+          "id": "indoor-outdoor-gap",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare the two pool types, showing that indoor was double outdoor in 2018 (60 vs 30 thousand) and that the gap widened to 55 thousand by 2024 (90 vs 35 thousand)?",
+            "ru": "Сравниваете ли вы два типа бассейнов, показывая, что в 2018 году крытые принимали вдвое больше (60 против 30 тыс.), а к 2024 году разрыв вырос до 55 тыс. (90 против 35 тыс.)?"
+          }
+        },
+        {
+          "id": "indoor-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report indoor admissions of 60, 65, 70 and 90 thousand in 2018, 2020, 2022 and 2024, noting that the sharpest rise (20 thousand) came between 2022 and 2024?",
+            "ru": "Приводите ли вы данные по крытым бассейнам — 60, 65, 70 и 90 тыс. в 2018, 2020, 2022 и 2024 годах — и отмечаете ли, что самый резкий рост (на 20 тыс.) пришёлся на 2022–2024 годы?"
+          }
+        },
+        {
+          "id": "outdoor-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report outdoor admissions rising from 30 thousand to a peak of 45 thousand in 2020, then falling to 40 thousand in 2022 and 35 thousand in 2024?",
+            "ru": "Указываете ли вы, что посещения открытых бассейнов выросли с 30 тыс. до пика в 45 тыс. в 2020 году, а затем снизились до 40 тыс. в 2022-м и 35 тыс. в 2024-м?"
+          }
+        },
+        {
+          "id": "net-rise-vs-fall",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you distinguish the outdoor net rise of 5 thousand over the whole period from its 10-thousand fall after 2020, call the figures admissions rather than people, and avoid adding reasons such as the weather?",
+            "ru": "Различаете ли вы чистый прирост открытых бассейнов на 5 тыс. за весь период и их падение на 10 тыс. после 2020 года, называете ли цифры посещениями, а не числом людей, и обходитесь ли без причин вроде погоды?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task1-training-age",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -46249,11 +46561,53 @@
             ]
           }
         ]
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-age-pattern",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that participation fell with age in both years (ages 20–29 highest, ages 50–59 lowest) but that the gap between age groups narrowed by 2024?",
+            "ru": "Говорится ли в вашем обзоре (overview), что в оба года участие снижалось с возрастом (выше всего в группе 20–29, ниже всего в группе 50–59), но к 2024 году разрыв между группами сократился?"
+          }
+        },
+        {
+          "id": "youngest-vs-oldest",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare the youngest and oldest groups (a gap of 45 percentage points in 2018, 60% vs 15%, but only 20 points in 2024, 55% vs 35%) and note that 20–29 was the only group whose participation fell?",
+            "ru": "Сравниваете ли вы самую младшую и самую старшую группы (разрыв 45 процентных пунктов в 2018 году, 60% против 15%, и лишь 20 пунктов в 2024-м, 55% против 35%) и отмечаете ли, что только в группе 20–29 участие снизилось?"
+          }
+        },
+        {
+          "id": "group-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you give each group's figures for 2018 and 2024: 20–29 60% → 55%, 30–39 45% → 50%, 40–49 30% → 45% and 50–59 15% → 35% (the largest rise)?",
+            "ru": "Приводите ли вы данные каждой группы за 2018 и 2024 годы: 20–29 — 60% → 55%, 30–39 — 45% → 50%, 40–49 — 30% → 45%, 50–59 — 15% → 35% (наибольший рост)?"
+          }
+        },
+        {
+          "id": "own-group-denominator",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you describe each figure as a percentage of that age group only, without turning it into numbers of people or adding percentages from different groups together?",
+            "ru": "Описываете ли вы каждое значение как процент от своей возрастной группы, не превращая его в число людей и не складывая проценты разных групп?"
+          }
+        },
+        {
+          "id": "points-no-reasons",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you express changes in percentage points (e.g., ages 50–59 rose by 20 points, not by 20%) and avoid inventing reasons such as retirement plans or employer policies?",
+            "ru": "Выражаете ли вы изменения в процентных пунктах (например, в группе 50–59 рост на 20 пунктов, а не на 20%) и обходитесь ли без выдуманных причин вроде пенсионных планов или политики работодателей?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task1-waste-routes",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -46350,11 +46704,53 @@
           }
         ]
       },
-      "sampleAnswer": "The chart presents the distribution of collected household waste among three treatment routes in Marden Borough in 2014, 2019 and 2024. Overall, landfill lost its dominant position as recycling expanded. Composting also became more common and accounted for the same share as landfill by the final year.\n\nIn 2014, landfill received 65% of the collected waste, considerably more than the combined recycling and composting share of 35%. Recycling represented one fifth of the total, while composting accounted for the remaining 15%. Five years later, landfill had fallen to 45%, but it was still the largest individual category. Recycling and composting had reached 35% and 20%, respectively.\n\nBy 2024, half of the collected waste was recycled. The other half was divided equally between landfill and composting, at 25% each. The recycling share therefore increased by 30 percentage points across the period, whereas the landfill proportion decreased by 40 points. Composting rose more gradually, gaining 5 points in each interval.\n\nThese figures show a substantial change in how the collected waste was treated. They do not show the total mass collected, so the decline in landfill's share cannot establish how many tonnes stopped going to landfill."
+      "sampleAnswer": "The chart presents the distribution of collected household waste among three treatment routes in Marden Borough in 2014, 2019 and 2024. Overall, landfill lost its dominant position as recycling expanded. Composting also became more common and accounted for the same share as landfill by the final year.\n\nIn 2014, landfill received 65% of the collected waste, considerably more than the combined recycling and composting share of 35%. Recycling represented one fifth of the total, while composting accounted for the remaining 15%. Five years later, landfill had fallen to 45%, but it was still the largest individual category. Recycling and composting had reached 35% and 20%, respectively.\n\nBy 2024, half of the collected waste was recycled. The other half was divided equally between landfill and composting, at 25% each. The recycling share therefore increased by 30 percentage points across the period, whereas the landfill proportion decreased by 40 points. Composting rose more gradually, gaining 5 points in each interval.\n\nThese figures show a substantial change in how the collected waste was treated. They do not show the total mass collected, so the decline in landfill's share cannot establish how many tonnes stopped going to landfill.",
+      "taskChecklist": [
+        {
+          "id": "overview-landfill-to-recycling",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that treatment shifted from landfill dominance to recycling leadership, with landfill and composting ending equal at 25% in 2024?",
+            "ru": "Говорится ли в вашем обзоре (overview), что преобладание захоронения на свалке сменилось лидерством переработки, а свалка и компостирование в 2024 году сравнялись на уровне 25%?"
+          }
+        },
+        {
+          "id": "recycling-vs-landfill",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare recycling with landfill over time: landfill still led in 2019 (45% vs 35%), but by 2024 recycling (50%) was double landfill (25%)?",
+            "ru": "Сравниваете ли вы переработку со свалкой во времени: в 2019 году свалка ещё лидировала (45% против 35%), а к 2024-му переработка (50%) вдвое превысила свалку (25%)?"
+          }
+        },
+        {
+          "id": "route-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report recycling 20% → 35% → 50%, landfill 65% → 45% → 25% and composting 15% → 20% → 25% for 2014, 2019 and 2024?",
+            "ru": "Приводите ли вы данные за 2014, 2019 и 2024 годы: переработка 20% → 35% → 50%, свалка 65% → 45% → 25%, компостирование 15% → 20% → 25%?"
+          }
+        },
+        {
+          "id": "percentage-points",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you describe the changes in percentage points (recycling up 30 points, landfill down 40, composting up 10) rather than as percent changes?",
+            "ru": "Описываете ли вы изменения в процентных пунктах (переработка +30 пунктов, свалка −40, компостирование +10), а не в процентах?"
+          }
+        },
+        {
+          "id": "shares-no-totals",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you treat the figures as shares of collected waste mass, without claiming that the amount of waste collected rose or fell, or adding reasons such as new recycling bins?",
+            "ru": "Трактуете ли вы значения как доли массы собранных отходов, не утверждая, что общее количество отходов выросло или сократилось, и не добавляя причин вроде новых контейнеров для переработки?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task1-bicycle-rentals",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -46445,11 +46841,53 @@
             ]
           }
         ]
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-july-peak-weekends",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that both weekday and weekend-day rentals peaked in July, and that weekend days had higher means than weekdays in every month shown?",
+            "ru": "Говорится ли в вашем обзоре (overview), что прокаты и в будни, и в выходные достигли пика в июле, а средние значения в выходные были выше будничных в каждом из показанных месяцев?"
+          }
+        },
+        {
+          "id": "weekday-weekend-gap",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare the weekday–weekend gap across the months: 20 rentals per day in January, 60 in April and October, and widest in July at 100?",
+            "ru": "Сравниваете ли вы разрыв между буднями и выходными по месяцам: 20 прокатов в день в январе, 60 в апреле и октябре и максимум в июле — 100?"
+          }
+        },
+        {
+          "id": "rental-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you give the January lows (80 on weekdays, 100 on weekend days), the July peaks (160 and 260) and the October figures (120 and 180), in rentals per day?",
+            "ru": "Приводите ли вы январские минимумы (80 в будни, 100 в выходные), июльские пики (160 и 260) и октябрьские значения (120 и 180) в прокатах в день?"
+          }
+        },
+        {
+          "id": "daily-means-not-totals",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you describe the figures as mean rentals per day, not monthly totals or numbers of riders, and avoid adding reasons such as weather or tourism?",
+            "ru": "Описываете ли вы значения как среднее число прокатов в день, а не месячные итоги или число велосипедистов, и обходитесь ли без причин вроде погоды или туризма?"
+          }
+        },
+        {
+          "id": "four-months-only",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you limit your claims to the four months shown (January, April, July and October) instead of describing the whole year or the months in between?",
+            "ru": "Ограничиваетесь ли вы четырьмя показанными месяцами (январь, апрель, июль и октябрь), не описывая весь год или промежуточные месяцы?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task1-delivery-times",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -46545,11 +46983,53 @@
             ]
           }
         ]
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-all-faster",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that delivery times fell for all three modes, with road the fastest and coastal ship the slowest in every year?",
+            "ru": "Говорится ли в вашем обзоре (overview), что время доставки сократилось для всех трёх видов транспорта, причём автомобильная доставка во все годы была самой быстрой, а доставка прибрежным судном — самой медленной?"
+          }
+        },
+        {
+          "id": "road-rail-gap",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you show the road–rail difference narrowing from 6 hours in 2012 (18 vs 24) to 4 hours in 2018 and just 2 hours in 2024 (14 vs 16)?",
+            "ru": "Показываете ли вы, как разница между автомобильной и железнодорожной доставкой сократилась с 6 часов в 2012 году (18 против 24) до 4 часов в 2018-м и всего 2 часов в 2024-м (14 против 16)?"
+          }
+        },
+        {
+          "id": "reductions-compared",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare the reductions (coastal ship cut the most time, 10 hours from 40 to 30, rail 8 hours and road 4) while noting that the ship still took more than twice as long as road in 2024?",
+            "ru": "Сравниваете ли вы сокращения (у прибрежного судна наибольшее — на 10 часов, с 40 до 30, у железной дороги — на 8 часов, у автомобиля — на 4) и отмечаете ли, что в 2024 году судно всё ещё шло более чем вдвое дольше автомобиля?"
+          }
+        },
+        {
+          "id": "mode-hours",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report the figures in hours for 2012, 2018 and 2024: road 18, 16, 14; rail 24, 20, 16; coastal ship 40, 36, 30?",
+            "ru": "Приводите ли вы данные в часах за 2012, 2018 и 2024 годы: автомобиль 18, 16, 14; железная дорога 24, 20, 16; прибрежное судно 40, 36, 30?"
+          }
+        },
+        {
+          "id": "shorter-means-faster",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you describe falling hours as faster deliveries (not as a decline), keep them as depot-to-depot times that exclude time before dispatch and after arrival, and avoid reasons such as new trains?",
+            "ru": "Описываете ли вы уменьшение часов как ускорение доставки (а не как спад), говорите ли о времени между терминалами (depot-to-depot) без учёта периода до отправки и после прибытия и обходитесь ли без причин вроде новых поездов?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task1-course-completion",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 3,
@@ -46641,11 +47121,53 @@
           }
         ]
       },
-      "sampleAnswer": "The chart compares enrolment and completion records for four courses at Vesta Adult College in 2024. Overall, basic computing had the largest numbers enrolled and completing, whereas gardening had the smallest. However, basic computing and bookkeeping shared the highest completion rate despite their different sizes.\n\nBasic computing attracted 120 enrolments, of which 108 ended in successful completion. Languages ranked second by enrolment, with 100 records, but only 80 completions. The language course therefore had the largest numerical gap between the two measures, at 20, compared with 12 for computing.\n\nBookkeeping recorded 80 enrolments and 72 completions. Both this course and computing consequently achieved a completion rate of 90%. The corresponding proportion for languages was lower, at 80%. Gardening was smaller than the other courses on both measures, with 60 enrolments and 42 completions, equivalent to a 70% completion rate.\n\nAcross all four courses, there were 360 enrolment records and 302 completion records. These totals describe participation in courses rather than the number of distinct people at the college, because a learner could enrol in more than one subject. The comparison therefore distinguishes the volume of course activity from the proportion of enrolments successfully completed."
+      "sampleAnswer": "The chart compares enrolment and completion records for four courses at Vesta Adult College in 2024. Overall, basic computing had the largest numbers enrolled and completing, whereas gardening had the smallest. However, basic computing and bookkeeping shared the highest completion rate despite their different sizes.\n\nBasic computing attracted 120 enrolments, of which 108 ended in successful completion. Languages ranked second by enrolment, with 100 records, but only 80 completions. The language course therefore had the largest numerical gap between the two measures, at 20, compared with 12 for computing.\n\nBookkeeping recorded 80 enrolments and 72 completions. Both this course and computing consequently achieved a completion rate of 90%. The corresponding proportion for languages was lower, at 80%. Gardening was smaller than the other courses on both measures, with 60 enrolments and 42 completions, equivalent to a 70% completion rate.\n\nAcross all four courses, there were 360 enrolment records and 302 completion records. These totals describe participation in courses rather than the number of distinct people at the college, because a learner could enrol in more than one subject. The comparison therefore distinguishes the volume of course activity from the proportion of enrolments successfully completed.",
+      "taskChecklist": [
+        {
+          "id": "overview-size-and-rates",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that basic computing had the most and gardening the fewest enrolments and completions, and that the completion proportion was highest for computing and bookkeeping and lowest for gardening?",
+            "ru": "Говорится ли в вашем обзоре (overview), что у курса базовой компьютерной грамотности больше всего записей и завершений, у садоводства — меньше всего, а доля завершивших выше всего у компьютерного курса и бухгалтерии и ниже всего у садоводства?"
+          }
+        },
+        {
+          "id": "completion-proportions",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare completion proportions: computing and bookkeeping both 90% despite very different counts (108 of 120 vs 72 of 80), languages 80% and gardening 70%?",
+            "ru": "Сравниваете ли вы доли завершения: у компьютерного курса и бухгалтерии по 90%, несмотря на очень разные количества (108 из 120 и 72 из 80), у языков — 80%, у садоводства — 70%?"
+          }
+        },
+        {
+          "id": "counts-vs-proportions",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you separate counts from proportions, e.g., languages had more completions than bookkeeping (80 vs 72) but a lower completion proportion (80% vs 90%)?",
+            "ru": "Разделяете ли вы количества и доли — например, у языков завершений больше, чем у бухгалтерии (80 против 72), но доля завершения ниже (80% против 90%)?"
+          }
+        },
+        {
+          "id": "course-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report enrolments and completions for each course: computing 120 and 108, languages 100 and 80, bookkeeping 80 and 72, gardening 60 and 42?",
+            "ru": "Приводите ли вы число записей и завершений по каждому курсу: компьютерная грамотность — 120 и 108, языки — 100 и 80, бухгалтерия — 80 и 72, садоводство — 60 и 42?"
+          }
+        },
+        {
+          "id": "enrolments-not-learners",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you call the figures course enrolments rather than students (one learner may take several courses, so 360 enrolments is not 360 people), and avoid inventing reasons why some did not complete?",
+            "ru": "Называете ли вы значения записями на курсы, а не числом студентов (один человек мог записаться на несколько курсов, поэтому 360 записей — это не 360 человек), и обходитесь ли без выдуманных причин, почему часть слушателей не закончила курс?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task1-room-bookings",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -46737,11 +47259,53 @@
             ]
           }
         ]
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-study-replaces-sports",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that study replaced sports as the largest share of booked room-hours, while sports fell from the largest share to the smallest?",
+            "ru": "Говорится ли в вашем обзоре (overview), что учёба сменила спорт как крупнейшую долю забронированных часов, а спорт опустился с первого места на последнее?"
+          }
+        },
+        {
+          "id": "activity-changes",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare the three changes: the sports share halved while arts and study both rose, study by more (15 percentage points vs 10)?",
+            "ru": "Сравниваете ли вы три изменения: доля спорта сократилась вдвое, а доли искусства и учёбы выросли, причём учёбы — сильнее (на 15 процентных пунктов против 10)?"
+          }
+        },
+        {
+          "id": "share-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report sports 50% → 25%, study 30% → 45% and arts 20% → 30% for 2010 and 2025?",
+            "ru": "Приводите ли вы данные за 2010 и 2025 годы: спорт 50% → 25%, учёба 30% → 45%, искусство 20% → 30%?"
+          }
+        },
+        {
+          "id": "distribution-not-total",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you describe only how booked room-hours were distributed, without claiming that total bookings or the actual hours used for sports rose or fell (total booked hours are not given)?",
+            "ru": "Описываете ли вы только распределение забронированных часов, не утверждая, что общее число бронирований или реальные часы спорта выросли или сократились (общий объём часов не указан)?"
+          }
+        },
+        {
+          "id": "points-no-reasons",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you give share changes in percentage points (sports −25, study +15, arts +10) and avoid inventing reasons such as a new gym opening elsewhere?",
+            "ru": "Указываете ли вы изменения долей в процентных пунктах (спорт −25, учёба +15, искусство +10) и обходитесь ли без выдуманных причин вроде открытия нового спортзала по соседству?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task1-reservoir-storage",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 3,
@@ -46835,11 +47399,61 @@
             ]
           }
         ]
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-august-low",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that both reservoirs fell to their lowest readings in August and recovered in September, and that East started higher than West but ended lower?",
+            "ru": "Говорится ли в вашем обзоре (overview), что запасы обоих водохранилищ снижались до минимума в августе и выросли в сентябре, а Восточное начинало выше Западного, но закончило ниже?"
+          }
+        },
+        {
+          "id": "east-falls-below-west",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you show East's lead shrinking from 20 million m³ in May (80 vs 60) to 2 in July (52 vs 50), then East falling below West in August (38 vs 42) and staying lower in September (45 vs 48)?",
+            "ru": "Показываете ли вы, как преимущество Восточного сократилось с 20 млн м³ в мае (80 против 60) до 2 в июле (52 против 50), затем в августе оно опустилось ниже Западного (38 против 42) и осталось ниже в сентябре (45 против 48)?"
+          }
+        },
+        {
+          "id": "net-loss-compared",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare the net change from May to September: East lost 35 million m³ (80 → 45) but West only 12 (60 → 48)?",
+            "ru": "Сравниваете ли вы итоговое изменение с мая по сентябрь: Восточное потеряло 35 млн м³ (80 → 45), а Западное — лишь 12 (60 → 48)?"
+          }
+        },
+        {
+          "id": "volume-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report the key volumes in million cubic metres: East 80 in May, 38 in August and 45 in September; West 60, 42 and 48 in the same months?",
+            "ru": "Приводите ли вы ключевые объёмы в миллионах кубических метров: Восточное — 80 в мае, 38 в августе и 45 в сентябре; Западное — 60, 42 и 48 в те же месяцы?"
+          }
+        },
+        {
+          "id": "no-capacity-or-causes",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you avoid claims the chart cannot support, such as how full each reservoir was (capacities are not given) or causes such as rainfall, drought or water use (inflows are not given)?",
+            "ru": "Избегаете ли вы утверждений, которые график не подтверждает, — насколько заполнено водохранилище (ёмкость не указана) или причин вроде дождей, засухи или водопотребления (приток не указан)?"
+          }
+        },
+        {
+          "id": "monthly-readings",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you describe the values as stored volumes from one scheduled reading each month (e.g., 'the lowest reading was in August'), not as the amount of water used or received during the month?",
+            "ru": "Описываете ли вы значения как запас воды по одному плановому замеру в месяц (например, «самый низкий замер — в августе»), а не как объём воды, израсходованной или поступившей за месяц?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task2-flexible-hours",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -46898,11 +47512,45 @@
           "ru": "Грамматический диапазон и точность: Используйте условные придаточные для ограничений, например if customers need continuous cover. Проверьте staff members и согласование."
         }
       ],
-      "minWords": 120
+      "minWords": 120,
+      "taskChecklist": [
+        {
+          "id": "view-flexibility-benefit",
+          "kind": "VIEW",
+          "text": {
+            "en": "Do you explain at least one benefit of letting staff choose their starting and finishing times, such as fitting work around childcare or avoiding rush-hour travel?",
+            "ru": "Объясняете ли вы хотя бы одно преимущество того, что сотрудники сами выбирают время начала и окончания работы, — например, работу легче совмещать с уходом за детьми или можно не ездить в час пик?"
+          }
+        },
+        {
+          "id": "view-fixed-hours-reason",
+          "kind": "VIEW",
+          "text": {
+            "en": "Do you explain at least one reason for requiring the same fixed hours for everyone, such as serving customers at set times or holding meetings when the whole team is present?",
+            "ru": "Объясняете ли вы хотя бы одну причину требовать одинаковый фиксированный график для всех — например, обслуживание клиентов в определённые часы или совещания, когда на месте вся команда?"
+          }
+        },
+        {
+          "id": "when-flexibility-fits",
+          "kind": "POSITION",
+          "text": {
+            "en": "Do you state your opinion about when flexibility is appropriate and when fixed hours are better (e.g., for which kinds of job), rather than only saying which you prefer?",
+            "ru": "Высказываете ли вы мнение о том, когда гибкий график уместен, а когда лучше фиксированные часы (например, для каких видов работы), а не просто говорите, что вам больше нравится?"
+          }
+        },
+        {
+          "id": "workplace-example",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Do you back your opinion with a reason and one relevant workplace example, such as an office worker who can work alone compared with a shop assistant who must cover opening hours?",
+            "ru": "Подкрепляете ли вы своё мнение причиной и одним уместным примером с работы — скажем, офисный сотрудник, который работает самостоятельно, в сравнении с продавцом, который должен быть на месте в часы работы магазина?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task2-work-placements",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -46962,11 +47610,61 @@
         }
       ],
       "minWords": 250,
-      "sampleAnswer": "A supervised work placement can give students experience that is difficult to obtain in a classroom. Nevertheless, making it compulsory in every undergraduate degree is a much broader policy than simply encouraging it. I believe the disadvantages of a universal requirement outweigh its advantages unless universities can guarantee suitable, accessible placements.\n\nThe strongest argument for compulsory participation is that students can test academic ideas against practical constraints. A design student, for example, might discover that a technically impressive proposal is difficult for a client to maintain. Supervised experience can make later coursework more purposeful because the student has seen why careful communication and realistic planning matter. A requirement also encourages participation by students who might otherwise assume that workplace experience is intended only for their more confident classmates.\n\nHowever, the quality of that experience is crucial. A placement consisting mainly of repetitive administrative duties may contribute little to the degree. If universities must find a position for every student regardless of subject or local opportunity, they may accept placements whose educational value is weak. The formal requirement could then replace time that would have been better spent on a relevant project.\n\nAccess creates another difficulty. Students with caring responsibilities or existing paid work may be unable to travel to a distant workplace or follow its full weekly schedule. Calling the placement compulsory does not remove those constraints. Without financial support and flexible arrangements, the same policy can impose very different burdens on different students.\n\nFor these reasons, universities should make well-supervised placements widely available while allowing credible alternatives, such as a project completed with an external organisation. A compulsory placement may be justified within a degree that can provide relevant opportunities and support for everyone. Applied to every degree without those safeguards, however, the requirement risks valuing participation on paper more than the learning it is meant to produce."
+      "sampleAnswer": "A supervised work placement can give students experience that is difficult to obtain in a classroom. Nevertheless, making it compulsory in every undergraduate degree is a much broader policy than simply encouraging it. I believe the disadvantages of a universal requirement outweigh its advantages unless universities can guarantee suitable, accessible placements.\n\nThe strongest argument for compulsory participation is that students can test academic ideas against practical constraints. A design student, for example, might discover that a technically impressive proposal is difficult for a client to maintain. Supervised experience can make later coursework more purposeful because the student has seen why careful communication and realistic planning matter. A requirement also encourages participation by students who might otherwise assume that workplace experience is intended only for their more confident classmates.\n\nHowever, the quality of that experience is crucial. A placement consisting mainly of repetitive administrative duties may contribute little to the degree. If universities must find a position for every student regardless of subject or local opportunity, they may accept placements whose educational value is weak. The formal requirement could then replace time that would have been better spent on a relevant project.\n\nAccess creates another difficulty. Students with caring responsibilities or existing paid work may be unable to travel to a distant workplace or follow its full weekly schedule. Calling the placement compulsory does not remove those constraints. Without financial support and flexible arrangements, the same policy can impose very different burdens on different students.\n\nFor these reasons, universities should make well-supervised placements widely available while allowing credible alternatives, such as a project completed with an external organisation. A compulsory placement may be justified within a degree that can provide relevant opportunities and support for everyone. Applied to every degree without those safeguards, however, the requirement risks valuing participation on paper more than the learning it is meant to produce.",
+      "taskChecklist": [
+        {
+          "id": "placement-advantages",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you explain the advantages of a compulsory supervised placement, such as practical experience, workplace contacts or a clearer idea of career options for every student?",
+            "ru": "Объясняете ли вы преимущества обязательной стажировки под руководством — например, практический опыт, профессиональные связи или более ясное представление о карьере у каждого студента?"
+          }
+        },
+        {
+          "id": "placement-disadvantages",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you explain the disadvantages, such as finding enough good placements for every student, less time for study, or difficulties for students with jobs or caring responsibilities?",
+            "ru": "Объясняете ли вы недостатки — например, трудность найти достаточно хороших мест для всех студентов, меньше времени на учёбу или сложности для тех, кто работает или ухаживает за родственниками?"
+          }
+        },
+        {
+          "id": "outweigh-judgement",
+          "kind": "POSITION",
+          "text": {
+            "en": "Do you make an explicit judgement on whether the advantages outweigh the disadvantages, and does your conclusion repeat the same judgement?",
+            "ru": "Даёте ли вы явный вывод о том, перевешивают ли преимущества недостатки, и повторяется ли тот же вывод в заключении?"
+          }
+        },
+        {
+          "id": "compulsory-for-every-degree",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you address making placements compulsory for every degree, and distinguish this from placements being useful as an option for some students?",
+            "ru": "Обсуждаете ли вы именно обязательность стажировки для каждой специальности и отделяете ли её от ситуации, когда стажировка полезна как добровольный вариант для части студентов?"
+          }
+        },
+        {
+          "id": "examples-across-degrees",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Do you use examples from different degrees, such as an engineering student compared with a philosophy or history student, to test whether one requirement suits everyone?",
+            "ru": "Приводите ли вы примеры из разных специальностей — скажем, студент-инженер в сравнении со студентом-философом или историком, — чтобы проверить, подходит ли одно требование всем?"
+          }
+        },
+        {
+          "id": "illustrative-not-statistics",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Are your examples presented as illustrations or personal experience rather than as invented research statistics?",
+            "ru": "Подаются ли ваши примеры как иллюстрации или личный опыт, а не как выдуманная статистика исследований?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task2-online-reviews",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -47025,11 +47723,53 @@
           "ru": "Грамматический диапазон и точность: Используйте определительные придаточные для связи отзывов и пользователей. Проверьте исчисляемое reviews и неисчисляемое information."
         }
       ],
-      "minWords": 250
+      "minWords": 250,
+      "taskChecklist": [
+        {
+          "id": "how-reviews-help",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you explain how comments from other customers help, for example by reducing uncertainty about a service you cannot try first, such as a hotel, a dentist or a plumber?",
+            "ru": "Объясняете ли вы, чем помогают отзывы других клиентов, — например, уменьшают неопределённость при выборе услуги, которую нельзя попробовать заранее: гостиницы, стоматолога или сантехника?"
+          }
+        },
+        {
+          "id": "heavy-reliance-problems",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you explain what problems arise when customers rely heavily on these comments, such as fake or paid reviews, a few extreme opinions, or reviews that do not match their own needs?",
+            "ru": "Объясняете ли вы, какие проблемы возникают, когда клиенты сильно полагаются на отзывы, — например, фальшивые или заказные отзывы, несколько крайних мнений или отзывы, не совпадающие с их собственными потребностями?"
+          }
+        },
+        {
+          "id": "show-how-it-happens",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "For each benefit and each problem, do you show how it actually happens with a relevant example, rather than simply naming it?",
+            "ru": "Показываете ли вы для каждого преимущества и каждой проблемы, как именно это происходит, на уместном примере, а не просто называете их?"
+          }
+        },
+        {
+          "id": "reviews-not-advertising",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you stay focused on comments written by other customers, not on advertising or marketing in general?",
+            "ru": "Держитесь ли вы темы отзывов, написанных другими клиентами, не переходя к рекламе и маркетингу в целом?"
+          }
+        },
+        {
+          "id": "conclusion-both-questions",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Does your conclusion answer both questions: how the comments help and what goes wrong when customers rely heavily on them?",
+            "ru": "Отвечает ли ваше заключение на оба вопроса: чем помогают отзывы и что идёт не так, когда клиенты слишком на них полагаются?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task2-group-projects",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -47089,11 +47829,53 @@
         }
       ],
       "minWords": 250,
-      "sampleAnswer": "Individual and group projects develop overlapping but different abilities. Working alone makes a student's own understanding visible, while working with others creates opportunities to negotiate and combine ideas. I believe schools should use both, with the balance determined by the purpose of the project and a clear record of each student's contribution.\n\nThe case for individual projects is strongest when teachers need to discover what a student can do independently. If a learner must plan an investigation, select evidence and explain a conclusion without a partner, the teacher can identify specific strengths and gaps. The student also has to manage the whole task rather than relying on someone else to complete the least comfortable part. This can be valuable before a more complicated collaborative assignment begins.\n\nSupporters of group projects emphasise skills that independent work cannot fully reproduce. Students have to explain ideas to people who may understand the problem differently. They may also need to adjust an attractive plan when it conflicts with another person's evidence or the available time. For example, a group preparing an exhibition must decide which contributions form a coherent whole, not merely place four unrelated reports beside one another.\n\nThe difficulty is that group membership does not guarantee meaningful participation. One confident student may make most decisions while another completes only a minor task. A school can reduce this problem by requiring an individual planning note, rotating responsibilities and asking each student to explain the final outcome. These measures make contribution more visible without eliminating cooperation.\n\nIn my view, an effective sequence would begin with a short individual task and develop into a shared project when interaction serves a clear learning purpose. Assessment should consider both the joint result and evidence of individual understanding. This approach recognises the distinct benefits of each format instead of assuming that either solitary work or teamwork can prepare students for every future situation."
+      "sampleAnswer": "Individual and group projects develop overlapping but different abilities. Working alone makes a student's own understanding visible, while working with others creates opportunities to negotiate and combine ideas. I believe schools should use both, with the balance determined by the purpose of the project and a clear record of each student's contribution.\n\nThe case for individual projects is strongest when teachers need to discover what a student can do independently. If a learner must plan an investigation, select evidence and explain a conclusion without a partner, the teacher can identify specific strengths and gaps. The student also has to manage the whole task rather than relying on someone else to complete the least comfortable part. This can be valuable before a more complicated collaborative assignment begins.\n\nSupporters of group projects emphasise skills that independent work cannot fully reproduce. Students have to explain ideas to people who may understand the problem differently. They may also need to adjust an attractive plan when it conflicts with another person's evidence or the available time. For example, a group preparing an exhibition must decide which contributions form a coherent whole, not merely place four unrelated reports beside one another.\n\nThe difficulty is that group membership does not guarantee meaningful participation. One confident student may make most decisions while another completes only a minor task. A school can reduce this problem by requiring an individual planning note, rotating responsibilities and asking each student to explain the final outcome. These measures make contribution more visible without eliminating cooperation.\n\nIn my view, an effective sequence would begin with a short individual task and develop into a shared project when interaction serves a clear learning purpose. Assessment should consider both the joint result and evidence of individual understanding. This approach recognises the distinct benefits of each format instead of assuming that either solitary work or teamwork can prepare students for every future situation.",
+      "taskChecklist": [
+        {
+          "id": "view-individual-projects",
+          "kind": "VIEW",
+          "text": {
+            "en": "Do you explain why some teachers prefer major projects to be done individually, for example because each student's own understanding and effort can be seen clearly, and develop that reason?",
+            "ru": "Объясняете ли вы, почему некоторые учителя предпочитают, чтобы крупные проекты выполнялись индивидуально, — например, так ясно видны понимание и вклад каждого ученика, — и развиваете ли эту причину?"
+          }
+        },
+        {
+          "id": "view-group-projects",
+          "kind": "VIEW",
+          "text": {
+            "en": "Do you explain why others believe group projects prepare students better for later life, for example sharing tasks, negotiating and meeting a joint deadline as in many jobs?",
+            "ru": "Объясняете ли вы, почему другие считают, что групповые проекты лучше готовят к дальнейшей жизни, — например, распределение задач, умение договариваться и укладываться в общий срок, как на многих работах?"
+          }
+        },
+        {
+          "id": "how-schools-should-use",
+          "kind": "POSITION",
+          "text": {
+            "en": "Do you give your own opinion on how schools should use individual and group projects (e.g., for which purposes or in what balance), and keep it consistent to the conclusion?",
+            "ru": "Высказываете ли вы собственное мнение о том, как школам использовать индивидуальные и групповые проекты (например, для каких целей или в какой пропорции), и сохраняете ли его до заключения?"
+          }
+        },
+        {
+          "id": "learning-not-enjoyment",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Are your reasons about learning and preparation for later life, not just about which format students enjoy more?",
+            "ru": "Касаются ли ваши доводы обучения и подготовки к дальнейшей жизни, а не только того, какой формат больше нравится ученикам?"
+          }
+        },
+        {
+          "id": "school-examples",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Do you support your points with relevant school examples, such as a science investigation, a history research report or a group presentation?",
+            "ru": "Подкрепляете ли вы доводы уместными школьными примерами — например, научным исследованием, исследовательским докладом по истории или групповой презентацией?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task2-heritage-funding",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 3,
@@ -47152,11 +47934,53 @@
           "ru": "Грамматический диапазон и точность: Используйте should и could для различения рекомендации и возможности. Проверьте единственное число с maintenance и access."
         }
       ],
-      "minWords": 250
+      "minWords": 250,
+      "taskChecklist": [
+        {
+          "id": "extent-of-agreement",
+          "kind": "POSITION",
+          "text": {
+            "en": "Do you state how far you agree that public money for maintaining historic buildings should be available only when the public gets meaningful access, and keep the same extent to the conclusion?",
+            "ru": "Указываете ли вы, в какой мере согласны с тем, что общественные деньги на содержание исторических зданий должны выделяться только при реальном доступе для публики, и сохраняете ли эту позицию до заключения?"
+          }
+        },
+        {
+          "id": "define-meaningful-access",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you explain what meaningful access would mean in practice, such as regular opening days, guided tours or school visits, rather than just being able to see the building from the street?",
+            "ru": "Объясняете ли вы, что на практике означает реальный доступ (meaningful access), — например, регулярные дни открытых дверей, экскурсии или школьные визиты, — а не просто возможность видеть здание с улицы?"
+          }
+        },
+        {
+          "id": "justified-exceptions",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you consider whether some cases justify funding without full access, such as a fragile interior, a building that is still a private home or urgent repairs to prevent collapse, and say whether you accept them?",
+            "ru": "Рассматриваете ли вы, оправдано ли в некоторых случаях финансирование без полного доступа, — например, хрупкий интерьер, здание, которое остаётся частным домом, или срочный ремонт против обрушения, — и говорите ли, принимаете ли вы такие исключения?"
+          }
+        },
+        {
+          "id": "funding-access-link",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Is each main point about the link between public funding and public access, rather than only about why preserving old buildings is valuable?",
+            "ru": "Касается ли каждый ваш главный довод связи между общественным финансированием и доступом для публики, а не только ценности сохранения старых зданий?"
+          }
+        },
+        {
+          "id": "building-examples",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Do you develop your reasons with relevant examples of historic buildings, such as a castle, a church or a privately owned manor house?",
+            "ru": "Развиваете ли вы доводы уместными примерами исторических зданий — например, замка, церкви или частной усадьбы?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task2-food-packaging",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -47215,11 +48039,53 @@
           "ru": "Грамматический диапазон и точность: Используйте причинные связи действия и результата без ложной уверенности. Проверьте условные придаточные и модальные глаголы в примерах."
         }
       ],
-      "minWords": 250
+      "minWords": 250,
+      "taskChecklist": [
+        {
+          "id": "view-producers",
+          "kind": "VIEW",
+          "text": {
+            "en": "Do you explain why food producers might bear the main responsibility, for example because they design the packaging and decide how much plastic surrounds a product before shoppers see it?",
+            "ru": "Объясняете ли вы, почему основная ответственность может лежать на производителях продуктов, — например, именно они разрабатывают упаковку и решают, сколько пластика окружает товар ещё до того, как его увидит покупатель?"
+          }
+        },
+        {
+          "id": "view-shoppers",
+          "kind": "VIEW",
+          "text": {
+            "en": "Do you explain why shoppers might achieve more by changing what they buy, for example choosing loose fruit or refillable products so that demand pushes producers to change?",
+            "ru": "Объясняете ли вы, почему покупатели могут добиться большего, меняя свой выбор, — например, покупая фрукты без упаковки или товары в многоразовой таре, чтобы спрос заставил производителей измениться?"
+          }
+        },
+        {
+          "id": "main-responsibility",
+          "kind": "POSITION",
+          "text": {
+            "en": "Do you decide where the main responsibility should lie (producers, shoppers or a clearly explained split) and keep that opinion consistent to the conclusion?",
+            "ru": "Решаете ли вы, на ком должна лежать основная ответственность (на производителях, покупателях или чётко объяснённое разделение), и сохраняете ли это мнение до заключения?"
+          }
+        },
+        {
+          "id": "unnecessary-vs-functional",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Do you distinguish unnecessary packaging (e.g., individually wrapped bananas) from packaging with a clear function, such as keeping meat safe or preventing food from spoiling?",
+            "ru": "Разграничиваете ли вы лишнюю упаковку (например, бананы в индивидуальной плёнке) и упаковку с понятной функцией — скажем, сохранение безопасности мяса или защита продуктов от порчи?"
+          }
+        },
+        {
+          "id": "shopping-examples",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Are your main points supported by reasons and relevant examples from food production and shopping, rather than general comments about the environment?",
+            "ru": "Подкреплены ли ваши главные доводы причинами и уместными примерами из производства и покупки продуктов, а не общими словами об экологии?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task2-research-horizons",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 3,
@@ -47279,11 +48145,53 @@
         }
       ],
       "minWords": 250,
-      "sampleAnswer": "Public research budgets are limited, so it is reasonable to ask how soon a project might benefit society. However, I disagree that a clear near-term application should always determine funding priority. Immediate needs deserve attention, but a research system also requires room for well-designed questions whose eventual uses are uncertain.\n\nProjects addressing an urgent practical problem can offer a strong claim on public support. A local authority facing frequent water-pipe failures, for instance, may need research that compares ways of detecting damage before a pipe breaks. The purpose is understandable, the relevant users can help define success, and a useful result could inform a current decision. When delay carries a substantial cost, giving such work priority is defensible.\n\nThe difficulty arises when this principle becomes the main rule for all research. Investigators would then be encouraged to choose questions with easily described applications, even if a less predictable question offered deeper understanding. A project studying an unfamiliar property of a material may not begin with a marketable product in mind. That uncertainty does not tell us whether its methods are careful or whether the knowledge could later help another investigation. Requiring a confident promise of immediate use may reward persuasive forecasts more than worthwhile inquiry.\n\nThis does not mean that any project without an application should receive public money. Researchers should still explain the question, justify their methods and show why the work matters within its field. Uncertainty about use should be distinguished from a lack of intellectual purpose or accountability.\n\nA sensible funding approach would therefore support a mixture of projects. Some resources should address clearly defined current needs, while another portion should allow rigorous exploration beyond them. The balance may change with circumstances, but neither category should be judged by a standard that makes only the other category appear valuable. Near-term usefulness is an important consideration; it is not a sufficient measure of research worth."
+      "sampleAnswer": "Public research budgets are limited, so it is reasonable to ask how soon a project might benefit society. However, I disagree that a clear near-term application should always determine funding priority. Immediate needs deserve attention, but a research system also requires room for well-designed questions whose eventual uses are uncertain.\n\nProjects addressing an urgent practical problem can offer a strong claim on public support. A local authority facing frequent water-pipe failures, for instance, may need research that compares ways of detecting damage before a pipe breaks. The purpose is understandable, the relevant users can help define success, and a useful result could inform a current decision. When delay carries a substantial cost, giving such work priority is defensible.\n\nThe difficulty arises when this principle becomes the main rule for all research. Investigators would then be encouraged to choose questions with easily described applications, even if a less predictable question offered deeper understanding. A project studying an unfamiliar property of a material may not begin with a marketable product in mind. That uncertainty does not tell us whether its methods are careful or whether the knowledge could later help another investigation. Requiring a confident promise of immediate use may reward persuasive forecasts more than worthwhile inquiry.\n\nThis does not mean that any project without an application should receive public money. Researchers should still explain the question, justify their methods and show why the work matters within its field. Uncertainty about use should be distinguished from a lack of intellectual purpose or accountability.\n\nA sensible funding approach would therefore support a mixture of projects. Some resources should address clearly defined current needs, while another portion should allow rigorous exploration beyond them. The balance may change with circumstances, but neither category should be judged by a standard that makes only the other category appear valuable. Near-term usefulness is an important consideration; it is not a sufficient measure of research worth.",
+      "taskChecklist": [
+        {
+          "id": "extent-of-agreement",
+          "kind": "POSITION",
+          "text": {
+            "en": "Do you state clearly how far you agree that publicly funded projects with a clear near-future use should get priority over those whose applications are uncertain, and keep this to the conclusion?",
+            "ru": "Ясно ли вы указываете, в какой мере согласны с тем, что при государственном финансировании проекты с понятной практической пользой в ближайшем будущем должны иметь приоритет над теми, чьё применение неясно, и сохраняете ли эту позицию до заключения?"
+          }
+        },
+        {
+          "id": "case-for-near-term",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you explain the case for near-term practical projects, for example quicker benefits for the public who pay, such as a cheaper test for a common illness?",
+            "ru": "Объясняете ли вы аргументы в пользу прикладных проектов с быстрым результатом — например, более скорая польза для общества, которое за них платит, вроде дешёвого теста на распространённое заболевание?"
+          }
+        },
+        {
+          "id": "case-for-uncertain",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you explain the possible value of research with uncertain applications, for example basic studies that later led to uses nobody had planned?",
+            "ru": "Объясняете ли вы возможную ценность исследований с неясным применением — например, фундаментальных работ, которые позже нашли непредвиденное применение?"
+          }
+        },
+        {
+          "id": "priority-not-usefulness",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you discuss priority (how limited public research money should be divided) rather than only whether each kind of research is useful?",
+            "ru": "Обсуждаете ли вы именно приоритет (как распределять ограниченные государственные деньги на исследования), а не только то, полезен ли каждый вид исследований?"
+          }
+        },
+        {
+          "id": "fair-to-uncertain-research",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Do you avoid assuming that an uncertain application means careless methods or no possible value?",
+            "ru": "Избегаете ли вы допущения, что неясное применение означает небрежные методы или отсутствие какой-либо ценности?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task2-small-town-careers",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 3,
@@ -47342,11 +48250,53 @@
           "ru": "Грамматический диапазон и точность: Используйте причинные связи и условные предложения без неподкреплённой уверенности. Проверьте jobs и employment."
         }
       ],
-      "minWords": 250
+      "minWords": 250,
+      "taskChecklist": [
+        {
+          "id": "reasons-for-leaving",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you explain why young adults might leave small towns after their education, such as few jobs matching their training, limited housing or fewer social opportunities?",
+            "ru": "Объясняете ли вы, почему молодые люди могут уезжать из небольших городов после учёбы, — например, мало работы по специальности, нехватка жилья или меньше возможностей для общения и досуга?"
+          }
+        },
+        {
+          "id": "practical-steps",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you propose practical steps that make staying a realistic choice, such as remote-work hubs, local apprenticeships, affordable rental housing or support for starting a business?",
+            "ru": "Предлагаете ли вы практические шаги, которые делают жизнь в родном городе реальным выбором, — например, коворкинги для удалённой работы, местное профессиональное обучение, доступное арендное жильё или поддержку открытия своего дела?"
+          }
+        },
+        {
+          "id": "steps-match-causes",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Is each step matched to a cause you identified, for example a housing measure answering a housing problem?",
+            "ru": "Соответствует ли каждый предложенный шаг одной из названных вами причин — например, мера по жилью отвечает на проблему с жильём?"
+          }
+        },
+        {
+          "id": "choice-not-obligation",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you focus on creating choices rather than making people stay, and acknowledge that some young adults will still prefer to move?",
+            "ru": "Делаете ли вы акцент на создании возможностей, а не на принуждении оставаться, и признаёте ли, что часть молодых людей всё равно предпочтёт уехать?"
+          }
+        },
+        {
+          "id": "town-examples",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Do you develop your reasons and steps with relevant examples, such as a newly qualified nurse or a young engineer deciding whether to return to their home town?",
+            "ru": "Развиваете ли вы причины и шаги уместными примерами — скажем, молодая медсестра или начинающий инженер решает, возвращаться ли в родной город?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v3-task2-recruitment-evidence",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 3,
@@ -47405,7 +48355,57 @@
           "ru": "Грамматический диапазон и точность: Используйте сравнительные и уступительные структуры для относительной важности. Проверьте candidates’ и согласование с evidence."
         }
       ],
-      "minWords": 250
+      "minWords": 250,
+      "taskChecklist": [
+        {
+          "id": "extent-of-agreement",
+          "kind": "POSITION",
+          "text": {
+            "en": "Do you state how far you agree that employers should give more weight to demonstrated ability than to academic qualifications, and keep the same extent to the conclusion?",
+            "ru": "Указываете ли вы, в какой мере согласны с тем, что работодателям следует придавать продемонстрированным умениям больше веса, чем академическим квалификациям, и сохраняете ли эту позицию до заключения?"
+          }
+        },
+        {
+          "id": "value-of-performance",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you explain the value of demonstrated ability, for example how a work sample, trial task or portfolio shows whether a candidate can actually do the job's tasks?",
+            "ru": "Объясняете ли вы ценность продемонстрированных умений — например, как пробное задание, образец работы или портфолио показывают, справится ли кандидат с реальными рабочими задачами?"
+          }
+        },
+        {
+          "id": "value-of-qualifications",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Do you explain what academic qualifications still show, for example broad theoretical knowledge, sustained effort, or a legally required qualification for doctors or engineers?",
+            "ru": "Объясняете ли вы, что всё же показывают академические квалификации, — например, широкие теоретические знания, способность к длительным усилиям или обязательный по закону диплом для врачей и инженеров?"
+          }
+        },
+        {
+          "id": "weighting-not-abolition",
+          "kind": "TASK_PART",
+          "text": {
+            "en": "Is your argument about how much weight each measure should receive, rather than about abolishing qualifications or skills tests altogether?",
+            "ru": "Рассуждаете ли вы о том, какой вес придавать каждому критерию, а не о полной отмене дипломов или проверки навыков?"
+          }
+        },
+        {
+          "id": "limits-by-kind-of-work",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Do you identify limits of each measure and differences between kinds of work, without claiming that either measure alone is always enough?",
+            "ru": "Указываете ли вы ограничения каждого критерия и различия между видами работы, не утверждая, что какого-то одного критерия всегда достаточно?"
+          }
+        },
+        {
+          "id": "recruitment-examples",
+          "kind": "SUPPORT",
+          "text": {
+            "en": "Do you support your points with relevant recruitment examples, such as a coding test for a programmer or the required degree for a nurse?",
+            "ru": "Подкрепляете ли вы доводы уместными примерами из найма — например, тестовым заданием для программиста или обязательным дипломом для медсестры?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-speak-v3-feedback-moment",
@@ -53470,7 +54470,7 @@
     },
     {
       "id": "ielts-write-v5-task1-estmark-electricity",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -53587,11 +54587,53 @@
           }
         ],
         "kind": "LINE"
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-coal-to-wind",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that Estmark shifted from coal to wind: coal fell steadily to become the smallest source, wind rose from nothing to become the largest, and gas rose to a peak and then declined?",
+            "ru": "Говорится ли в вашем обзоре (overview), что Эстмарк перешёл от угля к ветру: уголь неуклонно сокращался и стал наименьшим источником, ветер вырос с нуля до крупнейшего, а газ сначала рос до пика, а затем снижался?"
+          }
+        },
+        {
+          "id": "leading-source-changes",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare which source led: coal from 1990 to 2010, gas in 2015 (36 TWh vs 28 for coal and 25 for wind), and wind in 2020 and 2025 (38 and 47 TWh)?",
+            "ru": "Сравниваете ли вы, какой источник лидировал: уголь с 1990 по 2010 год, газ в 2015-м (36 ТВт·ч против 28 у угля и 25 у ветра), ветер в 2020 и 2025 годах (38 и 47 ТВт·ч)?"
+          }
+        },
+        {
+          "id": "coal-wind-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report coal falling from 62 TWh in 1990 to 8 TWh in 2025 and wind rising from 0 TWh in 1990 to 47 TWh in 2025?",
+            "ru": "Указываете ли вы, что уголь сократился с 62 ТВт·ч в 1990 году до 8 ТВт·ч в 2025-м, а ветер вырос с 0 ТВт·ч в 1990 году до 47 ТВт·ч в 2025-м?"
+          }
+        },
+        {
+          "id": "gas-peak-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report gas rising from 10 TWh in 1990 to a peak of 38 TWh in 2010 and then falling to 24 TWh in 2025?",
+            "ru": "Указываете ли вы, что газ вырос с 10 ТВт·ч в 1990 году до пика в 38 ТВт·ч в 2010-м, а затем снизился до 24 ТВт·ч в 2025-м?"
+          }
+        },
+        {
+          "id": "twh-crossings-no-reasons",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you use TWh throughout, place crossings between the years shown (e.g., wind overtook coal and gas between 2015 and 2020), and avoid calling the three-source sum Estmark's total electricity or adding reasons such as climate policy?",
+            "ru": "Используете ли вы везде ТВт·ч, относите ли пересечения линий к промежуткам между показанными годами (например, ветер обогнал уголь и газ между 2015 и 2020 годами) и обходитесь ли без утверждений, что сумма трёх источников — вся электроэнергия Эстмарка, и без причин вроде климатической политики?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v5-task1-hollin-college-travel",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -53686,11 +54728,53 @@
           }
         ],
         "kind": "PIE"
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-car-to-bicycle",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that the car lost its lead and the bicycle became the most popular way to travel to campus, with shares much more evenly spread in 2025?",
+            "ru": "Говорится ли в вашем обзоре (overview), что автомобиль утратил лидерство, а велосипед стал самым популярным способом добираться до кампуса, и что в 2025 году доли распределились гораздо равномернее?"
+          }
+        },
+        {
+          "id": "car-bicycle-swap",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you contrast the car and the bicycle: the car fell from the largest share (42%) to fourth place (18%), while the bicycle rose from the smallest share (8%) to the largest (27%)?",
+            "ru": "Противопоставляете ли вы автомобиль и велосипед: автомобиль опустился с первого места (42%) на четвёртое (18%), а велосипед поднялся с последнего места (8%) на первое (27%)?"
+          }
+        },
+        {
+          "id": "other-modes-compared",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare the other modes: the train share doubled from 10% to 20%, while the bus (25% to 22%) and walking (15% to 13%) changed only slightly?",
+            "ru": "Сравниваете ли вы остальные способы: доля поезда удвоилась с 10% до 20%, а автобус (25% → 22%) и ходьба пешком (15% → 13%) изменились лишь немного?"
+          }
+        },
+        {
+          "id": "mode-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report the key figures for 2005 and 2025 accurately: car 42% → 18%, bicycle 8% → 27% and train 10% → 20%?",
+            "ru": "Точно ли вы приводите ключевые цифры за 2005 и 2025 годы: автомобиль 42% → 18%, велосипед 8% → 27%, поезд 10% → 20%?"
+          }
+        },
+        {
+          "id": "shares-points-no-reasons",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you describe the figures as shares of students (the total number of students is not given), give changes in percentage points (car −24, bicycle +19), and avoid inventing reasons such as new cycle lanes or parking charges?",
+            "ru": "Описываете ли вы значения как доли студентов (общее число студентов не указано), даёте ли изменения в процентных пунктах (автомобиль −24, велосипед +19) и обходитесь ли без выдуманных причин вроде новых велодорожек или платной парковки?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v5-task1-city-water-use",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 2,
@@ -53795,11 +54879,53 @@
           }
         ],
         "kind": "TABLE"
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-corvel-dunhaven",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that Corvel used the most water per person and Dunhaven the least in all three years, and that most cities (three of the five) cut consumption, while Brisca and Dunhaven used more in 2020 than in 2000?",
+            "ru": "Говорится ли в вашем обзоре (overview), что во все три года больше всего воды на человека расходовали в Корвеле, а меньше всего — в Данхейвене, и что в большинстве городов (в трёх из пяти) потребление сократилось, а в Бриске и Данхейвене в 2020 году было выше, чем в 2000-м?"
+          }
+        },
+        {
+          "id": "brisca-passes-aldmere",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare Aldmere and Brisca, which swapped positions: Aldmere was well above Brisca in 2000 (210 vs 140 litres) but below it in 2020 (150 vs 165 litres)?",
+            "ru": "Сравниваете ли вы Алдмир и Бриску, поменявшиеся местами: в 2000 году Алдмир заметно опережал Бриску (210 против 140 литров), а в 2020-м оказался ниже (150 против 165 литров)?"
+          }
+        },
+        {
+          "id": "highest-lowest-gap",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you show that the gap between the highest and lowest users narrowed from 225 litres in 2000 (Corvel 320 vs Dunhaven 95) to 135 litres in 2020 (240 vs 105)?",
+            "ru": "Показываете ли вы, что разрыв между самым высоким и самым низким потреблением сократился с 225 литров в 2000 году (Корвел 320 против Данхейвена 95) до 135 литров в 2020-м (240 против 105)?"
+          }
+        },
+        {
+          "id": "city-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report the key changes from 2000 to 2020: Corvel 320 → 240 litres (the largest fall), Aldmere 210 → 150, Brisca 140 → 165, Dunhaven 95 → 105 (peaking at 110 in 2010) and Estwick almost unchanged at 180 → 175?",
+            "ru": "Приводите ли вы ключевые изменения с 2000 по 2020 год: Корвел 320 → 240 литров (наибольшее снижение), Алдмир 210 → 150, Бриска 140 → 165, Данхейвен 95 → 105 (пик 110 в 2010 году) и почти неизменный Эствик — 180 → 175?"
+          }
+        },
+        {
+          "id": "per-person-not-city-total",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you describe the figures as average litres per person per day, without claiming which city used the most water in total (populations are not given) or adding reasons such as water meters or drought?",
+            "ru": "Описываете ли вы значения как средний расход в литрах на человека в день, не утверждая, какой город израсходовал больше всего воды в целом (численность населения не указана), и не добавляя причин вроде счётчиков воды или засухи?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v5-task1-glass-bottle-recycling",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 3,
@@ -54007,11 +55133,53 @@
           }
         ],
         "caption": "Fictional plant created for practice; arrows show the order of the stages."
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-eight-stages",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that the process has eight stages, beginning with used bottles collected from bins and ending with new bottles delivered to drink makers, in two main phases?",
+            "ru": "Говорится ли в вашем обзоре (overview), что процесс состоит из восьми этапов — от сбора использованных бутылок из контейнеров до доставки новых бутылок производителям напитков — и делится на две основные фазы?"
+          }
+        },
+        {
+          "id": "two-phases-contrasted",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you contrast the two phases: the first four stages prepare the used glass (collecting, sorting, washing, crushing into cullet), while the last four turn it into new bottles (melting, shaping, cooling and inspecting, delivering)?",
+            "ru": "Противопоставляете ли вы две фазы: первые четыре этапа готовят использованное стекло (сбор, сортировка, мойка, дробление в стеклобой — cullet), а последние четыре превращают его в новые бутылки (плавка, формовка, охлаждение и проверка, доставка)?"
+          }
+        },
+        {
+          "id": "stages-in-order",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you name all eight stages in the correct order: collected from bins, sorted by colour, washed with labels removed, crushed into cullet, melted in a furnace, shaped in bottle moulds, cooled and inspected, delivered to drink makers?",
+            "ru": "Называете ли вы все восемь этапов в правильном порядке: сбор из контейнеров, сортировка по цвету, мойка и удаление этикеток, дробление в стеклобой, плавка в печи, формовка в бутылочных формах, охлаждение и проверка, доставка производителям напитков?"
+          }
+        },
+        {
+          "id": "inputs-and-temperature",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you include both added inputs at the right stages (hot water at the washing stage; sand and soda ash at the melting stage) and the furnace temperature of 1,500°C?",
+            "ru": "Упоминаете ли вы оба добавляемых компонента на нужных этапах (горячая вода — при мойке; песок и кальцинированная сода — при плавке) и температуру печи 1500 °C?"
+          }
+        },
+        {
+          "id": "passive-no-invented-detail",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you describe the stages mainly in the present passive (e.g., the bottles are sorted by colour) and avoid adding timings, quantities, temperatures other than 1,500°C, or machinery that the diagram does not show?",
+            "ru": "Описываете ли вы этапы в основном в настоящем времени страдательного залога (present passive, например the bottles are sorted by colour) и обходитесь ли без сроков, количеств, других температур, кроме 1500 °C, или оборудования, которых на схеме нет?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v5-task1-brackley-green-village",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 3,
@@ -54248,11 +55416,53 @@
           }
         ],
         "caption": "Fictional village created for practice; north is at the top. Not to scale."
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-more-developed",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that Brackley Green became much more developed, mainly north of Main Road, with countryside and open space replaced by buildings and facilities?",
+            "ru": "Говорится ли в вашем обзоре (overview), что Бракли-Грин стал гораздо более застроенным — в основном к северу от Главной дороги (Main Road), — а сельские угодья и открытые пространства сменились зданиями и объектами?"
+          }
+        },
+        {
+          "id": "north-south-contrast",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you contrast the two maps: north of Main Road there was only farmland and woodland in 2005 but there are now new buildings, while south of the road most buildings remain but some have changed use?",
+            "ru": "Противопоставляете ли вы две карты: в 2005 году к северу от Главной дороги были только поля и лес, а теперь там новые постройки, тогда как к югу от дороги большинство зданий сохранилось, но часть из них сменила назначение?"
+          }
+        },
+        {
+          "id": "north-changes",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report the northern changes: the farmland was replaced by a housing estate of 60 homes with a new access road from Main Road, and about half of the woodland (the western part) became a sports centre?",
+            "ru": "Описываете ли вы изменения на севере: на месте полей появился жилой квартал на 60 домов с новой подъездной дорогой от Главной дороги, а примерно половину леса (западную часть) заняли под спортивный центр?"
+          }
+        },
+        {
+          "id": "south-changes-unchanged",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report the southern changes (the shop became a café, the primary school was extended, the village green became a car park) and what stayed the same (the cottages, Main Road, the River Lenn and the rest of the woodland)?",
+            "ru": "Описываете ли вы изменения на юге (магазин стал кафе, начальную школу расширили, деревенский луг превратили в автостоянку) и то, что осталось прежним (коттеджи, Главная дорога, река Ленн и оставшаяся часть леса)?"
+          }
+        },
+        {
+          "id": "tense-no-invented-causes",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you use the past tense for the 2005 map (there was farmland) and the present or present perfect for today (it has been replaced), without inventing reasons such as population growth or dates for when each change happened?",
+            "ru": "Используете ли вы прошедшее время (past simple) для карты 2005 года (there was farmland) и настоящее время или present perfect для сегодняшней (it has been replaced), не придумывая причин вроде роста населения или дат отдельных изменений?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v5-task1-norvania-activity-age",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 3,
@@ -54357,11 +55567,53 @@
           }
         ],
         "kind": "TABLE"
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-walking-rises",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that walking for leisure was the most popular activity in every age group and the only one that rose with age, while most other activities fell with age?",
+            "ru": "Говорится ли в вашем обзоре (overview), что прогулки для удовольствия были самым популярным занятием во всех возрастных группах и единственным, чья популярность росла с возрастом, тогда как большинство других занятий с возрастом становились менее популярными?"
+          }
+        },
+        {
+          "id": "youngest-vs-oldest",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you compare the youngest and oldest groups, showing the steepest drops in team sports (38% vs 3%) and gym workouts (41% vs 9%), against the rise in walking (45% vs 66%)?",
+            "ru": "Сравниваете ли вы самую младшую и самую старшую группы, показывая самое резкое снижение в командных видах спорта (38% против 3%) и занятиях в спортзале (41% против 9%) на фоне роста прогулок (45% против 66%)?"
+          }
+        },
+        {
+          "id": "cycling-and-spread",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you note the exceptions and contrasts within groups: cycling peaked among 35–59-year-olds (27%), and activities were more evenly spread among 16–34-year-olds (22–45%) than among over-60s, where walking (66%) far exceeded swimming (18%), the next highest?",
+            "ru": "Отмечаете ли вы исключения и различия внутри групп: велосипед был популярнее всего в группе 35–59 лет (27%), а у 16–34-летних занятия распределены ровнее (22–45%), чем у тех, кому за 60, где прогулки (66%) намного опережают следующее по популярности плавание (18%)?"
+          }
+        },
+        {
+          "id": "activity-figures",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report the figures for ages 16–34, 35–59 and 60+ accurately: walking 45%, 58%, 66%; gym 41%, 29%, 9%; team sports 38%, 14%, 3%; swimming 30%, 24%, 18%; cycling 22%, 27%, 12%?",
+            "ru": "Точно ли вы приводите данные для групп 16–34, 35–59 и 60+: прогулки 45%, 58%, 66%; спортзал 41%, 29%, 9%; командные виды спорта 38%, 14%, 3%; плавание 30%, 24%, 18%; велосипед 22%, 27%, 12%?"
+          }
+        },
+        {
+          "id": "age-not-time-no-sums",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you compare age groups in 2024 rather than describing change over time, avoid adding percentages together (adults could report more than one activity), and avoid inventing reasons such as injuries or cost?",
+            "ru": "Сравниваете ли вы возрастные группы в 2024 году, а не изменения во времени, избегаете ли сложения процентов (взрослые могли указать несколько занятий) и обходитесь ли без выдуманных причин вроде травм или стоимости?"
+          }
+        }
+      ]
     },
     {
       "id": "ielts-write-v5-task1-port-selwick-harbour",
-      "version": 1,
+      "version": 2,
       "exam": "IELTS",
       "skillId": "ielts_writing",
       "difficulty": 3,
@@ -54610,7 +55862,49 @@
           }
         ],
         "caption": "Fictional harbour; north is at the top and the sea is to the south. Not to scale."
-      }
+      },
+      "taskChecklist": [
+        {
+          "id": "overview-work-to-leisure",
+          "kind": "OVERVIEW",
+          "text": {
+            "en": "Does your overview state that the harbour changed from a working fishing and transport area into a leisure and residential area, mostly by converting existing buildings rather than building new ones?",
+            "ru": "Говорится ли в вашем обзоре (overview), что гавань превратилась из рабочего рыболовного и транспортного района в зону отдыха и жилья, в основном за счёт перепрофилирования существующих зданий, а не нового строительства?"
+          }
+        },
+        {
+          "id": "old-vs-new-functions",
+          "kind": "COMPARISON",
+          "text": {
+            "en": "Do you contrast the two maps by function: in 1990 the fish market, fishing boat moorings, warehouses and railway station served fishing, storage and rail transport, while their replacements today serve residents and visitors?",
+            "ru": "Противопоставляете ли вы две карты по назначению объектов: в 1990 году рыбный рынок, стоянка рыболовецких судов, склады и железнодорожная станция служили рыболовству, хранению грузов и железнодорожному транспорту, а то, что стоит на их месте сегодня, служит жителям и гостям?"
+          }
+        },
+        {
+          "id": "conversions",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report every conversion: warehouses to apartments, railway station to museum, fish market to restaurants, fishing boat moorings to a yacht marina, and the shingle beach to a seafront promenade?",
+            "ru": "Называете ли вы каждое перепрофилирование: склады — в апартаменты, железнодорожная станция — в музей, рыбный рынок — в рестораны, стоянка рыболовецких судов — в яхтенную марину, галечный пляж — в набережную?"
+          }
+        },
+        {
+          "id": "new-and-unchanged",
+          "kind": "DATA",
+          "text": {
+            "en": "Do you report the one new feature, a ferry terminal in the east just south of the lighthouse, and what stayed the same: the houses, the lighthouse and Coast Road?",
+            "ru": "Упоминаете ли вы единственный новый объект — паромный терминал на востоке, чуть южнее маяка, — и то, что не изменилось: жилые дома, маяк и Прибрежную дорогу (Coast Road)?"
+          }
+        },
+        {
+          "id": "tense-no-invented-causes",
+          "kind": "ACCURACY",
+          "text": {
+            "en": "Do you use the past tense for the 1990 map (there was a fish market) and the present or present perfect for today (it has been converted), without inventing reasons such as a decline in fishing, dates of the changes, or numbers of boats or apartments?",
+            "ru": "Используете ли вы прошедшее время (past simple) для карты 1990 года (there was a fish market) и настоящее время или present perfect для сегодняшней (it has been converted), не придумывая причин вроде упадка рыболовства, дат изменений или числа судов и квартир?"
+          }
+        }
+      ]
     }
   ]
 }

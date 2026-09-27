@@ -43,7 +43,7 @@ fun Language.label(en: String, ru: String) = if (this == Language.RU) ru else en
 
 enum class Tab { Today, Library, Progress }
 
-private enum class Screen { Splash, Failed, Onboarding, Session, Paper, Settings, Tabs }
+private enum class Screen { Splash, Failed, Onboarding, Session, Paper, Revision, Settings, Tabs }
 
 @Composable
 fun StudyApp(vm: StudyViewModel) {
@@ -52,6 +52,7 @@ fun StudyApp(vm: StudyViewModel) {
     var practice by rememberSaveable { mutableStateOf(false) }
     var settingsOpen by rememberSaveable { mutableStateOf(false) }
     var paperIdValue by rememberSaveable { mutableStateOf<String?>(null) }
+    var revisionWorkValue by rememberSaveable { mutableStateOf<String?>(null) }
     val l = s.language
     val c = Study.colors
     val activeSession = { vm.state.value.session?.let { !it.finished } == true }
@@ -61,12 +62,15 @@ fun StudyApp(vm: StudyViewModel) {
     }
     val plannedDay: (Int) -> Unit = { day -> vm.startPlannedDay(day); if (activeSession()) practice = true }
     val openPaper: (String) -> Unit = { id -> paperIdValue = id; settingsOpen = false }
+    val openRevision: (String) -> Unit = { attemptId -> vm.beginRevision(attemptId)?.let { revisionWorkValue = it; settingsOpen = false } }
+    val continueRevision: (String) -> Unit = { workId -> revisionWorkValue = workId }
     val startSection: (String, String, Boolean) -> Unit = { skill, source, strict -> vm.startSection(skill, source, strict)?.let(openPaper) }
     val onboarding = !s.loading && s.pack != null && !s.settings.onboarded && s.attempts.isEmpty() &&
         s.sessions.isEmpty() && s.plans.isEmpty() && s.dailyPlans.isEmpty()
     val screen = when {
         s.pack == null -> if (s.loading) Screen.Splash else Screen.Failed
         // A draft being restored keeps loading visible; the old finished session must not flash first.
+        revisionWorkValue?.let { work -> s.revisions.values.any { it.workId == work } } == true && !s.loading -> Screen.Revision
         paperIdValue?.let { it in s.papers } == true && !s.loading -> Screen.Paper
         practice && s.session != null && !s.loading -> Screen.Session
         onboarding -> Screen.Onboarding
@@ -75,6 +79,7 @@ fun StudyApp(vm: StudyViewModel) {
     }
     BackHandler(screen == Screen.Session) { practice = false }
     BackHandler(screen == Screen.Paper) { paperIdValue = null }
+    BackHandler(screen == Screen.Revision) { revisionWorkValue = null }
     BackHandler(screen == Screen.Settings) { settingsOpen = false }
     BackHandler(screen == Screen.Tabs && tab != Tab.Today) { tab = Tab.Today }
     val tabs = rememberSaveableStateHolder()
@@ -89,9 +94,10 @@ fun StudyApp(vm: StudyViewModel) {
                     Text(s.error ?: l.label("Content unavailable", "Материалы недоступны"), style = StudyType.Body, color = c.ink)
                 }
                 Screen.Onboarding -> OnboardingScreen(s, vm) { begin(ContentSplit.DIAGNOSTIC, null) }
-                Screen.Session -> SessionScreen(s, vm, Modifier.fillMaxSize(),
+                Screen.Session -> SessionScreen(s, vm, Modifier.fillMaxSize(), openRevision,
                     close = { practice = false; tab = Tab.Today },
                     again = { practice = false; begin(ContentSplit.PRACTICE, null) })
+                Screen.Revision -> RevisionScreen(s, vm, revisionWorkValue.orEmpty()) { revisionWorkValue = null }
                 Screen.Paper -> PaperScreen(s, vm, paperIdValue.orEmpty()) { paperIdValue = null; tab = Tab.Today }
                 Screen.Settings -> SettingsScreen(s, vm) { settingsOpen = false }
                 Screen.Tabs -> Column(Modifier.fillMaxSize()) {
@@ -99,9 +105,9 @@ fun StudyApp(vm: StudyViewModel) {
                     Box(Modifier.weight(1f)) {
                         tabs.SaveableStateProvider(tab) {
                             when (tab) {
-                                Tab.Today -> TodayScreen(s, vm, begin, plannedDay, openPaper) { practice = true }
+                                Tab.Today -> TodayScreen(s, vm, begin, plannedDay, openPaper, continueRevision) { practice = true }
                                 Tab.Library -> LibraryScreen(s, begin, startSection, openPaper)
-                                Tab.Progress -> ProgressScreen(s)
+                                Tab.Progress -> ProgressScreen(s, openRevision)
                             }
                         }
                     }

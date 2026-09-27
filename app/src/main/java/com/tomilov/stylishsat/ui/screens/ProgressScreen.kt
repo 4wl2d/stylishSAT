@@ -33,7 +33,7 @@ import java.time.LocalDate
 private const val HeatmapWeeks = 17
 
 @Composable
-fun ProgressScreen(s: StudyUiState) {
+fun ProgressScreen(s: StudyUiState, openRevision: (String) -> Unit) {
     val l = s.language
     val c = Study.colors
     val pack = s.pack ?: return
@@ -90,7 +90,7 @@ fun ProgressScreen(s: StudyUiState) {
         }
         item { SectionLabel(l.label("Recent answers", "Последние ответы"), Modifier.padding(top = 28.dp, bottom = 4.dp), "${history.size}") }
         if (history.isEmpty()) item { Text(l.label("Nothing yet.", "Пока пусто."), style = StudyType.Body, color = c.inkSoft) }
-        items(if (allHistoryValue) history else history.take(12), key = { it.id }) { attempt -> HistoryRow(s, attempt) }
+        items(if (allHistoryValue) history else history.take(12), key = { it.id }) { attempt -> HistoryRow(s, attempt, openRevision) }
         if (history.size > 12) item {
             StudyButton(if (allHistoryValue) l.label("Show recent only", "Только последние") else l.label("Show all ${history.size}", "Показать все: ${history.size}"),
                 { allHistoryValue = !allHistoryValue }, Modifier.fillMaxWidth().padding(top = 12.dp), tone = Tone.Quiet, compact = true)
@@ -137,13 +137,15 @@ private fun Heatmap(rhythm: Rhythm, l: Language) {
 }
 
 @Composable
-private fun HistoryRow(s: StudyUiState, attempt: Attempt) {
+private fun HistoryRow(s: StudyUiState, attempt: Attempt, openRevision: (String) -> Unit) {
     val l = s.language
     val c = Study.colors
     var openValue by rememberSaveable(attempt.id) { mutableStateOf(false) }
     val recordings = attempt.recordingPaths.ifEmpty { listOfNotNull(attempt.recordingPath) }
     val feedback = remember(s.feedback, attempt.id) { s.feedback.filter { it.attemptId == attempt.id } }
-    val expandable = recordings.isNotEmpty() || feedback.isNotEmpty() || attempt.answer.length > 60
+    val writing = attempt.skillId == "ielts_writing" && attempt.correct == null && attempt.answer.isNotBlank()
+    val versions = remember(s.revisions, attempt.workId) { s.revisions.values.count { it.saved && it.workId == (attempt.workId ?: "attempt:${attempt.id}") } }
+    val expandable = recordings.isNotEmpty() || feedback.isNotEmpty() || attempt.answer.length > 60 || writing
     Column {
         Row(Modifier.fillMaxWidth().tapSurface(RoundedCornerShape(12.dp), c.paper, enabled = expandable) { openValue = !openValue }.padding(vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically) {
@@ -163,6 +165,8 @@ private fun HistoryRow(s: StudyUiState, attempt: Attempt) {
             }
         }
         if (openValue) Column(Modifier.padding(start = 34.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (writing) StudyButton(if (versions > 1) l.label("Revisions · $versions versions", "Доработка · версий: $versions") else l.label("Check and revise", "Проверить и доработать"),
+                { openRevision(attempt.id) }, tone = Tone.Quiet, compact = true, arrow = true)
             if (recordings.isNotEmpty()) {
                 val player = remember { RecordingPlayback() }
                 DisposableEffect(player) { onDispose { player.stop() } }
