@@ -4,6 +4,8 @@ Versions follow the [version policy](docs/VERSIONING.md).
 
 ## Unreleased
 
+## 0.4.0 — 2026-09-27
+
 - Redesigned interface: paper-and-ink look with one highlighter accent, a system-following dark theme and a drawn icon set.
 - First-run setup chooses language, exam and daily minutes, then goes straight to the diagnostic.
 - Today leads with a single next step (continue, diagnostic, route day or intensive block), plus a week strip, streak, answer time against the daily goal and the course route as a tappable grid.
