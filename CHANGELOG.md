@@ -4,6 +4,8 @@ Versions follow the [version policy](docs/VERSIONING.md).
 
 ## Unreleased
 
+- Refresh the README for the 0.4.0 study flow, distinguish it from the published 0.3.1 APK and label the older screenshots as an archive.
+
 ## 0.4.0 — 2026-09-27
 
 - Redesigned interface: paper-and-ink look with one highlighter accent, a system-following dark theme and a drawn icon set.
