@@ -39,7 +39,8 @@ fun NotebookScreen(s: StudyUiState, vm: StudyViewModel, openAttempt: (String) ->
     val l = s.language
     val c = Study.colors
     var filterValue by rememberSaveable(s.exam) { mutableStateOf(NotebookFilter.Open) }
-    val mistakes = remember(s.attempts, s.exam) { Notebook.mistakes(s.attempts, s.exam) }
+    val marked = remember(s.marks) { s.marks.values.filter { it.marked }.map { it.workId }.toSet() }
+    val mistakes = remember(s.attempts, s.exam, marked) { Notebook.mistakes(s.attempts, s.exam, marked) }
     val shown = mistakes.filter { attempt ->
         val resolved = s.notebook[attempt.id]?.resolved == true
         when (filterValue) { NotebookFilter.Open -> !resolved; NotebookFilter.Resolved -> resolved; NotebookFilter.All -> true }
@@ -53,8 +54,8 @@ fun NotebookScreen(s: StudyUiState, vm: StudyViewModel, openAttempt: (String) ->
         LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)) {
             item {
-                Text(l.label("Wrong and skipped answers reopen the exact question you saw: prompt, your answer, key and explanation. Write why it went wrong, then queue a fresh question from the same family.",
-                    "Неверные и пропущенные ответы открывают то же задание, что вы видели: вопрос, ваш ответ, ключ и объяснение. Запишите, почему ошиблись, и поставьте в очередь новое задание той же семьи."),
+                Text(l.label("Wrong, skipped and marked answers reopen the exact question you saw: prompt, your answer, key and explanation. Write why it went wrong, then queue a fresh question from the same family.",
+                    "Неверные, пропущенные и отмеченные ответы открывают то же задание, что вы видели: вопрос, ваш ответ, ключ и объяснение. Запишите, почему ошиблись, и поставьте в очередь новое задание той же семьи."),
                     style = StudyType.Small, color = c.inkSoft)
             }
             if (pending.isNotEmpty()) item {
@@ -80,9 +81,11 @@ fun NotebookScreen(s: StudyUiState, vm: StudyViewModel, openAttempt: (String) ->
                     verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Meta(listOfNotNull(skill, shortDate(StudyRhythm.day(attempt, java.time.ZoneId.systemDefault()), l),
                         if (attempt.errorType == "SKIPPED") l.label("skipped", "пропуск") else null,
+                        if (attempt.workId in marked) l.label("marked", "отмечено") else null,
                         entry?.cause?.let { causeLabel(it, l) }).joinToString(" · "))
                     prompt?.let { Text(it, style = StudyType.Small, color = c.ink, maxLines = 2, overflow = TextOverflow.Ellipsis) }
-                    Text(l.label("You: ", "Вы: ") + attempt.answer.ifBlank { "—" }, style = StudyType.Small.copy(fontSize = 13.sp), color = c.bad, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(l.label("You: ", "Вы: ") + attempt.answer.ifBlank { "—" }, style = StudyType.Small.copy(fontSize = 13.sp),
+                        color = if (attempt.correct == true) c.ink else c.bad, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     val status = listOfNotNull(
                         if (entry?.note?.isNotBlank() == true) l.label("note written", "заметка") else null,
                         if (entry?.queuedExerciseId != null) l.label("follow-up queued", "в очереди") else null,
@@ -113,7 +116,8 @@ fun AttemptReviewScreen(s: StudyUiState, vm: StudyViewModel, attemptId: String, 
     if (attempt == null) { LaunchedEffect(attemptId) { close() }; return }
     val exercise = rememberExercise(s, vm, attempt.exam, attempt.exerciseId, attempt.exerciseVersion)
     val entry = s.notebook[attempt.id]
-    val mistake = attempt.correct == false || attempt.errorType == "SKIPPED"
+    val marked = attempt.workId?.let { s.marks[it]?.marked } == true
+    val mistake = attempt.correct == false || attempt.errorType == "SKIPPED" || marked
     Column(Modifier.fillMaxSize().background(c.paper).statusBarsPadding().imePadding()) {
         Row(Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 6.dp), verticalAlignment = Alignment.CenterVertically) {
             GlyphButton(Glyph.ArrowLeft, l.label("Back", "Назад"), close)
@@ -153,6 +157,8 @@ fun AttemptReviewScreen(s: StudyUiState, vm: StudyViewModel, attemptId: String, 
             }
             if (exercise.type == ExerciseType.WRITING && attempt.answer.isNotBlank())
                 StudyButton(l.label("Check and revise", "Проверить и доработать"), { openRevision(attempt.id) }, Modifier.fillMaxWidth(), tone = Tone.Quiet, compact = true, arrow = true)
+            if (marked) StudyButton(l.label("Marked for review · unmark", "Отмечено для повторения · снять отметку"), { attempt.workId?.let(vm::toggleMark) },
+                Modifier.fillMaxWidth(), tone = Tone.Quiet, compact = true, glyph = Glyph.Bookmark)
             if (mistake) NotebookTools(s, vm, attempt, exercise, entry)
         }
     }

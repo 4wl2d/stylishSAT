@@ -192,6 +192,7 @@ private fun ColumnScope.SheetView(run: PaperRun, part: PaperPart, vm: StudyViewM
     val items = part.exercises.filter { it.sourceId == source }
     val passage = items.firstNotNullOfOrNull { it.passage }
     var tabValue by rememberSaveable(run.id, part.id, source) { mutableIntStateOf(if (passage != null) 0 else 1) }
+    var highlightingValue by rememberSaveable(run.id) { mutableStateOf(false) }
     if (sources.size > 1) Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         sources.forEachIndexed { index, id ->
             val on = index == sourceValue
@@ -210,8 +211,18 @@ private fun ColumnScope.SheetView(run: PaperRun, part: PaperPart, vm: StudyViewM
         .padding(horizontal = 20.dp).padding(top = 12.dp, bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         if (tabValue == 0 && passage != null) {
             items.firstNotNullOfOrNull { it.sourceTitle }?.let { Text(it, style = StudyType.Title, color = c.ink) }
-            Meta(l.label("${AnswerChecker.wordCount(passage)} words", "${AnswerChecker.wordCount(passage)} слов"))
-            SelectionContainer { Text(passage, style = StudyType.Reading.copy(fontSize = 17.sp, lineHeight = 28.sp), color = c.ink) }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Meta(l.label("${AnswerChecker.wordCount(passage)} words", "${AnswerChecker.wordCount(passage)} слов"), Modifier.weight(1f))
+                Row(Modifier.tapSurface(RoundedCornerShape(50), if (highlightingValue) c.ink else c.sunken, role = Role.Switch) { highlightingValue = !highlightingValue }
+                    .semantics { selected = highlightingValue }.padding(horizontal = 12.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
+                    GlyphIcon(Glyph.Marker, tint = if (highlightingValue) c.paper else c.ink, size = 16.dp)
+                    Spacer(Modifier.width(6.dp))
+                    Text(l.label("Highlight", "Выделять"), style = StudyType.Button.copy(fontSize = 13.sp), color = if (highlightingValue) c.paper else c.ink)
+                }
+            }
+            HighlightablePassage(passage, run.highlights["source:$source"].orEmpty(), highlightingValue, StudyType.Reading.copy(fontSize = 17.sp, lineHeight = 28.sp)) {
+                vm.paperHighlight(run.id, "source:$source", it)
+            }
         } else {
             if (timeUp) TimeUpBanner(run, vm, l)
             // Under exam conditions the player stays on the live recording while you look at any part's questions.
@@ -271,10 +282,11 @@ private fun PaperQuestion(run: PaperRun, exercise: Exercise, number: Int, enable
 
 /** Choice rows, a key grid for shared lists, a one-line field or an essay editor. The editor owns its text. */
 @Composable
-private fun AnswerInput(exercise: Exercise, saved: String, enabled: Boolean, number: Int, l: Language, open: Boolean, answer: (String) -> Unit) {
+private fun AnswerInput(exercise: Exercise, saved: String, enabled: Boolean, number: Int, l: Language, open: Boolean,
+    eliminated: List<String> = emptyList(), eliminating: Boolean = false, eliminate: (String) -> Unit = {}, answer: (String) -> Unit) {
     when {
         exercise.usesGroupList() -> KeyChips(exercise, saved, enabled, answer)
-        exercise.type == ExerciseType.MULTIPLE_CHOICE -> ChoiceList(exercise, saved, enabled, answer)
+        exercise.type == ExerciseType.MULTIPLE_CHOICE -> ChoiceList(exercise, saved, enabled, eliminated, eliminating, eliminate, answer)
         else -> {
             val state = rememberTextFieldState(initialText = saved)
             LaunchedEffect(state) { snapshotFlow { state.text.toString() }.collect { answer(it) } }
@@ -308,6 +320,15 @@ private fun ColumnScope.ModuleView(run: PaperRun, part: PaperPart, vm: StudyView
     val index = run.itemIndex.coerceIn(0, total - 1)
     val exercise = part.exercises[index]
     val flagged = exercise.versionKey in run.flagged
+    var toolValue by remember(exercise.versionKey) { mutableStateOf<WorkTool?>(null) }
+    var eliminatingValue by rememberSaveable(run.id) { mutableStateOf(false) }
+    var highlightingValue by rememberSaveable(run.id) { mutableStateOf(false) }
+    when (toolValue) {
+        WorkTool.Calculator -> CalculatorSheet(vm, l) { toolValue = null }
+        WorkTool.Reference -> ReferenceSheet(l) { toolValue = null }
+        WorkTool.Note -> NoteSheet(run.id + exercise.versionKey, run.notes[exercise.versionKey].orEmpty(), l, { vm.paperNote(run.id, exercise.versionKey, it) }) { toolValue = null }
+        null -> Unit
+    }
     Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         Row(Modifier.tapSurface(RoundedCornerShape(50), c.sunken) { vm.paperReview(run.id, true) }.padding(horizontal = 14.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically) {
@@ -324,19 +345,28 @@ private fun ColumnScope.ModuleView(run: PaperRun, part: PaperPart, vm: StudyView
             Text(l.label("Mark for review", "Отметить"), style = StudyType.Button.copy(fontSize = 13.sp), color = if (flagged) c.onMarker else c.ink)
         }
     }
+    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp)) {
+        ToolBar(exercise, ToolState(eliminatingValue, highlightingValue, run.notes[exercise.versionKey].orEmpty().isNotBlank()), l,
+            open = { toolValue = it }, eliminate = { eliminatingValue = !eliminatingValue }, highlight = { highlightingValue = !highlightingValue }, mark = null)
+    }
     val scroll = rememberScrollState()
     LaunchedEffect(index) { scroll.scrollTo(0) }
     Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll).padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         if (timeUp) TimeUpBanner(run, vm, l)
         exercise.passage?.let { passage ->
-            Block(padding = 18.dp) { SelectionContainer { Text(passage, style = StudyType.Reading.copy(fontSize = 17.sp, lineHeight = 28.sp), color = c.ink) } }
+            Block(padding = 18.dp) {
+                HighlightablePassage(passage, run.highlights[exercise.versionKey].orEmpty(), highlightingValue && !timeUp, StudyType.Reading.copy(fontSize = 17.sp, lineHeight = 28.sp)) {
+                    vm.paperHighlight(run.id, exercise.versionKey, it)
+                }
+            }
         }
         exercise.chart?.let { Chart(it, l) }
         exercise.figure?.let { FigureView(it) }
         Text(exercise.prompt, style = StudyType.Question.copy(fontSize = 19.sp, lineHeight = 28.sp), color = c.ink)
         key(run.id, exercise.versionKey) {
-            AnswerInput(exercise, run.answers[exercise.versionKey].orEmpty(), !timeUp, index + 1, l, false) { vm.paperAnswer(run.id, exercise.versionKey, it) }
+            AnswerInput(exercise, run.answers[exercise.versionKey].orEmpty(), !timeUp, index + 1, l, false,
+                run.eliminated[exercise.versionKey].orEmpty(), eliminatingValue, { vm.paperEliminate(run.id, exercise.versionKey, it) }) { vm.paperAnswer(run.id, exercise.versionKey, it) }
         }
     }
     Row(Modifier.fillMaxWidth().background(c.paper).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {

@@ -71,6 +71,10 @@ data class PaperRun(
     /** SAT stages still to be built; a second module is chosen from the first module's raw result. */
     val plannedStages: List<String> = emptyList(),
     val breakElapsedSeconds: Int = 0,
+    /** Working tools: struck-out options and notes by question, highlighted sentences by passage. Never marked. */
+    val eliminated: Map<String, List<String>> = emptyMap(),
+    val highlights: Map<String, List<Int>> = emptyMap(),
+    val notes: Map<String, String> = emptyMap(),
 ) {
     val part: PaperPart? get() = parts.getOrNull(partIndex)
     val finished: Boolean get() = finishedAt != null

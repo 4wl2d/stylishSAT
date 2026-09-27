@@ -53,6 +53,10 @@ data class StudySession(
     val timeLimitSeconds: Int? = null,
     val continuedWithoutTimeLimit: Boolean = false,
     val reviewGuidanceViewed: Boolean = false,
+    /** Working tools for the current step; they never reach marking. */
+    val eliminated: List<String> = emptyList(),
+    val highlights: List<Int> = emptyList(),
+    val note: String = "",
 ) {
     val activity: PlannedActivity? get() = activities.getOrNull(index)
     val stepCount: Int get() = activities.size.takeIf { it > 0 } ?: exercises.size
@@ -74,7 +78,24 @@ data class StudyDraft(
     val timeLimitSeconds: Int? = null,
     val continuedWithoutTimeLimit: Boolean = false,
     val reviewGuidanceViewed: Boolean = false,
+    val eliminated: List<String> = emptyList(),
+    val highlights: List<Int> = emptyList(),
+    val note: String = "",
 ) { val key: String get() = "${exam.name}:$exerciseId:$exerciseVersion:${workId ?: "legacy"}" }
+
+/** A question the learner marked for review; it appears in the mistake notebook until unmarked. */
+@Serializable
+data class ReviewMark(val workId: String, val exam: Exam, val marked: Boolean = true, val updatedAt: Long = 0)
+
+/** The calculator's working state for this app session. Not persisted and never an answer. */
+data class CalculatorState(
+    val expression: String = "",
+    val history: List<String> = emptyList(),
+    val angle: Calculator.Angle = Calculator.Angle.DEG,
+    val ans: Double = 0.0,
+    val second: Boolean = false,
+    val evaluated: Boolean = false,
+)
 
 @Serializable
 data class CourseProgress(val exam: Exam, val planId: String, val completedDays: List<Int> = emptyList())
@@ -96,6 +117,7 @@ data class StudyUiState(
     val papers: Map<String, PaperRun> = emptyMap(),
     val revisions: Map<String, WritingRevision> = emptyMap(),
     val notebook: Map<String, NotebookEntry> = emptyMap(),
+    val marks: Map<String, ReviewMark> = emptyMap(),
 ) {
     val exam get() = settings.exam
     val language get() = settings.language
@@ -160,6 +182,7 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
                 val papers = decode("paper") { storageJson.decodeFromString<PaperRun>(it) }.map { run -> paperParts[run.id]?.let { run.copy(parts = it.parts) } ?: run }
                 val revisions = decode("revision") { storageJson.decodeFromString<WritingRevision>(it) }
                 val notebook = decode("notebook") { storageJson.decodeFromString<NotebookEntry>(it) }
+                val marks = decode("mark") { storageJson.decodeFromString<ReviewMark>(it) }
                 mutableState.update { it.copy(
                     pack = pack, settings = initialSettings,
                     profiles = it.profiles + profiles.associateBy { p -> p.exam },
@@ -171,6 +194,7 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
                     papers = papers.associateBy { run -> run.id },
                     revisions = revisions.associateBy { revision -> revision.id },
                     notebook = notebook.associateBy { entry -> entry.attemptId },
+                    marks = marks.associateBy { mark -> mark.workId },
                 ) }
                 }
                 Exam.entries.forEach { refreshStoredCourse(it) }
@@ -248,6 +272,7 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
             recordingPaths = (session.recordingPaths + listOfNotNull(session.recordingPath)).distinct(),
             timeLimitSeconds = session.timeLimitSeconds, continuedWithoutTimeLimit = session.continuedWithoutTimeLimit,
             reviewGuidanceViewed = session.reviewGuidanceViewed,
+            eliminated = session.eliminated, highlights = session.highlights, note = session.note,
         ) else null
     }
     private fun saveSession(session: StudySession) {
@@ -293,6 +318,7 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
             timeLimitSeconds = if (existing != null) existing.timeLimitSeconds else exercise.expectedSeconds.takeIf { timed && it > 0 },
             continuedWithoutTimeLimit = existing?.continuedWithoutTimeLimit ?: false,
             reviewGuidanceViewed = existing?.reviewGuidanceViewed ?: false,
+            eliminated = existing?.eliminated.orEmpty(), highlights = existing?.highlights.orEmpty(), note = existing?.note.orEmpty(),
         )
     }
     private fun recordingBlocksStop(): Boolean {
@@ -404,7 +430,7 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
                 recordingPath = draft.recordingPath, recordingPaths = (draft.recordingPaths + listOfNotNull(draft.recordingPath)).distinct(),
                 previousWorkSeconds = draft.elapsedSeconds, manualWorkId = workId, resumingDraft = true, startedAt = now(),
                 timeLimitSeconds = draft.timeLimitSeconds, continuedWithoutTimeLimit = draft.continuedWithoutTimeLimit,
-                reviewGuidanceViewed = draft.reviewGuidanceViewed)
+                reviewGuidanceViewed = draft.reviewGuidanceViewed, eliminated = draft.eliminated, highlights = draft.highlights, note = draft.note)
             val migrated = draft.copy(workId = workId)
             val updates = listOfNotNull(draft.takeIf { it.workId == null }?.copy(supersededByWorkId = workId), migrated)
             database.withTransaction {
@@ -565,7 +591,7 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         val draft = StudyDraft(s.exam, exercise.id, exercise.version, session.draft, session.workId,
             session.previousWorkSeconds + session.activeSeconds, session.hintsUsed, session.recordingPath, submitted = true, updatedAt = now(), recordingPaths = session.recordingPaths.ifEmpty { listOfNotNull(session.recordingPath) },
             timeLimitSeconds = session.timeLimitSeconds, continuedWithoutTimeLimit = session.continuedWithoutTimeLimit,
-            reviewGuidanceViewed = session.reviewGuidanceViewed)
+            reviewGuidanceViewed = session.reviewGuidanceViewed, eliminated = session.eliminated, highlights = session.highlights, note = session.note)
         mutableState.update { it.copy(attempts = it.attempts + attempt, sessions = it.sessions + (s.exam to savedSession), drafts = it.drafts + (draft.key to draft)) }
         enqueue {
             database.withTransaction {
@@ -877,12 +903,15 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
             phase = when { last -> PaperPhase.FINISHED; part.breakAfterSeconds > 0 -> PaperPhase.BREAK; else -> PaperPhase.WORKING },
             itemIndex = 0, reviewing = false, breakElapsedSeconds = 0,
             finishedAt = if (last) now() else null)
-        mutableState.update { it.copy(attempts = it.attempts + attempts, papers = it.papers + (next.id to next)) }
+        // Questions marked for review in this part stay marked in the notebook after the sitting.
+        val newMarks = part.exercises.filter { it.versionKey in run.flagged }.map { ReviewMark("${run.id}:${it.versionKey}", run.exam, true, now()) }
+        mutableState.update { it.copy(attempts = it.attempts + attempts, papers = it.papers + (next.id to next), marks = it.marks + newMarks.associateBy { mark -> mark.workId }) }
         enqueue {
             val records = withContext(Dispatchers.Default) {
                 attempts.map { StoredRecord("attempt:${it.id}", "attempt", run.exam.name, storageJson.encodeToString(it)) } +
                     StoredRecord("paper_parts:${next.id}", "paper_parts", run.exam.name, storageJson.encodeToString(PaperPartsRecord(next.id, next.parts))) +
-                    StoredRecord("paper:${next.id}", "paper", run.exam.name, storageJson.encodeToString(next.copy(parts = emptyList())))
+                    StoredRecord("paper:${next.id}", "paper", run.exam.name, storageJson.encodeToString(next.copy(parts = emptyList()))) +
+                    newMarks.map { StoredRecord("mark:${it.workId}", "mark", run.exam.name, storageJson.encodeToString(it)) }
             }
             database.withTransaction { records.forEach { database.dao().put(it) } }
         }
@@ -1016,6 +1045,88 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         saveSession(restoreStep(StudySession(exam = s.exam, mode = ContentSplit.PRACTICE, exercises = exercises)))
         return true
     }
+
+    private fun liveStep(expectedStep: String): StudySession? = state.value.session?.takeIf {
+        !state.value.loading && !it.finished && it.result == null && it.stepKey == expectedStep && it.activity?.isLesson != true
+    }
+
+    /** Strike out an option while thinking. Choosing a struck option restores it. */
+    fun sessionEliminate(option: String, expectedStep: String) {
+        val session = liveStep(expectedStep) ?: return
+        saveSession(session.copy(eliminated = if (option in session.eliminated) session.eliminated - option else session.eliminated + option))
+    }
+
+    fun sessionHighlight(sentence: Int, expectedStep: String) {
+        val session = liveStep(expectedStep) ?: return
+        saveSession(session.copy(highlights = if (sentence in session.highlights) session.highlights - sentence else session.highlights + sentence))
+    }
+
+    /** Scratch notes follow the editor; they are kept with the draft, not with the answer. */
+    fun sessionNote(text: String, expectedStep: String) {
+        val session = state.value.session?.takeIf { !it.finished && it.stepKey == expectedStep } ?: return
+        if (session.note != text) saveSession(session.copy(note = text))
+    }
+
+    /** Marks a question for later review in the notebook, whatever its result. */
+    fun toggleMark(workId: String) {
+        val s = state.value
+        val current = s.marks[workId]
+        val mark = ReviewMark(workId, s.exam, marked = current?.marked != true, updatedAt = now())
+        mutableState.update { it.copy(marks = it.marks + (workId to mark)) }
+        persist("mark:$workId", "mark", s.exam, mark)
+    }
+
+    fun paperEliminate(runId: String, versionKey: String, option: String) {
+        val run = livePaper(runId) ?: return
+        val current = run.eliminated[versionKey].orEmpty()
+        savePaper(run.copy(eliminated = run.eliminated + (versionKey to if (option in current) current - option else current + option)))
+    }
+
+    fun paperHighlight(runId: String, passageKey: String, sentence: Int) {
+        val run = livePaper(runId) ?: return
+        val current = run.highlights[passageKey].orEmpty()
+        savePaper(run.copy(highlights = run.highlights + (passageKey to if (sentence in current) current - sentence else current + sentence)))
+    }
+
+    fun paperNote(runId: String, versionKey: String, text: String) {
+        val run = livePaper(runId) ?: return
+        if (run.notes[versionKey].orEmpty() != text) savePaper(run.copy(notes = run.notes + (versionKey to text)))
+    }
+
+    private val calculatorState = MutableStateFlow(CalculatorState())
+    val calculator = calculatorState.asStateFlow()
+
+    /** Calculator keypad input. Evaluation is deterministic and local; nothing is saved or marked. */
+    fun calculatorKey(key: String) {
+        calculatorState.update { calc ->
+            val operators = setOf("+", "−", "×", "÷", "^", "!", "%")
+            when (key) {
+                "AC" -> calc.copy(expression = "", evaluated = false)
+                "⌫" -> calc.copy(expression = if (calc.evaluated) "" else calculatorBackspace(calc.expression), evaluated = false)
+                "2nd" -> calc.copy(second = !calc.second)
+                "DEG" -> calc.copy(angle = if (calc.angle == Calculator.Angle.DEG) Calculator.Angle.RAD else Calculator.Angle.DEG)
+                "=" -> when (val result = Calculator.evaluate(calc.expression, calc.angle, calc.ans)) {
+                    is Calculator.Result.Value -> calc.copy(ans = result.value, evaluated = true,
+                        history = (listOf("${calc.expression} = ${Calculator.format(result.value)}") + calc.history).take(6))
+                    is Calculator.Result.Error -> calc
+                }
+                else -> {
+                    val base = when {
+                        !calc.evaluated -> calc.expression
+                        key in operators -> "ans"
+                        else -> ""
+                    }
+                    calc.copy(expression = base + key, evaluated = false, second = false)
+                }
+            }
+        }
+    }
+
+    /** A function name and its bracket, or "ans", are deleted as one key. */
+    private fun calculatorBackspace(expression: String): String =
+        Regex("(asin|acos|atan|sin|cos|tan|ln|log|abs)\\($|ans$").find(expression)?.let { expression.removeRange(it.range) } ?: expression.dropLast(1)
+
+    fun calculatorInsert(text: String) = calculatorState.update { it.copy(expression = (if (it.evaluated) "" else it.expression) + text, evaluated = false) }
 
     fun importContent(uri: Uri) {
         viewModelScope.launch {

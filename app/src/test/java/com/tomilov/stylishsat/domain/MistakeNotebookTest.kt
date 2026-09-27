@@ -57,4 +57,11 @@ class MistakeNotebookTest {
         assertEquals(emptyList<NotebookEntry>(), Notebook.pending(listOf(entry), listOf(earlier.copy(id = "y", timestampEpochMillis = 1_500)), Exam.SAT))
         assertEquals(emptyList<NotebookEntry>(), Notebook.pending(listOf(entry), emptyList(), Exam.IELTS))
     }
+
+    @Test fun markedQuestionsJoinTheNotebookEvenWhenCorrect() {
+        val a = item("a", "fa")
+        val right = wrong(a, "r", 100).copy(correct = true, errorType = null, workId = "run:a@1")
+        assertEquals(emptyList<Attempt>(), Notebook.mistakes(listOf(right), Exam.SAT))
+        assertEquals(listOf("r"), Notebook.mistakes(listOf(right), Exam.SAT, marked = setOf("run:a@1")).map { it.id })
+    }
 }

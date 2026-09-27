@@ -24,9 +24,9 @@ data class NotebookEntry(
 )
 
 object Notebook {
-    /** Wrong and skipped answers for one exam, newest first, one row per answered exercise version. */
-    fun mistakes(attempts: List<Attempt>, exam: Exam): List<Attempt> = attempts.asSequence()
-        .filter { it.exam == exam && (it.correct == false || it.errorType == "SKIPPED") }
+    /** Wrong, skipped and marked-for-review answers for one exam, newest first, one row per answered exercise version. */
+    fun mistakes(attempts: List<Attempt>, exam: Exam, marked: Set<String> = emptySet()): List<Attempt> = attempts.asSequence()
+        .filter { it.exam == exam && (it.correct == false || it.errorType == "SKIPPED" || it.workId?.let { work -> work in marked } == true) }
         .sortedWith(compareByDescending<Attempt> { it.timestampEpochMillis }.thenBy { it.id })
         .distinctBy { it.exerciseId to it.exerciseVersion }.toList()
 

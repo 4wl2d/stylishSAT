@@ -89,13 +89,13 @@ fun ProgressScreen(s: StudyUiState, openRevision: (String) -> Unit, openAttempt:
             Hairline()
         }
         item {
-            val mistakes = remember(s.attempts, s.exam) { Notebook.mistakes(s.attempts, s.exam) }
+            val mistakes = remember(s.attempts, s.exam, s.marks) { Notebook.mistakes(s.attempts, s.exam, s.marks.values.filter { it.marked }.map { it.workId }.toSet()) }
             val open = mistakes.count { s.notebook[it.id]?.resolved != true }
             Row(Modifier.fillMaxWidth().padding(top = 28.dp).tapSurface(RoundedCornerShape(18.dp), c.raised, onClick = openNotebook).padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(l.label("Mistake notebook", "Тетрадь ошибок"), style = StudyType.Strong, color = c.ink)
-                    Text(l.label("$open open of ${mistakes.size} wrong or skipped", "Открыто $open из ${mistakes.size} неверных или пропущенных"), style = StudyType.Small, color = c.inkSoft)
+                    Text(l.label("$open open of ${mistakes.size} wrong, skipped or marked", "Открыто $open из ${mistakes.size}: неверные, пропущенные, отмеченные"), style = StudyType.Small, color = c.inkSoft)
                 }
                 GlyphIcon(Glyph.ChevronRight, tint = c.inkSoft, size = 18.dp)
             }

@@ -17,6 +17,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tomilov.stylishsat.domain.*
@@ -102,19 +103,26 @@ fun KeyChips(exercise: Exercise, selected: String, enabled: Boolean, onPick: (St
     }
 }
 
-/** Compact option rows for ordinary multiple choice inside a section. */
+/** Compact option rows for ordinary multiple choice inside a section or module; options can be struck out while thinking. */
 @Composable
-fun ChoiceList(exercise: Exercise, selected: String, enabled: Boolean, onPick: (String) -> Unit) {
+fun ChoiceList(exercise: Exercise, selected: String, enabled: Boolean, eliminated: List<String> = emptyList(), eliminating: Boolean = false,
+    eliminate: (String) -> Unit = {}, onPick: (String) -> Unit) {
     val c = Study.colors
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         exercise.options.forEachIndexed { index, option ->
             val on = option == selected
+            val struck = option in eliminated
             Row(Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                .tapSurface(RoundedCornerShape(14.dp), if (on) c.sunken else c.raised, enabled, BorderStroke(if (on) 2.dp else 1.dp, if (on) c.ink else c.line), role = Role.RadioButton) { onPick(option) }
+                .tapSurface(RoundedCornerShape(14.dp), if (on) c.sunken else c.raised, enabled, BorderStroke(if (on) 2.dp else 1.dp, if (on) c.ink else c.line), role = Role.RadioButton) {
+                    if (struck) eliminate(option)
+                    onPick(option)
+                }
                 .semantics { this.selected = on }
                 .padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text("${'A' + index}", Modifier.width(26.dp), style = StudyType.Mono, color = c.inkSoft)
-                Text(option, Modifier.weight(1f), style = StudyType.Body, color = c.ink)
+                Text(option, Modifier.weight(1f), style = if (struck) StudyType.Body.copy(textDecoration = TextDecoration.LineThrough) else StudyType.Body,
+                    color = if (struck) c.inkFaint else c.ink)
+                if (eliminating && enabled) GlyphButton(Glyph.Strike, "${'A' + index}", { eliminate(option) }, tint = if (struck) c.ink else c.inkSoft, size = 40.dp)
             }
         }
     }

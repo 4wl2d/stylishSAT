@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -288,8 +289,25 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
                 }
             }
         }
+        var toolValue by remember(session.stepKey) { mutableStateOf<WorkTool?>(null) }
+        var eliminatingValue by remember(session.stepKey) { mutableStateOf(false) }
+        var highlightingValue by remember(session.stepKey) { mutableStateOf(false) }
+        if (exercise.type != ExerciseType.WRITING && exercise.type != ExerciseType.SPEAKING) ToolBar(exercise,
+            ToolState(eliminatingValue, highlightingValue, session.note.isNotBlank(), s.marks[session.workId]?.marked == true), l,
+            open = { toolValue = it }, eliminate = { eliminatingValue = !eliminatingValue }, highlight = { highlightingValue = !highlightingValue },
+            mark = { vm.toggleMark(session.workId) })
+        when (toolValue) {
+            WorkTool.Calculator -> CalculatorSheet(vm, l) { toolValue = null }
+            WorkTool.Reference -> ReferenceSheet(l) { toolValue = null }
+            WorkTool.Note -> NoteSheet(session.stepKey, session.note, l, { vm.sessionNote(it, session.stepKey) }) { toolValue = null }
+            null -> Unit
+        }
         exercise.passage?.let { passage ->
-            Block(padding = 20.dp) { SelectionContainer { Text(passage, style = StudyType.Reading.copy(fontSize = 17.sp, lineHeight = 28.sp), color = c.ink) } }
+            Block(padding = 20.dp) {
+                HighlightablePassage(passage, session.highlights, highlightingValue && result == null, StudyType.Reading.copy(fontSize = 17.sp, lineHeight = 28.sp)) {
+                    vm.sessionHighlight(it, session.stepKey)
+                }
+            }
         }
         exercise.audioAssetPath?.let { ListeningPlayer(it, l) }
         exercise.chart?.let { Chart(it, l) }
@@ -305,13 +323,17 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
                 exercise.options.forEachIndexed { index, option ->
                     val selected = session.draft == option
                     val isKey = result != null && exercise.acceptedAnswers.any { AnswerChecker.normalize(it) == AnswerChecker.normalize(option) }
+                    val struck = option in session.eliminated
                     OptionRow(('A'.code + index).toChar(), optionLabel(exercise, option), when {
                         result == null -> if (selected) OptionState.Selected else OptionState.Idle
                         isKey -> OptionState.Key
                         selected -> OptionState.Wrong
                         else -> OptionState.Dimmed
-                    }, answerEnabled) {
+                    }, answerEnabled, struck && result == null, eliminatingValue && answerEnabled,
+                        if (struck) l.label("Restore choice ${'A' + index}", "Вернуть вариант ${'A' + index}") else l.label("Eliminate choice ${'A' + index}", "Вычеркнуть вариант ${'A' + index}"),
+                        { vm.sessionEliminate(option, session.stepKey) }) {
                         if (!selected) haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                        if (struck) vm.sessionEliminate(option, session.stepKey)
                         vm.draft(option, session.stepKey)
                     }
                 }
@@ -376,7 +398,8 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
 private enum class OptionState { Idle, Selected, Key, Wrong, Dimmed }
 
 @Composable
-private fun OptionRow(letter: Char, text: String, state: OptionState, enabled: Boolean, onClick: () -> Unit) {
+private fun OptionRow(letter: Char, text: String, state: OptionState, enabled: Boolean, struck: Boolean = false, eliminating: Boolean = false,
+    eliminateLabel: String = "", eliminate: () -> Unit = {}, onClick: () -> Unit) {
     val c = Study.colors
     val background by animateColorAsState(when (state) {
         OptionState.Key -> c.marker
@@ -415,7 +438,9 @@ private fun OptionRow(letter: Char, text: String, state: OptionState, enabled: B
             }
         }
         Spacer(Modifier.width(14.dp))
-        Text(text, Modifier.weight(1f), style = StudyType.Body, color = content)
+        Text(text, Modifier.weight(1f), style = if (struck) StudyType.Body.copy(textDecoration = TextDecoration.LineThrough) else StudyType.Body,
+            color = if (struck) c.inkFaint else content)
+        if (eliminating) GlyphButton(Glyph.Strike, eliminateLabel, eliminate, tint = if (struck) c.ink else c.inkSoft, size = 40.dp)
     }
 }
 
