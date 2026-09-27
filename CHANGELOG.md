@@ -4,6 +4,13 @@ Versions follow the [version policy](docs/VERSIONING.md).
 
 ## Unreleased
 
+- Redesigned interface: paper-and-ink look with one highlighter accent, a system-following dark theme and a drawn icon set.
+- First-run setup chooses language, exam and daily minutes, then goes straight to the diagnostic.
+- Today leads with a single next step (continue, diagnostic, route day or intensive block), plus a week strip, streak, answer time against the daily goal and the course route as a tappable grid.
+- Sessions show one progress segment per step coloured by its saved result, mark the key and your choice in place, keep actions in a bottom bar above the keyboard, add haptic feedback and offer another round from the summary.
+- Library opens skills and lessons as pages; Progress adds a 17-week activity map; Settings adds an exam-date picker and daily-minute presets and checks model files off the main thread.
+- Content status, privacy and grading notes are consolidated in Settings → About instead of repeating on every screen.
+
 ## 0.3.1 — 2026-09-07
 
 First installable GitHub Release, including all functionality in the 0.3.0 source snapshot.
