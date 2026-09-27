@@ -1,437 +1,544 @@
 package com.tomilov.stylishsat.ui.screens
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.media.MediaPlayer
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.text.input.TextFieldLineLimits
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import com.tomilov.stylishsat.StudySession
 import com.tomilov.stylishsat.StudyUiState
 import com.tomilov.stylishsat.StudyViewModel
-import com.tomilov.stylishsat.ai.*
 import com.tomilov.stylishsat.domain.*
 import com.tomilov.stylishsat.speech.RecorderState
-import kotlinx.coroutines.CancellationException
+import com.tomilov.stylishsat.ui.components.*
+import com.tomilov.stylishsat.ui.theme.Study
+import com.tomilov.stylishsat.ui.theme.StudyType
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
+private enum class StepKind { Finished, Review, Lesson, Exercise }
+
+private fun StudySession.kind(): StepKind = when {
+    finished -> StepKind.Finished
+    activity?.kind == ActivityKind.REVIEW && activity?.lessonId == null -> StepKind.Review
+    !lessonSeen -> StepKind.Lesson
+    else -> StepKind.Exercise
+}
+
+/** One animated page per step phase; a lesson and its exercise share a step but not a page. */
+private fun StudySession.phase(): String = "$id:$index:${kind()}"
+
 @Composable
-fun SessionScreen(s: StudyUiState, vm: StudyViewModel, modifier: Modifier, close: () -> Unit) {
+fun SessionScreen(s: StudyUiState, vm: StudyViewModel, modifier: Modifier, close: () -> Unit, again: () -> Unit) {
     val session = s.session ?: return
     val exercise = session.exercise ?: return
     val l = s.language
-    val answerEnabled = session.result == null && !session.answerLockedByTimeLimit
+    val c = Study.colors
+    // Compose owns live editing. Persistence follows the editor, and a new draft revision recreates the editor once.
     val answerState = key(session.id, session.index, session.draftRevision) { rememberTextFieldState(initialText = session.draft) }
     if (exercise.type != ExerciseType.MULTIPLE_CHOICE && session.result == null && !session.finished) {
         LaunchedEffect(answerState) { snapshotFlow { answerState.text.toString() }.collect { vm.draft(it, session.stepKey) } }
     }
-    val scrollState = rememberScrollState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    if (session.kind() == StepKind.Exercise && session.result == null && !session.answerLockedByTimeLimit) {
+        LaunchedEffect(session.stepKey, answerState, lifecycleOwner) {
+            lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                while (true) {
+                    delay(1000)
+                    vm.tick(session.stepKey, answerState.text.toString().takeIf { exercise.type != ExerciseType.MULTIPLE_CHOICE }, session.draftRevision)
+                }
+            }
+        }
+    }
     val captureValue by vm.runtime.recorder.state.collectAsStateWithLifecycle()
-    LaunchedEffect(session.id, session.index, session.lessonSeen, session.finished) { scrollState.scrollTo(0) }
-    Column(modifier.fillMaxSize()) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = close) { Text(l.label("← Today", "← Сегодня")) }
-            Spacer(Modifier.weight(1f))
-            Text("${session.index + 1} / ${session.stepCount}", style = MaterialTheme.typography.labelLarge)
+    val recording = captureValue is RecorderState.RecordingAudio
+    var menuValue by remember { mutableStateOf(false) }
+    // The clock ticks every second; step colours only change with attempts or the step itself.
+    val marks = remember(s.attempts, session.id, session.index, session.result, session.finished) { sessionMarks(s, session) }
+
+    Column(modifier.background(c.paper).statusBarsPadding().imePadding()) {
+        Row(Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            GlyphButton(Glyph.Close, l.label("Close", "Закрыть"), close)
+            StepTrack(marks, Modifier.weight(1f).padding(horizontal = 8.dp))
+            if (session.kind() == StepKind.Exercise) SessionClock(session, exercise)
+            if (!session.finished) Box {
+                GlyphButton(Glyph.More, l.label("More", "Ещё"), { menuValue = true })
+                DropdownMenu(menuValue, { menuValue = false }, containerColor = c.raised) {
+                    DropdownMenuItem(text = { Text(l.label("Save and end for today", "Сохранить и закончить на сегодня"), style = StudyType.Body) }, enabled = !recording, onClick = {
+                        menuValue = false
+                        if (exercise.type != ExerciseType.MULTIPLE_CHOICE && session.result == null && session.lessonSeen && session.activity?.isLesson != true)
+                            vm.draft(answerState.text.toString(), session.stepKey)
+                        vm.finishForNow()
+                    })
+                }
+            }
         }
-        if (!session.finished) TextButton(onClick = {
-            if (exercise.type != ExerciseType.MULTIPLE_CHOICE && session.result == null && session.lessonSeen && session.activity?.isLesson != true)
-                vm.draft(answerState.text.toString(), session.stepKey)
-            vm.finishForNow()
-        }, enabled = captureValue !is RecorderState.RecordingAudio, modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(l.label("Save and finish for today", "Сохранить и закончить на сегодня"))
+        AnimatedContent(session, Modifier.weight(1f), contentKey = { it.phase() }, transitionSpec = {
+            (fadeIn(tween(180)) + slideInHorizontally(tween(240)) { it / 10 }) togetherWith fadeOut(tween(100))
+        }, label = "step") { target ->
+            // An outgoing page renders its own snapshot; only the live page gets the live editor.
+            val live = target.phase() == session.phase()
+            val current = if (live) session else target
+            when (current.kind()) {
+                StepKind.Finished -> FinishedStep(s, current, close, again)
+                StepKind.Review -> ReviewStep(s, vm, current)
+                StepKind.Lesson -> LessonStep(s, vm, current)
+                StepKind.Exercise -> ExerciseStep(s, vm, current, if (live) answerState else null, recording)
+            }
         }
-        LinearProgressIndicator(progress = { if (session.finished && !session.stoppedEarly) 1f else (session.index + if (session.result != null) 1 else 0).toFloat() / session.stepCount }, modifier = Modifier.fillMaxWidth())
-        Column(Modifier.fillMaxSize().verticalScroll(scrollState).padding(22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-            if (session.finished) {
-                PageTitle(if (session.stoppedEarly) l.label("SAVED FOR LATER", "СОХРАНЕНО НА ПОТОМ") else l.label("SESSION COMPLETE", "СЕССИЯ ЗАВЕРШЕНА"), if (session.stoppedEarly) l.label("Continue when\nyou're ready.", "Продолжите, когда\nбудете готовы.") else l.label("One step\nfurther.", "Ещё один\nшаг вперёд."), if (s.pendingWrites == 0) l.label("Your answers and next steps are saved on this device.", "Ответы и следующие шаги сохранены на устройстве.") else l.label("Saving your answers and next steps…", "Сохраняем ответы и следующие шаги…"))
-                StudyCard(color = MaterialTheme.colorScheme.primaryContainer) {
-                    Text(if (session.stoppedEarly) l.label("Unfinished answers stay ungraded", "Незаконченные ответы остаются без оценки") else l.label("${session.stepCount} study steps completed", "Пройдено учебных шагов: ${session.stepCount}"), style = MaterialTheme.typography.titleLarge)
-                    if (session.stoppedEarly) SmallNote(if (session.courseDay != null) l.label("Unfinished work continues in the next days of your course.", "Незавершённая работа продолжится в следующих днях курса.") else l.label("Open your saved drafts on Today to continue an answer.", "Откройте сохранённые черновики на странице «Сегодня», чтобы продолжить ответ."))
-                    if (!session.stoppedEarly) SmallNote(l.label("This is a preliminary training observation. Practise new items to confirm what you know; open responses need review.", "Это предварительное учебное наблюдение. Подтверждайте знания новыми заданиями; открытые ответы требуют разбора."))
-                    Button(onClick = close, modifier = Modifier.fillMaxWidth()) { Text(l.label("See my route →", "К моему маршруту →")) }
+    }
+}
+
+@Composable
+private fun SessionClock(session: StudySession, exercise: Exercise) {
+    val c = Study.colors
+    val elapsed = session.previousWorkSeconds + session.activeSeconds
+    val limit = session.timeLimitSeconds
+    val (text, color) = if (limit != null && session.result == null && !session.continuedWithoutTimeLimit) {
+        val remaining = (limit - elapsed).coerceAtLeast(0)
+        clock(remaining) to if (remaining <= 10) c.bad else c.ink
+    } else clock(elapsed) to if (exercise.expectedSeconds in 1 until elapsed) c.warn else c.inkSoft
+    Row(Modifier.padding(end = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+        GlyphIcon(Glyph.Clock, tint = color, size = 15.dp)
+        Spacer(Modifier.width(4.dp))
+        Text(text, style = StudyType.Mono, color = color)
+    }
+}
+
+/** Scrolling body plus a bottom action area that stays above the keyboard and navigation bar. */
+@Composable
+private fun StepFrame(scroll: ScrollState = rememberScrollState(), actions: @Composable ColumnScope.() -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    val c = Study.colors
+    Column(Modifier.fillMaxSize()) {
+        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll).padding(horizontal = 22.dp).padding(top = 12.dp, bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp), content = content)
+        Column(Modifier.fillMaxWidth().background(c.paper).navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp), content = actions)
+    }
+}
+
+@Composable
+private fun LessonStep(s: StudyUiState, vm: StudyViewModel, session: StudySession) {
+    val l = s.language
+    val c = Study.colors
+    val exercise = session.exercise ?: return
+    val pack = s.pack ?: return
+    val lesson = session.activity?.lessonId?.let { id -> session.lessonSnapshots.firstOrNull { it.id == id } ?: pack.lessons.firstOrNull { it.id == id } }
+        ?: pack.lessons.firstOrNull { it.skillId == exercise.skillId }
+    val skill = pack.skills.find { it.id == exercise.skillId }
+    StepFrame(actions = {
+        if (session.activity?.remainingMinutes?.let { it > 0 } == true)
+            StudyButton(l.label("Finish this lesson tomorrow", "Дочитать завтра"), { vm.checkpoint(session.stepKey) }, Modifier.fillMaxWidth(), tone = Tone.Quiet, compact = true)
+        StudyButton(if (session.activity != null) l.label("Got it", "Понятно") else l.label("Start practice", "К практике"),
+            { vm.lessonSeen(session.stepKey) }, Modifier.fillMaxWidth(), arrow = true)
+    }) {
+        Meta(listOfNotNull(skill?.title?.text(l), l.label("Lesson", "Урок"), (session.activity?.minutes ?: lesson?.estimatedMinutes)?.let { minutes(it, l) }).joinToString(" · "))
+        MarkedText(lesson?.title?.text(l) ?: l.label("Before you start", "Перед практикой"), StudyType.Headline)
+        if (session.activity?.continuation == true) Meta(l.label("Continued from last time", "Продолжение с прошлого раза"), color = c.ink)
+        lesson?.let {
+            SelectionContainer { Text(it.body.text(l), style = StudyType.Reading, color = c.ink) }
+            MarginNote {
+                Meta(l.label("Worked example", "Разобранный пример"))
+                SelectionContainer { Text(it.workedExample.text(l), style = StudyType.Reading.copy(fontSize = 17.sp, lineHeight = 27.sp), color = c.ink) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReviewStep(s: StudyUiState, vm: StudyViewModel, session: StudySession) {
+    val l = s.language
+    val c = Study.colors
+    val exercise = session.exercise ?: return
+    val attempt = s.attempts.lastOrNull { it.exam == session.exam && it.exerciseId == exercise.id && it.exerciseVersion == exercise.version }
+    StepFrame(actions = {
+        StudyButton(l.label("Review done", "Разбор завершён"), { vm.lessonSeen(session.stepKey) }, Modifier.fillMaxWidth(), arrow = true)
+    }) {
+        Meta(listOfNotNull(s.pack?.skills?.find { it.id == exercise.skillId }?.title?.text(l), l.label("Review", "Разбор")).joinToString(" · "))
+        MarkedText(l.label("Look back at your answer.", "Вернитесь к своему ответу."), StudyType.Headline)
+        if (attempt != null) {
+            Text(exercise.prompt, style = StudyType.Question.copy(fontSize = 18.sp, lineHeight = 27.sp), color = c.ink)
+            SelectionContainer { AnswerPair(l.label("You", "Вы"), attempt.answer, wrong = attempt.correct?.not()) }
+            if (exercise.acceptedAnswers.isNotEmpty()) AnswerPair(l.label("Key", "Ключ"), exercise.acceptedAnswers.joinToString(" / "), wrong = false)
+            Explanation(exercise, l)
+            exercise.sampleAnswer?.let { SampleAnswer(it, l) }
+            exercise.sampleAudioAssetPath?.let { ListeningPlayer(it, l, sample = true) }
+            Text(l.label("Say the rule in your own words and pick one correction to practise next. This review isn't graded.",
+                "Сформулируйте правило своими словами и выберите одно исправление для практики. Разбор не оценивается."), style = StudyType.Small, color = c.inkSoft)
+        } else {
+            Text(l.label("No saved answer is available for this review. Revisit the skill lesson in the library first.",
+                "Для разбора нет сохранённого ответа. Сначала повторите урок в библиотеке."), style = StudyType.Body, color = c.inkSoft)
+        }
+    }
+}
+
+@Composable
+private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySession, answerState: TextFieldState?, recording: Boolean) {
+    val l = s.language
+    val c = Study.colors
+    val exercise = session.exercise ?: return
+    val pack = s.pack ?: return
+    val result = session.result
+    val answerEnabled = answerState != null && result == null && !session.answerLockedByTimeLimit
+    val haptic = LocalHapticFeedback.current
+    val scroll = rememberScrollState()
+    val resultAnchor = remember { BringIntoViewRequester() }
+    val density = LocalDensity.current
+    var announcedValue by remember(session.stepKey) { mutableStateOf(result != null) }
+    LaunchedEffect(result) {
+        if (result != null && !announcedValue) {
+            announcedValue = true
+            haptic.performHapticFeedback(if (result.correct == false) HapticFeedbackType.Reject else HapticFeedbackType.Confirm)
+            delay(60)
+            resultAnchor.bringIntoView(Rect(0f, 0f, 1f, with(density) { 220.dp.toPx() }))
+        }
+    }
+    val typed = answerState?.text?.toString() ?: session.draft
+    val saveTyped = { if (answerState != null && exercise.type != ExerciseType.MULTIPLE_CHOICE) vm.draft(answerState.text.toString(), session.stepKey) }
+    val open = exercise.type == ExerciseType.WRITING || exercise.type == ExerciseType.SPEAKING
+
+    StepFrame(scroll, actions = {
+        if (result == null) {
+            val secondary = mutableListOf<Triple<String, Boolean, () -> Unit>>()
+            if (session.mode == ContentSplit.PRACTICE && exercise.hints.isNotEmpty() && session.hintsUsed < exercise.hints.size)
+                secondary += Triple(l.label("Hint ${session.hintsUsed + 1}/${exercise.hints.size}", "Подсказка ${session.hintsUsed + 1}/${exercise.hints.size}"), !session.answerLockedByTimeLimit) { vm.hint() }
+            if (session.activity?.remainingMinutes?.let { it > 0 } == true)
+                secondary += Triple(l.label("Save draft for next day", "Черновик на завтра"), !recording) { saveTyped(); vm.checkpoint(session.stepKey) }
+            if (session.mode == ContentSplit.DIAGNOSTIC)
+                secondary += Triple(l.label("Skip · don't know yet", "Пропустить · пока не знаю"), true) { saveTyped(); vm.submit(skip = true) }
+            if (secondary.isNotEmpty()) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                secondary.forEach { (text, enabled, action) -> StudyButton(text, action, Modifier.weight(1f), tone = Tone.Quiet, compact = true, enabled = enabled) }
+            }
+            val ready = (if (exercise.type == ExerciseType.MULTIPLE_CHOICE) session.draft.isNotBlank() else typed.isNotBlank()) && !recording && answerState != null
+            StudyButton(if (open) l.label("Submit for review", "Сохранить и разобрать") else l.label("Check", "Проверить"),
+                { saveTyped(); vm.submit() }, Modifier.fillMaxWidth(), enabled = ready)
+        } else ResultBar(result, exercise, session, l, vm::next)
+    }) {
+        val skill = pack.skills.find { it.id == exercise.skillId }
+        Meta(listOfNotNull(skill?.title?.text(l), modeLabel(session.mode, l), if (session.mode == ContentSplit.PRACTICE) l.label("level ${exercise.difficulty}", "уровень ${exercise.difficulty}") else null).joinToString(" · "))
+        val chips = buildList {
+            if (session.activity?.continuation == true || session.resumingDraft) add(l.label("Draft restored", "Черновик восстановлен"))
+            if (session.timeLimitSeconds != null && result == null) add(if (session.continuedWithoutTimeLimit) l.label("No limit now", "Без лимита") else l.label("Timed · pauses when you leave", "На время · пауза при выходе"))
+            if (session.activity?.let { !it.isLesson && it.remainingMinutes > 0 } == true) add(l.label("Spans several days", "На несколько дней"))
+        }
+        if (chips.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            chips.forEach { Meta(it, Modifier.clip(RoundedCornerShape(50)).background(c.sunken).padding(horizontal = 10.dp, vertical = 5.dp), color = c.ink, maxLines = 1) }
+        }
+        if (session.answerLockedByTimeLimit && result == null) Block(color = c.badSoft) {
+            Text(l.label("Time's up. Your answer is saved.", "Время вышло. Ответ сохранён."), style = StudyType.Title, color = c.ink)
+            Text(l.label("Check it now, keep going without the limit, or save it for later. Nothing is graded automatically.",
+                "Проверьте его, продолжите без лимита или сохраните на потом. Автоматически ничего не оценивается."), style = StudyType.Small, color = c.ink)
+            StudyButton(l.label("Keep going without limit", "Продолжить без лимита"), { vm.continueWithoutTimeLimit(session.stepKey) }, tone = Tone.Ink, compact = true)
+        }
+        if (session.mode == ContentSplit.PRACTICE && result == null) {
+            val checks = remember(s.pack, s.attempts, exercise) { StudyPlanner.practiceChecks(pack, exercise, s.attempts) }
+            if (checks.isNotEmpty()) {
+                if (session.reviewGuidanceViewed) MarginNote(rule = c.inkSoft) {
+                    Meta(l.label("Check before answering · counted as a hint", "Проверьте перед ответом · считается подсказкой"))
+                    checks.forEach { Text("• ${it.text(l)}", style = StudyType.Small, color = c.ink) }
+                } else Row(Modifier.fillMaxWidth().tapSurface(RoundedCornerShape(16.dp), c.sunken, enabled = !session.answerLockedByTimeLimit) { vm.reviewGuidance(session.stepKey) }
+                    .padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    GlyphIcon(Glyph.Bulb, size = 18.dp)
+                    Spacer(Modifier.width(10.dp))
+                    Text(l.label("You missed this before. Show a checklist? Counts as a hint.", "Здесь уже была ошибка. Показать список проверки? Считается подсказкой."),
+                        Modifier.weight(1f), style = StudyType.Small, color = c.ink)
                 }
-                return@Column
             }
-            val skill = s.pack!!.skills.find { it.id == exercise.skillId }
-            Eyebrow("${s.exam} · ${skill?.title?.text(l) ?: exercise.skillId}")
-            val plannedActivity = session.activity
-            if (plannedActivity?.kind == ActivityKind.REVIEW && plannedActivity.lessonId == null) {
-                val attempt = s.attempts.lastOrNull { it.exam == session.exam && it.exerciseId == exercise.id && it.exerciseVersion == exercise.version }
-                PageTitle(l.label("REVIEW YOUR CHECK", "РАЗБОР ПРОВЕРКИ"), l.label("Explain your next step.", "Объясните следующий шаг."))
-                if (attempt != null) {
-                    Text(exercise.prompt, style = MaterialTheme.typography.titleMedium)
-                    StudyCard { Eyebrow(l.label("Your saved answer", "Ваш сохранённый ответ")); SelectionContainer { Text(attempt.answer) } }
-                    StudyCard(color = MaterialTheme.colorScheme.primaryContainer) {
-                        if (exercise.acceptedAnswers.isNotEmpty()) Text("${l.label("Prepared answer", "Ответ из ключа")}: ${exercise.acceptedAnswers.joinToString(" / ")}")
-                        Text(exercise.explanation.text(l), lineHeight = 25.sp)
-                        exercise.evidence?.let { Text(it) }
-                        exercise.typicalErrors.forEach { SmallNote("• ${it.text(l)}") }
-                    }
-                    exercise.sampleAnswer?.let { StudyCard { Eyebrow(l.label("Illustrative answer", "Пример ответа")); Text(it) } }
-                    exercise.sampleAudioAssetPath?.let { ListeningPlayer(it, l, sample = true) }
-                    SmallNote(l.label("Explain the rule in your own words. Identify one useful correction, then choose what to practise next. This review does not create another graded attempt.", "Объясните правило своими словами. Выберите одно полезное исправление и тему для следующей практики. Разбор не создаёт новую оценённую попытку."))
-                } else {
-                    SmallNote(l.label("No saved answer is available for this review. Use the skill lesson in your library before continuing.", "Для разбора нет сохранённого ответа. Повторите урок по навыку в библиотеке перед продолжением."))
-                }
-                Button(onClick = { vm.lessonSeen(session.stepKey) }, modifier = Modifier.fillMaxWidth()) { Text(l.label("Review complete →", "Разбор завершён →")) }
-                return@Column
-            }
-            if (!session.lessonSeen) {
-                val lesson = session.activity?.lessonId?.let { id -> session.lessonSnapshots.firstOrNull { it.id == id } ?: s.pack.lessons.firstOrNull { it.id == id } }
-                    ?: s.pack.lessons.firstOrNull { it.skillId == exercise.skillId }
-                PageTitle(l.label("A RULE TO TAKE WITH YOU", "ПРАВИЛО ПЕРЕД ПРАКТИКОЙ"), lesson?.title?.text(l) ?: l.label("Prepare, then try.", "Разберитесь и попробуйте."))
-                lesson?.let {
-                    StudyCard { Text(it.body.text(l), lineHeight = 26.sp) }
-                    StudyCard(color = MaterialTheme.colorScheme.primaryContainer) { Eyebrow(l.label("Worked example", "Разобранный пример")); Text(it.workedExample.text(l), lineHeight = 25.sp) }
-                }
-                session.activity?.let { activity -> SmallNote(l.label("${activity.minutes} minutes planned${if (activity.continuation) " · continuing yesterday's work" else ""}", "По плану ${activity.minutes} мин${if (activity.continuation) " · продолжение работы" else ""}")) }
-                Button(onClick = { vm.lessonSeen(session.stepKey) }, modifier = Modifier.fillMaxWidth()) { Text(if (session.activity != null) l.label("I've completed this lesson →", "Урок пройден →") else l.label("I'm ready to practise →", "Перейти к практике →")) }
-                if (session.activity?.remainingMinutes?.let { it > 0 } == true) TextButton(onClick = { vm.checkpoint(session.stepKey) }) { Text(l.label("Continue the lesson next day", "Продолжить урок в следующий день")) }
-                return@Column
-            }
-            val lifecycleOwner = LocalLifecycleOwner.current
-            if (session.result == null && !session.answerLockedByTimeLimit) LaunchedEffect(session.stepKey, answerState, lifecycleOwner) {
-                lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                    while (true) {
-                        delay(1000)
-                        vm.tick(session.stepKey, answerState.text.toString().takeIf { exercise.type != ExerciseType.MULTIPLE_CHOICE }, session.draftRevision)
-                    }
-                }
-            }
-            val elapsed = session.previousWorkSeconds + session.activeSeconds
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(when (session.mode) { ContentSplit.DIAGNOSTIC -> l.label("Diagnostic", "Диагностика"); ContentSplit.PRACTICE -> l.label("Practice · level ${exercise.difficulty}", "Практика · уровень ${exercise.difficulty}"); ContentSplit.ASSESSMENT -> l.label("Fresh timed check", "Проверка на новых заданиях") }, style = MaterialTheme.typography.labelMedium)
-                Text("${elapsed / 60}:${(elapsed % 60).toString().padStart(2, '0')} / ${exercise.expectedSeconds / 60}:${(exercise.expectedSeconds % 60).toString().padStart(2, '0')}", style = MaterialTheme.typography.labelMedium, color = if (elapsed > exercise.expectedSeconds) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            if (session.timeLimitSeconds != null && session.result == null) {
-                val remaining = (session.timeLimitSeconds - elapsed).coerceAtLeast(0)
-                StudyCard(color = if (session.answerLockedByTimeLimit) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer) {
-                    Text(when {
-                        session.continuedWithoutTimeLimit -> l.label("Continuing without a time limit", "Продолжение без ограничения времени")
-                        session.answerLockedByTimeLimit -> l.label("Time is up. Your answer is saved.", "Время вышло. Ответ сохранён.")
-                        else -> l.label("Independent practice · ${remaining / 60}:${(remaining % 60).toString().padStart(2, '0')} left", "Самостоятельная практика · осталось ${remaining / 60}:${(remaining % 60).toString().padStart(2, '0')}")
-                    }, style = MaterialTheme.typography.titleMedium)
-                    SmallNote(l.label("The timer counts time on this answer while the screen is active. Leaving the screen pauses it. Saved work keeps its remaining time.", "Таймер считает время работы над ответом на активном экране. При выходе он приостанавливается. Сохранённая работа сохраняет остаток времени."))
-                    if (session.answerLockedByTimeLimit) {
-                        SmallNote(l.label("Check the saved answer below, continue without the limit, or save it for later. No result is recorded automatically.", "Проверьте сохранённый ответ ниже, продолжите без лимита или сохраните на потом. Результат не записывается автоматически."))
-                        OutlinedButton(onClick = { vm.continueWithoutTimeLimit(session.stepKey) }) { Text(l.label("Continue without limit", "Продолжить без лимита")) }
-                    }
-                }
-            }
-            session.activity?.takeUnless { it.isLesson }?.let { activity ->
-                StudyCard(color = MaterialTheme.colorScheme.primaryContainer) {
-                    Text(l.label("Today's work: ${activity.minutes} minutes", "Сегодня на работу: ${activity.minutes} мин"), style = MaterialTheme.typography.titleMedium)
-                    if (activity.continuation || session.resumingDraft) SmallNote(l.label("Your previous draft, recording and hints are restored.", "Предыдущий черновик, запись и подсказки восстановлены."))
-                    if (activity.remainingMinutes > 0) SmallNote(l.label("A longer task spans several study days. Save today's draft without grading; continue it in the next day of your course.", "Длинное задание занимает несколько дней. Сохраните сегодняшний черновик без оценки и продолжите в следующем дне курса."))
-                }
-            }
-            if (session.activity == null && session.resumingDraft) SmallNote(l.label("Continuing your saved draft. It has not been graded yet.", "Продолжаем сохранённый черновик. Он ещё не оценён."))
-            if (session.mode == ContentSplit.PRACTICE && session.result == null) {
-                val checks = remember(s.pack, s.attempts, exercise) { StudyPlanner.practiceChecks(s.pack, exercise, s.attempts) }
-                if (checks.isNotEmpty()) StudyCard {
-                    Eyebrow(l.label("Check before answering", "Проверьте перед ответом"))
-                    if (session.reviewGuidanceViewed) {
-                        SmallNote(l.label("This task-specific guidance counts as a hint. Possible mistakes are a checklist, not a diagnosis of your reasoning.", "Эта помощь по заданию учитывается как подсказка. Возможные ошибки — список для проверки, а не оценка причины вашей ошибки."))
-                        checks.forEach { SmallNote("• ${it.text(l)}") }
-                    } else {
-                        SmallNote(l.label("Guidance is available for the difficulty observed in an earlier answer. You can try independently or reveal it as a hint.", "Есть помощь по затруднению из предыдущего ответа. Попробуйте самостоятельно или откройте её как подсказку."))
-                        TextButton(onClick = { vm.reviewGuidance(session.stepKey) }, enabled = !session.answerLockedByTimeLimit) {
-                            Text(l.label("Show guidance · counts as a hint", "Показать помощь · считается подсказкой"))
-                        }
-                    }
-                }
-            }
-            exercise.passage?.let { StudyCard { SelectionContainer { Text(it, lineHeight = 26.sp) } } }
-            exercise.audioAssetPath?.let { ListeningPlayer(it, l) }
-            exercise.chart?.let { Chart(it) }
-            Text(exercise.prompt, fontSize = 20.sp, lineHeight = 28.sp, fontWeight = FontWeight.Medium)
-            if (exercise.type == ExerciseType.SPEAKING) SpeakingPanel(s, vm)
-            if (exercise.type == ExerciseType.MULTIPLE_CHOICE) {
+        }
+        exercise.passage?.let { passage ->
+            Block(padding = 20.dp) { SelectionContainer { Text(passage, style = StudyType.Reading.copy(fontSize = 17.sp, lineHeight = 28.sp), color = c.ink) } }
+        }
+        exercise.audioAssetPath?.let { ListeningPlayer(it, l) }
+        exercise.chart?.let { Chart(it) }
+        Text(exercise.prompt, style = StudyType.Question, color = c.ink)
+        if (exercise.type == ExerciseType.SPEAKING) SpeakingPanel(s, vm)
+        if (exercise.type == ExerciseType.MULTIPLE_CHOICE) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 exercise.options.forEachIndexed { index, option ->
-                    Surface(shape = RoundedCornerShape(16.dp), color = if (session.draft == option) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, border = androidx.compose.foundation.BorderStroke(1.dp, if (session.draft == option) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant), modifier = Modifier.fillMaxWidth().clickable(enabled = answerEnabled) { vm.draft(option, session.stepKey) }) {
-                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(selected = session.draft == option, onClick = { vm.draft(option, session.stepKey) }, enabled = answerEnabled)
-                            Text("${('A'.code + index).toChar()}. $option", modifier = Modifier.padding(start = 7.dp), lineHeight = 23.sp)
-                        }
+                    val selected = session.draft == option
+                    val isKey = result != null && exercise.acceptedAnswers.any { AnswerChecker.normalize(it) == AnswerChecker.normalize(option) }
+                    OptionRow(('A'.code + index).toChar(), option, when {
+                        result == null -> if (selected) OptionState.Selected else OptionState.Idle
+                        isKey -> OptionState.Key
+                        selected -> OptionState.Wrong
+                        else -> OptionState.Dimmed
+                    }, answerEnabled) {
+                        if (!selected) haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                        vm.draft(option, session.stepKey)
                     }
                 }
-            } else {
-                OutlinedTextField(state = answerState, enabled = answerEnabled,
-                    label = { Text(if (exercise.type == ExerciseType.SPEAKING) l.label("Review or type your transcript", "Исправьте или введите транскрипт") else l.label("Your answer", "Ваш ответ")) },
-                    modifier = Modifier.fillMaxWidth(), lineLimits = if (exercise.type == ExerciseType.WRITING || exercise.type == ExerciseType.SPEAKING) TextFieldLineLimits.MultiLine(minHeightInLines = 7, maxHeightInLines = 12) else TextFieldLineLimits.SingleLine,
-                    supportingText = { Text(when {
-                        exercise.wordLimit != null -> l.label("No more than ${exercise.wordLimit} word(s).", "Не более ${exercise.wordLimit} слов.")
-                        exercise.type == ExerciseType.WRITING -> "${Regex("\\S+").findAll(answerState.text.toString().trim()).count()} ${l.label("words", "слов")} · ${l.label("target", "ориентир")} ${exercise.minWords ?: 150}+"
-                        exercise.type == ExerciseType.NUMERIC -> if (exercise.prompt.contains("exact fraction", ignoreCase = true)) l.label("Enter the exact fraction requested, without decimal rounding.", "Введите точную дробь, без десятичного округления.") else l.label("Decimals and fractions accepted, e.g. 0.5 or 1/2.", "Можно вводить дроби: 0.5 или 1/2.")
-                        else -> l.label("Saved locally as you type.", "Сохраняется на устройстве при вводе.")
-                    }) }, shape = RoundedCornerShape(16.dp))
             }
-            if (exercise.criteria.isNotEmpty()) StudyCard {
-                Eyebrow(l.label("Review criteria", "Критерии разбора"))
-                exercise.criteria.forEach { SmallNote("• ${it.text(l)}") }
-                SmallNote(l.label("Training feedback only. No official band is calculated.", "Только тренировочная обратная связь. Официальный band не рассчитывается."))
+        } else if (answerState != null) {
+            OutlinedTextField(state = answerState, enabled = answerEnabled,
+                label = { Text(if (exercise.type == ExerciseType.SPEAKING) l.label("Transcript · review or type", "Транскрипт · проверьте или введите") else l.label("Your answer", "Ваш ответ")) },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = if (open) StudyType.Reading.copy(fontSize = 17.sp, lineHeight = 27.sp) else StudyType.Body.copy(fontSize = 18.sp),
+                lineLimits = if (open) TextFieldLineLimits.MultiLine(minHeightInLines = 7, maxHeightInLines = 14) else TextFieldLineLimits.SingleLine,
+                supportingText = { Text(when {
+                    exercise.wordLimit != null -> l.label("No more than ${exercise.wordLimit} word(s).", "Не более ${exercise.wordLimit} слов.")
+                    exercise.type == ExerciseType.WRITING -> "${Regex("\\S+").findAll(answerState.text.toString().trim()).count()} ${l.label("words", "слов")} · ${l.label("target", "ориентир")} ${exercise.minWords ?: 150}+"
+                    exercise.type == ExerciseType.NUMERIC -> if (exercise.prompt.contains("exact fraction", ignoreCase = true)) l.label("Enter the exact fraction requested, without decimal rounding.", "Введите точную дробь, без десятичного округления.") else l.label("Decimals and fractions accepted, e.g. 0.5 or 1/2.", "Можно вводить дроби: 0.5 или 1/2.")
+                    else -> l.label("Saved on this device as you type.", "Сохраняется на устройстве при вводе.")
+                }, style = StudyType.Small.copy(fontSize = 13.sp)) }, shape = RoundedCornerShape(16.dp), colors = studyFieldColors())
+        } else Block { Text(session.draft.ifBlank { "—" }, style = StudyType.Body, color = c.ink) }
+        if (exercise.criteria.isNotEmpty()) Disclosure(l.label("Review criteria", "Критерии разбора"), "${exercise.criteria.size}") {
+            exercise.criteria.forEach { Text("• ${it.text(l)}", style = StudyType.Small, color = c.ink) }
+        }
+        if (session.mode == ContentSplit.PRACTICE && result == null) exercise.hints.take(session.hintsUsed).forEachIndexed { index, hint ->
+            MarginNote {
+                Meta(l.label("Hint ${index + 1}", "Подсказка ${index + 1}"))
+                Text(hint.text(l), style = StudyType.Body, color = c.ink)
             }
-            if (session.mode == ContentSplit.PRACTICE && session.result == null && exercise.hints.isNotEmpty()) {
-                exercise.hints.take(session.hintsUsed).forEachIndexed { index, hint -> StudyCard(color = MaterialTheme.colorScheme.tertiaryContainer) { Eyebrow("${l.label("Hint", "Подсказка")} ${index + 1}"); Text(hint.text(l)) } }
-                if (session.hintsUsed < exercise.hints.size) TextButton(onClick = vm::hint, enabled = !session.answerLockedByTimeLimit) { Text(l.label("Show a hint (${session.hintsUsed + 1}/${exercise.hints.size})", "Подсказка (${session.hintsUsed + 1}/${exercise.hints.size})")) }
+        }
+        if (result != null) Column(Modifier.bringIntoViewRequester(resultAnchor), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Hairline()
+            // The bar already says right or wrong; show the checker's message only when it adds a reason.
+            if (result.status == AnswerStatus.NEEDS_REVIEW || result.status == AnswerStatus.INCORRECT && result.errorType != "KEY_MISMATCH")
+                Text(result.message.text(l), style = StudyType.Strong, color = c.ink)
+            if (exercise.type != ExerciseType.MULTIPLE_CHOICE && exercise.acceptedAnswers.isNotEmpty()) {
+                AnswerPair(l.label("You", "Вы"), session.draft, wrong = result.correct?.not())
+                AnswerPair(l.label("Key", "Ключ"), exercise.acceptedAnswers.joinToString(" / "), wrong = false)
             }
-            if (session.result == null) {
-                if (session.activity?.remainingMinutes?.let { it > 0 } == true) {
-                    Button(onClick = { if (exercise.type != ExerciseType.MULTIPLE_CHOICE) vm.draft(answerState.text.toString(), session.stepKey); vm.checkpoint(session.stepKey) }, enabled = captureValue !is RecorderState.RecordingAudio, modifier = Modifier.fillMaxWidth()) { Text(l.label("Save draft for the next study day →", "Сохранить черновик до следующего дня →")) }
-                    SmallNote(l.label("No attempt or skill result is recorded until you submit the finished answer.", "Попытка и результат навыка появятся только после отправки готового ответа."))
+            Explanation(exercise, l)
+            if (session.hintsUsed > 0 || session.reviewGuidanceViewed) Text(l.label("Answered with a hint: practice, not independent evidence.", "Ответ с подсказкой — это практика, а не самостоятельное подтверждение."), style = StudyType.Small, color = c.inkSoft)
+            if (session.continuedWithoutTimeLimit) Text(l.label("You continued past the limit. The full working time is saved.", "Вы продолжили после лимита. Полное время работы сохранено."), style = StudyType.Small, color = c.inkSoft)
+            exercise.transcript?.let { transcript ->
+                Disclosure(l.label("Audio transcript", "Транскрипт аудио"), null) {
+                    SelectionContainer { Text(transcript, style = StudyType.Reading.copy(fontSize = 16.sp, lineHeight = 25.sp), color = c.ink) }
+                    exercise.transcriptSegments.forEach { Text("${it.startMs / 1000}–${it.endMs / 1000}s · ${it.text}", style = StudyType.Small, color = c.inkSoft) }
                 }
-                Button(onClick = { if (exercise.type != ExerciseType.MULTIPLE_CHOICE) vm.draft(answerState.text.toString(), session.stepKey); vm.submit() }, enabled = (if (exercise.type == ExerciseType.MULTIPLE_CHOICE) session.draft.isNotBlank() else answerState.text.isNotBlank()) && captureValue !is RecorderState.RecordingAudio, modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(17.dp)) { Text(if (exercise.type in listOf(ExerciseType.WRITING, ExerciseType.SPEAKING)) l.label("Save & review →", "Сохранить и разобрать →") else l.label("Check my answer →", "Проверить ответ →")) }
-                if (session.mode == ContentSplit.DIAGNOSTIC) TextButton(onClick = { if (exercise.type != ExerciseType.MULTIPLE_CHOICE) vm.draft(answerState.text.toString(), session.stepKey); vm.submit(skip = true) }) { Text(l.label("Skip — I don't know yet", "Пропустить — пока не знаю")) }
-            } else {
-                StudyCard(color = if (session.result.correct == false) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer) {
-                    Text(session.result.message.text(l), style = MaterialTheme.typography.titleLarge)
-                    if (exercise.acceptedAnswers.isNotEmpty()) Text("${l.label("Prepared answer", "Ответ из ключа")}: ${exercise.acceptedAnswers.joinToString(" / ")}", fontWeight = FontWeight.SemiBold)
-                    Text(exercise.explanation.text(l), lineHeight = 25.sp)
-                    exercise.evidence?.let { Text("${l.label("Evidence", "Подтверждение")}: $it", fontWeight = FontWeight.Medium) }
-                    exercise.typicalErrors.forEach { SmallNote("• ${it.text(l)}") }
-                    if (session.hintsUsed > 0 || session.reviewGuidanceViewed) SmallNote(l.label("An answer with a hint is practice, not independent mastery evidence.", "Ответ с подсказкой не считается самостоятельным подтверждением освоения."))
-                    if (session.continuedWithoutTimeLimit) SmallNote(l.label("You continued after the time limit. The full working time is saved in your progress.", "Вы продолжили после лимита. Полное время работы сохранено в прогрессе."))
-                }
-                exercise.transcript?.let { transcript ->
-                    StudyCard { Eyebrow(l.label("Audio transcript", "Транскрипт аудио")); Text(transcript); exercise.transcriptSegments.forEach { SmallNote("${it.startMs / 1000}–${it.endMs / 1000}s · ${it.text}") } }
-                }
-                exercise.sampleAnswer?.let { StudyCard { Eyebrow(l.label("Illustrative answer", "Пример ответа")); Text(it); SmallNote(l.label("Pilot sample awaiting expert annotation.", "Пилотный образец, ожидает экспертной аннотации.")) } }
-                exercise.sampleAudioAssetPath?.let { ListeningPlayer(it, l, sample = true) }
-                FeedbackPanel(s, vm)
-                Button(onClick = vm::next, modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(17.dp)) { Text(if (session.index + 1 == session.stepCount) l.label("Finish session →", "Завершить сессию →") else l.label("Next task →", "Следующее задание →")) }
             }
-            SmallNote("${l.label("Original pilot material", "Оригинальный пилотный материал")} · ${exercise.author} · v${exercise.version}")
-            Spacer(Modifier.height(20.dp))
+            exercise.sampleAnswer?.let { SampleAnswer(it, l) }
+            exercise.sampleAudioAssetPath?.let { ListeningPlayer(it, l, sample = true) }
+            FeedbackPanel(s, vm)
+        }
+        Text("v${exercise.version} · ${exercise.author}", style = StudyType.Small.copy(fontSize = 11.sp, lineHeight = 15.sp), color = c.inkSoft, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+private enum class OptionState { Idle, Selected, Key, Wrong, Dimmed }
+
+@Composable
+private fun OptionRow(letter: Char, text: String, state: OptionState, enabled: Boolean, onClick: () -> Unit) {
+    val c = Study.colors
+    val background by animateColorAsState(when (state) {
+        OptionState.Key -> c.marker
+        OptionState.Wrong -> c.badSoft
+        OptionState.Dimmed -> c.paper
+        else -> c.raised
+    }, tween(160), label = "option")
+    val border = when (state) {
+        OptionState.Selected -> BorderStroke(2.dp, c.ink)
+        OptionState.Wrong -> BorderStroke(2.dp, c.bad)
+        OptionState.Key -> BorderStroke(2.dp, c.marker)
+        else -> BorderStroke(1.dp, c.line)
+    }
+    val content = when (state) {
+        OptionState.Key -> c.onMarker
+        OptionState.Dimmed -> c.inkSoft
+        else -> c.ink
+    }
+    Row(Modifier.fillMaxWidth().heightIn(min = 60.dp)
+        .tapSurface(RoundedCornerShape(18.dp), background, enabled, border, role = Role.RadioButton, onClick = onClick)
+        .semantics { selected = state == OptionState.Selected || state == OptionState.Wrong }
+        .padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        val (badge, badgeContent) = when (state) {
+            OptionState.Idle -> c.sunken to c.ink
+            OptionState.Selected -> c.ink to c.paper
+            OptionState.Key -> c.onMarker to c.marker
+            OptionState.Wrong -> c.bad to c.paper
+            OptionState.Dimmed -> c.paper to c.inkFaint
+        }
+        Box(Modifier.size(32.dp).clip(CircleShape).background(badge).then(if (state == OptionState.Dimmed) Modifier.border(1.dp, c.line, CircleShape) else Modifier),
+            contentAlignment = Alignment.Center) {
+            when (state) {
+                OptionState.Key -> GlyphIcon(Glyph.Check, tint = badgeContent, size = 16.dp)
+                OptionState.Wrong -> GlyphIcon(Glyph.Cross, tint = badgeContent, size = 16.dp)
+                else -> Text("$letter", style = StudyType.Mono.copy(fontSize = 14.sp), color = badgeContent)
+            }
+        }
+        Spacer(Modifier.width(14.dp))
+        Text(text, Modifier.weight(1f), style = StudyType.Body, color = content)
+    }
+}
+
+@Composable
+private fun ResultBar(result: AnswerResult, exercise: Exercise, session: StudySession, l: Language, next: () -> Unit) {
+    val c = Study.colors
+    val (background, glyph, title) = when {
+        result.correct == true -> Triple(c.marker, Glyph.Check, l.label("Correct", "Верно"))
+        result.correct == false -> Triple(c.badSoft, Glyph.Cross, l.label("Not quite", "Пока неверно"))
+        exercise.type == ExerciseType.WRITING || exercise.type == ExerciseType.SPEAKING -> Triple(c.sunken, Glyph.Dot, l.label("Saved for review", "Сохранено для разбора"))
+        else -> Triple(c.sunken, Glyph.Dot, l.label("Skipped", "Пропущено"))
+    }
+    val content = if (result.correct == true) c.onMarker else c.ink
+    val shown = remember { MutableTransitionState(false).apply { targetState = true } }
+    AnimatedVisibility(shown, enter = slideInVertically(tween(220)) { it / 2 } + fadeIn(tween(160))) {
+        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(26.dp)).background(background).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.padding(start = 6.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                GlyphIcon(glyph, tint = if (result.correct == false) c.bad else content, size = 22.dp)
+                Spacer(Modifier.width(10.dp))
+                Text(title, style = StudyType.Title, color = content)
+            }
+            StudyButton(if (session.index + 1 == session.stepCount) l.label("Finish", "Завершить") else l.label("Continue", "Дальше"), next,
+                Modifier.fillMaxWidth(), tone = if (result.correct == true) Tone.Night else Tone.Ink, arrow = true)
         }
     }
 }
 
 @Composable
-private fun ListeningPlayer(assetPath: String, l: Language, sample: Boolean = false) {
-    val context = LocalContext.current
-    var playerValue by remember(assetPath) { mutableStateOf<MediaPlayer?>(null) }
-    var playingValue by remember(assetPath) { mutableStateOf(false) }
-    var errorValue by remember(assetPath) { mutableStateOf("") }
-    val owner = LocalLifecycleOwner.current
-    DisposableEffect(assetPath, owner) {
-        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) { playerValue?.pause(); playingValue = false } }
-        owner.lifecycle.addObserver(observer)
-        onDispose { owner.lifecycle.removeObserver(observer); playerValue?.release(); playerValue = null }
-    }
-    StudyCard(color = MaterialTheme.colorScheme.primaryContainer) {
-        Eyebrow(if (sample) l.label("Speaking · synthetic sample", "Speaking · синтетический образец") else l.label("Listening · original synthetic audio", "Listening · синтетическая учебная запись"))
-        Button(onClick = {
-            try {
-                if (playingValue) { playerValue?.pause(); playingValue = false }
-                else {
-                    if (playerValue == null) {
-                        val player = MediaPlayer()
-                        context.assets.openFd(assetPath).use { player.setDataSource(it.fileDescriptor, it.startOffset, it.length) }
-                        player.setOnCompletionListener { playingValue = false }
-                        player.setOnErrorListener { _, _, _ -> errorValue = l.label("Audio could not play. Try again.", "Не удалось воспроизвести аудио."); playingValue = false; true }
-                        player.prepare(); playerValue = player
-                    }
-                    playerValue?.start(); playingValue = true
-                }
-            } catch (error: Exception) { errorValue = error.message ?: "Audio unavailable" }
-        }) { Text(if (playingValue) l.label("Pause audio", "Пауза") else l.label("▶ Listen", "▶ Слушать")) }
-        if (errorValue.isNotEmpty()) SmallNote(errorValue)
-        SmallNote(if (sample) l.label("An illustrative answer awaiting expert listening review. Listen for clear phrasing and pauses; it is not a calibrated pronunciation or band exemplar.", "Учебный образец ожидает прослушивания специалистом. Обратите внимание на фразы и паузы; это не калиброванный эталон произношения или band.") else l.label("The transcript is revealed after submitting your answer.", "Транскрипт откроется после отправки ответа."))
+private fun Explanation(exercise: Exercise, l: Language) {
+    val c = Study.colors
+    SelectionContainer { Text(exercise.explanation.text(l), style = StudyType.Body, color = c.ink) }
+    exercise.evidence?.let { MarginNote(rule = c.inkSoft) { Meta(l.label("Evidence", "Подтверждение")); Text(it, style = StudyType.Reading.copy(fontSize = 16.sp, lineHeight = 25.sp), color = c.ink) } }
+    if (exercise.typicalErrors.isNotEmpty()) Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Meta(l.label("Common slips", "Типичные ошибки"))
+        exercise.typicalErrors.forEach { Text("• ${it.text(l)}", style = StudyType.Small, color = c.ink) }
     }
 }
 
 @Composable
-private fun Chart(chart: ChartData) {
-    StudyCard {
-        Text(chart.title, style = MaterialTheme.typography.titleMedium)
-        SmallNote("${chart.xLabel} · ${chart.yLabel} (${chart.unit})")
-        val maximum = chart.series.flatMap { it.values }.maxOrNull()?.coerceAtLeast(1.0) ?: 1.0
-        chart.labels.forEachIndexed { index, label ->
-            Text(label, fontWeight = FontWeight.SemiBold)
-            chart.series.forEach { series ->
-                val value = series.values.getOrNull(index) ?: 0.0
-                SmallNote("${series.name}: ${if (value % 1 == 0.0) value.toInt() else value} ${chart.unit}")
-                Box(Modifier.fillMaxWidth().height(9.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))) {
-                    Box(Modifier.fillMaxWidth((value / maximum).toFloat().coerceIn(0f, 1f)).fillMaxHeight().background(MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp)))
-                }
-            }
+private fun SampleAnswer(text: String, l: Language) {
+    val c = Study.colors
+    Disclosure(l.label("Sample answer", "Пример ответа"), null) {
+        SelectionContainer { Text(text, style = StudyType.Reading.copy(fontSize = 16.sp, lineHeight = 25.sp), color = c.ink) }
+        Text(l.label("Pilot sample, not yet expert-annotated.", "Пилотный образец, ещё без экспертной аннотации."), style = StudyType.Small, color = c.inkSoft)
+    }
+}
+
+@Composable
+fun Disclosure(title: String, badge: String?, initiallyOpen: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
+    val c = Study.colors
+    var openValue by remember(title) { mutableStateOf(initiallyOpen) }
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(c.raised)) {
+        Row(Modifier.fillMaxWidth().tapSurface(RoundedCornerShape(18.dp), c.raised) { openValue = !openValue }.padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            Text(title, Modifier.weight(1f), style = StudyType.Strong, color = c.ink)
+            badge?.let { Meta(it); Spacer(Modifier.width(8.dp)) }
+            val turn by animateFloatAsState(if (openValue) 180f else 0f, tween(180), label = "chevron")
+            GlyphIcon(Glyph.ChevronDown, Modifier.rotate(turn), tint = c.inkSoft, size = 18.dp)
+        }
+        AnimatedVisibility(openValue) {
+            Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp), content = content)
         }
     }
 }
 
 @Composable
-private fun SpeakingPanel(s: StudyUiState, vm: StudyViewModel) {
-    val context = LocalContext.current
+private fun FinishedStep(s: StudyUiState, session: StudySession, close: () -> Unit, again: () -> Unit) {
     val l = s.language
-    val scope = rememberCoroutineScope()
-    val recorderValue by vm.runtime.recorder.state.collectAsStateWithLifecycle()
-    val stepKey = s.session?.stepKey
-    var messageValue by remember(stepKey) { mutableStateOf("") }
-    var transcribingValue by remember(stepKey) { mutableStateOf(false) }
-    var recognizedValue by remember(stepKey) { mutableStateOf<String?>(null) }
-    val beginRecording = {
-        if (vm.state.value.session?.let { it.stepKey == stepKey && it.result == null && !it.finished } == true) {
-            runCatching { vm.runtime.recorder.start() }.onSuccess { vm.attachRecording(it.absolutePath, stepKey); messageValue = "" }.onFailure { messageValue = it.message ?: "Recording failed" }
-        }
-        Unit
-    }
-    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) beginRecording() else messageValue = l.label("Microphone access was denied. You can type a transcript and keep practising.", "Микрофон недоступен. Можно ввести транскрипт и продолжить практику.")
-    }
-    val owner = LocalLifecycleOwner.current
-    DisposableEffect(owner) {
-        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) vm.stopRecording() }
-        owner.lifecycle.addObserver(observer)
-        onDispose { owner.lifecycle.removeObserver(observer); vm.stopRecording(); vm.runtime.playback.stop() }
-    }
-    StudyCard {
-        Eyebrow(l.label("Record one answer", "Запишите один ответ"))
-        SmallNote(l.label("Record each answer separately. Select a take to transcribe it, then add its text to your response and correct it below.", "Записывайте ответы по отдельности. Выберите запись для расшифровки, добавьте текст к ответу и исправьте его ниже."))
-        val active = recorderValue as? RecorderState.RecordingAudio
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (s.session?.result == null) Button(onClick = {
-                if (active != null) scope.launch { vm.runtime.recorder.stop()?.let { vm.attachRecording(it.file.absolutePath, stepKey) } }
-                else if (context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) beginRecording()
-                else permission.launch(Manifest.permission.RECORD_AUDIO)
-            }, enabled = !transcribingValue) { Text(if (active != null) l.label("■ Stop · ${active.elapsedMillis / 1000}s", "■ Стоп · ${active.elapsedMillis / 1000}с") else l.label("● Record", "● Записать")) }
-            s.session?.recordingPath?.let { path ->
-                if (active == null) OutlinedButton(onClick = { vm.runtime.playback.play(File(path), onError = { messageValue = it }) }) { Text(l.label("▶ Replay", "▶ Прослушать")) }
+    val c = Study.colors
+    val rhythm = rememberRhythm(s)
+    val ids = remember(session) { session.stepWorkIds().toSet() }
+    val attempts = remember(s.attempts, ids) { s.attempts.filter { it.exam == session.exam && it.workId in ids } }
+    val checked = attempts.count { it.correct != null }
+    val right = attempts.count { it.correct == true }
+    val seconds = attempts.sumOf { it.elapsedSeconds }
+    val marks = remember(s.attempts, session) { sessionMarks(s, session) }
+    StepFrame(actions = {
+        if (!session.stoppedEarly && session.mode != ContentSplit.DIAGNOSTIC)
+            StudyButton(l.label("Another round", "Ещё раунд"), again, Modifier.fillMaxWidth(), tone = Tone.Quiet, glyph = Glyph.Plus)
+        StudyButton(l.label("Done", "Готово"), close, Modifier.fillMaxWidth(), arrow = true)
+    }) {
+        Spacer(Modifier.height(24.dp))
+        Meta(when {
+            session.stoppedEarly -> l.label("Saved for later", "Сохранено на потом")
+            session.courseDay != null -> l.label("Day ${session.courseDay} complete", "День ${session.courseDay} пройден")
+            else -> modeLabel(session.mode, l) + " · " + l.label("complete", "завершено")
+        }, color = c.ink)
+        if (!session.stoppedEarly && checked > 0) {
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text("$right", style = StudyType.Display.copy(fontSize = 112.sp, lineHeight = 104.sp), color = c.ink)
+                Text("/$checked", Modifier.padding(bottom = 14.dp), style = StudyType.Display.copy(fontSize = 44.sp, lineHeight = 44.sp), color = c.inkFaint)
             }
-        }
-        val takes = s.session?.recordingPaths.orEmpty().ifEmpty { listOfNotNull(s.session?.recordingPath) }
-        if (takes.size > 1 && active == null) {
-            takes.forEachIndexed { index, path ->
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { vm.runtime.playback.play(File(path), onError = { messageValue = it }) }) { Text(l.label("▶ Answer ${index + 1}", "▶ Ответ ${index + 1}")) }
-                    if (s.session?.result == null) TextButton(onClick = { vm.attachRecording(path, stepKey) }, enabled = !transcribingValue) { Text(if (s.session?.recordingPath == path) l.label("✓ Selected", "✓ Выбрана") else l.label("Select for transcript", "Выбрать для расшифровки")) }
-                }
+            MarkedText(l.label("correct", "верно"), StudyType.Title)
+        } else {
+            val done = marks.count { it != Mark.Todo && it != Mark.Now }
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text("$done", style = StudyType.Display.copy(fontSize = 112.sp, lineHeight = 104.sp), color = c.ink)
+                Text("/${session.stepCount}", Modifier.padding(bottom = 14.dp), style = StudyType.Display.copy(fontSize = 44.sp, lineHeight = 44.sp), color = c.inkFaint)
             }
+            MarkedText(l.label("steps done", "шагов пройдено"), StudyType.Title)
         }
-        s.session?.recordingPath?.let { path ->
-            if (active == null && s.session!!.result == null) OutlinedButton(onClick = {
-                scope.launch {
-                    transcribingValue = true
-                    try {
-                        val originalDraft = s.session!!.draft
-                        val transcript = vm.runtime.speechTranscriber.transcribe(File(path)).text
-                        if (vm.state.value.session?.draft == originalDraft && originalDraft.isBlank() && vm.state.value.session?.stepKey == s.session!!.stepKey) {
-                            vm.applyTranscript(transcript, s.session!!.stepKey)
-                            messageValue = l.label("Review and correct the transcript before submitting.", "Проверьте и исправьте транскрипт перед отправкой.")
-                        } else if (vm.state.value.session?.stepKey == stepKey) {
-                            recognizedValue = transcript
-                            messageValue = l.label("Your existing text is preserved. Review this take before adding it.", "Текущий текст сохранён. Проверьте расшифровку этой записи перед добавлением.")
-                        }
-                    }
-                    catch (cancelled: CancellationException) { throw cancelled }
-                    catch (error: Exception) { messageValue = runtimeMessage(error.message ?: "Transcription failed", l) }
-                    finally { transcribingValue = false }
-                }
-            }, enabled = !transcribingValue) { Text(if (transcribingValue) l.label("Transcribing…", "Распознавание…") else l.label("Transcribe offline", "Распознать офлайн")) }
+        StepTrack(marks)
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp)) {
+            Stat(if (seconds > 0) clock(seconds) else "—", l.label("answer time", "время ответов"))
+            Stat("${rhythm.streak}", l.label("day streak", "дней подряд"))
         }
-        recognizedValue?.takeIf { s.session?.result == null }?.let { transcript ->
-            SelectionContainer { Text(transcript) }
-            Button(onClick = {
-                val current = vm.state.value.session?.takeIf { it.stepKey == stepKey }?.draft.orEmpty()
-                vm.applyTranscript(listOf(current.trimEnd(), transcript).filter { it.isNotBlank() }.joinToString("\n\n"), stepKey)
-                recognizedValue = null
-            }) { Text(l.label("Add to my response", "Добавить к моему ответу")) }
-            TextButton(onClick = { vm.applyTranscript(transcript, stepKey); recognizedValue = null }) { Text(l.label("Replace transcript with this take", "Заменить текст этой расшифровкой")) }
+        if (session.stoppedEarly) Text(if (session.courseDay != null) l.label("Unfinished work continues in the next days of your route. It stays ungraded until you submit it.", "Незавершённая работа продолжится в следующих днях маршрута и останется без оценки до отправки.")
+            else l.label("Unfinished answers stay ungraded. Continue them from Today.", "Незаконченные ответы остаются без оценки. Продолжите их на странице «Сегодня»."), style = StudyType.Body, color = c.inkSoft)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(8.dp).clip(CircleShape).background(if (s.pendingWrites == 0) c.good else c.warn))
+            Spacer(Modifier.width(8.dp))
+            Meta(if (s.pendingWrites == 0) l.label("Saved on this device", "Сохранено на устройстве") else l.label("Saving…", "Сохраняем…"))
         }
-        if (messageValue.isNotBlank()) SmallNote(messageValue)
-        SmallNote(l.label("Your original recording is kept. Replay it and check intelligibility, stress and rhythm. A text transcript cannot establish a pronunciation band.", "Оригинальная запись сохраняется. Прослушайте её: понятность, ударения и ритм. По тексту нельзя определить pronunciation band."))
     }
 }
 
-private fun tutorRequest(s: StudyUiState): TutorRequest {
-    val exercise = s.session!!.exercise!!
-    return TutorRequestFactory.create(exercise, s.session!!.draft, s.language)
+/** Work ids of every step, matching the ids its attempts were saved with. */
+internal fun StudySession.stepWorkIds(): List<String> = (0 until stepCount).map { index ->
+    activities.getOrNull(index)?.workId ?: if (index == this.index) workId else "$id:$index"
 }
 
-@Composable
-private fun FeedbackPanel(s: StudyUiState, vm: StudyViewModel) {
-    val l = s.language
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val accelerationValue by vm.runtime.acceleration.state.collectAsStateWithLifecycle()
-    var outputValue by rememberSaveable(s.session!!.id, s.session!!.index) { mutableStateOf("") }
-    var busyValue by remember { mutableStateOf(false) }
-    var previewValue by remember { mutableStateOf(false) }
-    var externalValue by rememberSaveable(s.session!!.id, s.session!!.index) { mutableStateOf(s.session!!.externalFeedback) }
-    val request = tutorRequest(s)
-    StudyCard {
-        Eyebrow(l.label("Understand your answer", "Разберите свой ответ"))
-        SmallNote(l.label("Prepared explanations work offline. AI feedback can be wrong: compare it with the key and prepared explanation. It does not change your result or level.", "Готовый разбор доступен офлайн. ИИ может ошибаться: сверяйте его выводы с ключом и готовым разбором. ИИ не меняет результат или уровень."))
-        OutlinedButton(onClick = {
-            scope.launch {
-                busyValue = true; outputValue = ""
-                try {
-                    val lessons = vm.contentRepository.contextFor(s.session!!.exercise!!.skillId, s.session!!.exercise!!.prompt)
-                    vm.runtime.tutorEngine.explain(request.copy(excerpts = request.excerpts + lessons.map { TutorExcerpt(it.id, it.body.text(l) + "\n" + it.workedExample.text(l)) })).collect { event ->
-                        when (event) {
-                            TutorEvent.Loading -> outputValue = l.label("Loading local model…\n", "Загрузка локальной модели…\n")
-                            is TutorEvent.Text -> {
-                                if (outputValue == l.label("Loading local model…\n", "Загрузка локальной модели…\n")) outputValue = ""
-                                outputValue += event.delta
-                            }
-                            is TutorEvent.Complete -> vm.saveFeedback(outputValue, "LOCAL_AI", s.session!!.stepKey)
-                            is TutorEvent.Failure -> outputValue += "\n${runtimeMessage(event.message, l)}"
-                            is TutorEvent.Unavailable -> outputValue = runtimeMessage(event.reason, l)
-                            is TutorEvent.TooLong -> outputValue = l.label("Your complete answer exceeds the local context budget. Edit it or use the ChatGPT preview; nothing was silently cut.", "Полный ответ превышает локальный контекст. Сократите его сами или откройте запрос для ChatGPT. Скрытой обрезки нет.")
-                        }
-                    }
-                } catch (cancelled: CancellationException) { throw cancelled }
-                catch (error: Exception) { outputValue = error.message ?: "Feedback unavailable" }
-                finally { busyValue = false }
-            }
-        }, enabled = !busyValue && accelerationValue !is LocalAccelerationState.Preparing) { Text(if (busyValue) l.label("Working locally…", "Локальный разбор…") else l.label("Explain with local AI", "Разобрать с локальным ИИ")) }
-        if (accelerationValue is LocalAccelerationState.Preparing) SmallNote(l.label("Local setup is in progress. The prepared explanation above is available now.", "Идёт локальная подготовка. Готовый разбор выше уже доступен."))
-        if (outputValue.isNotBlank()) SelectionContainer { Text(outputValue, lineHeight = 24.sp) }
-        OutlinedButton(onClick = { previewValue = true }) { Text(l.label("Preview request for ChatGPT ↗", "Запрос для ChatGPT ↗")) }
-        OutlinedTextField(externalValue, { externalValue = it }, label = { Text(l.label("Paste external feedback (optional)", "Вставить внешний отзыв (необязательно)")) }, minLines = 3, modifier = Modifier.fillMaxWidth())
-        if (externalValue.isNotBlank()) TextButton(onClick = { vm.saveFeedback(externalValue) }) { Text(l.label("Save as external feedback", "Сохранить как внешний отзыв")) }
-    }
-    if (previewValue) AlertDialog(onDismissRequest = { previewValue = false }, title = { Text(l.label("Review before sharing", "Текст перед передачей")) }, text = {
-        Column(Modifier.heightIn(max = 400.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            SmallNote(l.label("Use your ChatGPT account or subscription. Copy is always available; send the request yourself.", "Продолжите в своём ChatGPT. Копирование доступно всегда; запрос отправляете вы сами."))
-            SelectionContainer { Text(ChatGptHandoff.preview(request)) }
+/** Segment colours come from saved attempts only; steps without one show as neutral progress. */
+internal fun sessionMarks(s: StudyUiState, session: StudySession): List<Mark> {
+    val ids = session.stepWorkIds()
+    val byWork = s.attempts.asSequence().filter { it.exam == session.exam && it.workId != null && it.workId in ids }.associateBy { it.workId }
+    return ids.mapIndexed { index, id ->
+        if (!session.finished && index == session.index) return@mapIndexed when (session.result?.correct) {
+            null -> if (session.result == null) Mark.Now else Mark.Open
+            true -> Mark.Right
+            false -> Mark.Wrong
         }
-    }, confirmButton = { TextButton(onClick = { ChatGptHandoff.copy(context, ChatGptHandoff.preview(request)); previewValue = false }) { Text(l.label("Copy", "Копировать")) } }, dismissButton = { TextButton(onClick = { ChatGptHandoff.share(context, ChatGptHandoff.preview(request)) }) { Text(l.label("Share…", "Поделиться…")) } })
-}
-
-internal fun runtimeMessage(message: String, language: Language): String {
-    if (language == Language.EN) return message
-    return when {
-        "8 GB" in message -> "Для локального ИИ нужны ARM64 и 8+ ГБ RAM. Уроки, запись и ручной транскрипт доступны на этом устройстве."
-        "Download Gemma" in message -> "Сначала скачайте Gemma в настройках. Сейчас доступны готовый разбор и запрос для ChatGPT."
-        "Download Whisper" in message -> "Сначала скачайте Whisper в настройках. Запись сохранена; транскрипт можно ввести вручную."
-        "free RAM" in message -> "Недостаточно свободной памяти. Закройте другие приложения или используйте готовый разбор."
-        "Microphone" in message -> "Не удалось использовать микрофон. Можно ввести транскрипт вручную и продолжить."
-        else -> "Не удалось завершить локальную обработку. Ваш ответ остаётся в редакторе. $message"
+        val attempt = byWork[id]
+        when {
+            attempt != null -> when (attempt.correct) { true -> Mark.Right; false -> Mark.Wrong; null -> Mark.Open }
+            index < session.index -> Mark.Done
+            session.finished && !session.stoppedEarly && index == session.index -> Mark.Done
+            else -> Mark.Todo
+        }
     }
 }
