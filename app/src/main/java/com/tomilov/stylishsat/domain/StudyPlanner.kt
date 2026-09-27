@@ -28,10 +28,18 @@ object StudyPlanner {
         }
     }
 
+    /** Full-length assessment sources feed whole sittings; answering one question alone would expose the rest. */
+    const val PAPER_SOURCE_MINIMUM = 13
+
+    fun paperSources(pack: ContentPack): Set<String> = pack.exercises.asSequence()
+        .filter { it.split == ContentSplit.ASSESSMENT }.groupingBy { it.sourceId }.eachCount()
+        .filterValues { it >= PAPER_SOURCE_MINIMUM }.keys
+
     fun assessment(pack: ContentPack, exam: Exam, attempts: List<Attempt>, limit: Int = 8): List<Exercise> {
         require(limit >= 0)
         if (limit == 0) return emptyList()
-        val grouped = fresh(pack, exam, ContentSplit.ASSESSMENT, attempts).groupBy { it.skillId }
+        val reserved = paperSources(pack)
+        val grouped = fresh(pack, exam, ContentSplit.ASSESSMENT, attempts).filter { it.sourceId !in reserved }.groupBy { it.skillId }
         // Round-robin across skills, so one long passage cannot consume the whole check.
         val skills = pack.skills.filter { it.exam == exam }
         return (0 until (grouped.values.maxOfOrNull { it.size } ?: 0)).flatMap { index ->
@@ -39,40 +47,51 @@ object StudyPlanner {
         }.take(limit)
     }
 
-    fun isFamiliar(exercise: Exercise, pack: ContentPack, attempts: List<Attempt>): Boolean {
+    /** [runId] names the current section or exam sitting: its own earlier answers do not make a sibling familiar. */
+    fun isFamiliar(exercise: Exercise, pack: ContentPack, attempts: List<Attempt>, runId: String? = null): Boolean {
         if (attempts.isEmpty()) return false
         val byId = if (attempts.any { it.familyId == null || it.sourceId == null }) pack.exercises.associateBy { it.id } else emptyMap()
         return attempts.any { attempt ->
             val earlier = byId[attempt.exerciseId]
-            attempt.exerciseId == exercise.id ||
+            (runId == null || attempt.runId != runId) && (attempt.exerciseId == exercise.id ||
                 (attempt.familyId ?: earlier?.familyId) == exercise.familyId ||
-                (attempt.sourceId ?: earlier?.sourceId) == exercise.sourceId
+                (attempt.sourceId ?: earlier?.sourceId) == exercise.sourceId)
         }
     }
 
-    /** One history index per selection/replay operation, rather than one pack index per comparison. */
+    /** One history index per selection/replay operation, rather than one pack index per comparison.
+     * Each key remembers the sitting that first exposed it; a run's own siblings do not count as prior exposure. */
     private class SeenHistory(private val exercises: Map<String, Exercise>) {
-        private val ids = hashSetOf<String>()
-        private val families = hashSetOf<String>()
-        private val sources = hashSetOf<String>()
+        private val ids = hashMapOf<String, String>()
+        private val families = hashMapOf<String, String>()
+        private val sources = hashMapOf<String, String>()
         private val explicitFamilies = hashSetOf<String>()
         private val explicitSources = hashSetOf<String>()
         fun add(attempt: Attempt) {
-            ids += attempt.exerciseId
+            val origin = attempt.runId?.let { "run:$it" } ?: "attempt:${attempt.id}"
+            ids.putIfAbsent(attempt.exerciseId, origin)
             val earlier = exercises[attempt.exerciseId]
-            (attempt.familyId ?: earlier?.familyId)?.let(families::add)
-            (attempt.sourceId ?: earlier?.sourceId)?.let(sources::add)
+            (attempt.familyId ?: earlier?.familyId)?.let { families.putIfAbsent(it, origin) }
+            (attempt.sourceId ?: earlier?.sourceId)?.let { sources.putIfAbsent(it, origin) }
             attempt.familyId?.let(explicitFamilies::add)
             attempt.sourceId?.let(explicitSources::add)
         }
         fun add(exercise: Exercise) {
-            ids += exercise.id
-            families += exercise.familyId
-            sources += exercise.sourceId
+            ids.putIfAbsent(exercise.id, PLANNED)
+            families.putIfAbsent(exercise.familyId, PLANNED)
+            sources.putIfAbsent(exercise.sourceId, PLANNED)
         }
-        fun contains(exercise: Exercise) = exercise.id in ids || exercise.familyId in families || exercise.sourceId in sources
-        fun containsRemoved(attempt: Attempt) = attempt.exerciseId in ids ||
-            attempt.familyId?.let { it in explicitFamilies } == true || attempt.sourceId?.let { it in explicitSources } == true
+        fun contains(exercise: Exercise, runId: String? = null): Boolean {
+            val own = runId?.let { "run:$it" }
+            return listOf(ids[exercise.id], families[exercise.familyId], sources[exercise.sourceId]).any { it != null && it != own }
+        }
+        fun containsRemoved(attempt: Attempt): Boolean {
+            val own = attempt.runId?.let { "run:$it" }
+            return ids[attempt.exerciseId].let { it != null && it != own } ||
+                attempt.familyId?.let { it in explicitFamilies && families[it] != own } == true ||
+                attempt.sourceId?.let { it in explicitSources && sources[it] != own } == true
+        }
+        private companion object { const val PLANNED = "planned" }
     }
 
     private fun seenHistory(pack: ContentPack, attempts: List<Attempt>): SeenHistory {
@@ -129,7 +148,7 @@ object StudyPlanner {
                 val errorExercise = exercise?.takeIf { it.version == attempt.exerciseVersion }
                 if (attempt.correct == false && attempt.errorType in setOf("WORD_LIMIT", "NUMERIC_FORMAT", "KEY_MISMATCH")) {
                     reviewNeeds[attempt.skillId] = ReviewNeed(requireNotNull(attempt.errorType), errorExercise)
-                } else if (attempt.correct == true && attempt.independent && errorExercise != null && !reviewSeen.contains(errorExercise) &&
+                } else if (attempt.correct == true && attempt.independent && errorExercise != null && !reviewSeen.contains(errorExercise, attempt.runId) &&
                     reviewNeeds[attempt.skillId]?.matches(errorExercise) == true) {
                     reviewNeeds.remove(attempt.skillId)
                 }
@@ -294,7 +313,7 @@ object StudyPlanner {
         val seen = SeenHistory(exercises)
         attempts.distinctBy { it.id }.sortedWith(compareBy({ it.timestampEpochMillis }, { it.id })).forEach { attempt ->
             val exercise = exercises[attempt.exerciseId]
-            val familiar = exercise?.let(seen::contains) ?: seen.containsRemoved(attempt)
+            val familiar = exercise?.let { seen.contains(it, attempt.runId) } ?: seen.containsRemoved(attempt)
             states[attempt.skillId]?.let { state ->
                 states[attempt.skillId] = updateSkill(
                     state, attempt.copy(

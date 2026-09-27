@@ -19,8 +19,8 @@ StylishSAT brings short bilingual lessons, English exam-style exercises and your
 
 | Learn | Practise | Continue |
 | --- | --- | --- |
-| 48 Russian/English mini-lessons | 810 SAT and IELTS exercises | Saved answers, drafts and progress |
-| Worked examples and staged hints | SAT Reading & Writing / Math; all four IELTS skills | Adaptive review and 28-day courses |
+| 48 Russian/English mini-lessons | 884 SAT and IELTS exercises | Saved answers, drafts and progress |
+| Worked examples and staged hints | SAT Reading & Writing / Math; all four IELTS skills; full IELTS sections | Adaptive review and 28-day courses |
 | 30 bundled audio recordings/samples | Exact closed-answer checking | Separate SAT and IELTS histories |
 
 Menus, lessons and explanations support English and Russian. Exam prompts and answers stay in English. Writing includes charts and prepared feedback; Speaking supports recording, playback and editable transcripts.
@@ -30,7 +30,7 @@ Menus, lessons and explanations support English and Russian. Exam prompts and an
 - **First-run setup:** choose English or Russian, SAT or IELTS Academic, and 15, 30, 45 or 60 minutes a day. Start the diagnostic or choose to look around first. Learners with saved study history skip this setup.
 - **Today:** a single next action, a weekly activity strip, a streak and saved answer time against your daily goal. Open adaptive practice, a timed check or a 2/4/6-hour intensive; return to unfinished drafts or choose a day in the 28-day route.
 - **Study sessions:** step-by-step progress, an exercise clock, answer choices marked after checking, and actions above the keyboard. Close a session to return to Today, or use **More → Save and end for today**. After completing a practice session, the summary offers another round.
-- **Library:** search skills and lesson text, open a skill page, read its lessons and launch focused practice.
+- **Library:** search skills and lesson text, open a skill page, read its lessons and launch focused practice. IELTS Reading and Listening pages list full sections: every question for one passage or recording on one page, as practice or under exam conditions (a clock for Reading; one play for Listening).
 - **Progress:** independent answer accuracy, a 17-week activity map, skill progress and saved answer history for the selected exam. Activity and minutes come from saved answers.
 - **Settings:** daily-minute presets, an exam-date picker, profile goals, optional model downloads, content imports and saved recordings. **About** contains privacy, content-status, grading and license information.
 

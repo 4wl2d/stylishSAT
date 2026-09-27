@@ -17,11 +17,13 @@ class ContentBankTest {
 
     @Test fun bundledPackageDecodesStrictlyAndItsMediaSegmentsStayWithinFiles() {
         val pack = content()
-        assertEquals(810, pack.exercises.size)
+        // Package5 keeps the 810 published exercises first and adds 67 long-passage questions and 7 Task 1 visuals.
+        assertEquals(884, pack.exercises.size)
+        assertEquals(810, pack.exercises.take(810).count { it.format == null && it.group == null && it.figure == null })
         assertEquals(48, pack.lessons.size)
         assertEquals(288, pack.exercises.count { it.exam == Exam.SAT })
         assertEquals(6, pack.exercises.count { it.sampleAudioAssetPath != null })
-        assertEquals(2, pack.schemaVersion)
+        assertEquals(3, pack.schemaVersion)
         assertEquals(8, pack.skills.count { it.exam == Exam.SAT })
         assertEquals(4, pack.skills.count { it.exam == Exam.IELTS })
         assertEquals(16, StudyPlanner.diagnostic(pack, Exam.SAT).size)
@@ -32,6 +34,29 @@ class ContentBankTest {
             assertTrue(exercise.id, exercise.transcriptSegments.isNotEmpty())
             assertEquals(exercise.id, exercise.transcript, exercise.transcriptSegments.joinToString(" ") { it.text })
         }
+    }
+
+    @Test fun fullLengthPassagesCoverTheMissingFormatsAndStayReservedForSittings() {
+        val pack = content()
+        val long = Sections.of(pack, Exam.IELTS, skillId = "ielts_reading").filter { it.exercises.size >= StudyPlanner.PAPER_SOURCE_MINIMUM }
+        assertEquals(5, long.size)
+        assertTrue(long.all { it.words in 700..900 && it.exercises.size in 13..14 && it.exercises.all { item -> item.format != null } })
+        assertEquals(40, long.filter { it.split == ContentSplit.ASSESSMENT }.sumOf { it.exercises.size })
+        val formats = long.flatMap { section -> section.exercises.mapNotNull { it.format } }.toSet()
+        listOf(QuestionFormat.TRUE_FALSE_NOT_GIVEN, QuestionFormat.YES_NO_NOT_GIVEN, QuestionFormat.MATCHING_HEADINGS, QuestionFormat.MATCHING_INFORMATION,
+            QuestionFormat.MATCHING_FEATURES, QuestionFormat.SUMMARY_COMPLETION, QuestionFormat.DIAGRAM_LABEL, QuestionFormat.TABLE_COMPLETION)
+            .forEach { assertTrue(it.name, it in formats) }
+        // Every gap and diagram label points at a question that exists in the same group.
+        long.flatMap { it.exercises }.mapNotNull { it.group }.distinct().forEach { group ->
+            val refs = ContentPackCodec.gapIds(group.text.orEmpty()) + group.figure?.panels.orEmpty().flatMap { panel -> panel.nodes.flatMap { ContentPackCodec.gapIds(it.label) } }
+            assertTrue(group.id, refs.all { ref -> pack.exercises.any { it.id == ref && it.group == group } })
+        }
+        // A single-item timed check never exposes a reserved full-length passage.
+        val reserved = StudyPlanner.paperSources(pack)
+        assertEquals(long.filter { it.split == ContentSplit.ASSESSMENT }.map { it.sourceId }.toSet(), reserved)
+        assertTrue(StudyPlanner.assessment(pack, Exam.IELTS, emptyList(), limit = 200).none { it.sourceId in reserved })
+        val visuals = pack.exercises.filter { it.type == ExerciseType.WRITING }.mapNotNull { it.chart?.kind?.name ?: it.figure?.kind?.name }
+        listOf("LINE", "PIE", "TABLE", "PROCESS", "MAP").forEach { assertTrue(it, it in visuals) }
     }
 
     @Test fun all24SatMathKeysAgreeWithIndependentSolutions() {

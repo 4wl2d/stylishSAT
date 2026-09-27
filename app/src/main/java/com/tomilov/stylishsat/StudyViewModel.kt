@@ -93,6 +93,7 @@ data class StudyUiState(
     val courseProgress: Map<Exam, CourseProgress> = emptyMap(),
     val feedback: List<Feedback> = emptyList(),
     val drafts: Map<String, StudyDraft> = emptyMap(),
+    val papers: Map<String, PaperRun> = emptyMap(),
 ) {
     val exam get() = settings.exam
     val language get() = settings.language
@@ -101,6 +102,8 @@ data class StudyUiState(
     val plan get() = plans[exam]
     val examAttempts get() = attempts.filter { it.exam == exam }
     val skillStates get() = pack?.let { StudyPlanner.statesFromAttempts(it, attempts) }.orEmpty()
+    /** At most one unfinished sitting per exam. */
+    val paper: PaperRun? get() = papers.values.filter { it.exam == exam && it.active }.maxByOrNull { it.startedAt }
 }
 
 class StudyViewModel @JvmOverloads constructor(application: Application, databaseOverride: StudyDatabase? = null, settingsOverride: SettingsStore? = null, clockOverride: Clock? = null) : AndroidViewModel(application) {
@@ -150,6 +153,7 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
                 val courses = decode("course_progress") { storageJson.decodeFromString<CourseProgress>(it) }
                 val drafts = decode("draft") { storageJson.decodeFromString<StudyDraft>(it) }
                 val plans = decode("plan") { storageJson.decodeFromString<StudyPlan>(it) }
+                val papers = decode("paper") { storageJson.decodeFromString<PaperRun>(it) }
                 mutableState.update { it.copy(
                     pack = pack, settings = initialSettings,
                     profiles = it.profiles + profiles.associateBy { p -> p.exam },
@@ -158,6 +162,7 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
                     dailyPlans = dailyPlans.associateBy { p -> p.exam },
                     attempts = attempts, drafts = drafts.groupBy { draft -> draft.key }.mapValues { (_, versions) -> versions.maxWith(compareBy<StudyDraft>({ it.updatedAt }, { it.submitted })) },
                     feedback = decode("feedback") { storageJson.decodeFromString<Feedback>(it) },
+                    papers = papers.associateBy { run -> run.id },
                 ) }
                 }
                 Exam.entries.forEach { refreshStoredCourse(it) }
@@ -692,6 +697,107 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         persist("feedback:${feedback.id}", "feedback", s.exam, feedback)
         saveSession(session.copy(externalFeedback = text))
     }
+    private fun savePaper(run: PaperRun) {
+        mutableState.update { it.copy(papers = it.papers + (run.id to run)) }
+        persist("paper:${run.id}", "paper", run.exam, run)
+    }
+
+    /** Opens every question for one passage or recording. Returns the run id, or null if it could not start. */
+    fun startSection(skillId: String, sourceId: String, strict: Boolean): String? {
+        var s = state.value
+        if (s.loading) return null
+        val pack = s.pack ?: return null
+        if (s.paper != null) {
+            mutableState.update { it.copy(error = if (it.language == Language.RU)
+                "Сначала завершите открытую секцию или экзамен. Ответы в ней сохранены."
+                else "Finish the open section or exam first. Its answers are saved.") }
+            return null
+        }
+        if (s.session?.let { !it.finished } == true) {
+            if (!finishForNow()) return null
+            s = state.value
+        }
+        val section = Sections.of(pack, s.exam, skillId = skillId).firstOrNull { it.sourceId == sourceId } ?: return null
+        val part = PaperPart(section.sourceId, section.title, section.exercises,
+            timeLimitSeconds = if (strict) Sections.strictSeconds(section) else null,
+            transferSeconds = if (strict && section.listening) Sections.LISTENING_CHECK_SECONDS else 0)
+        val run = PaperRun(UUID.randomUUID().toString(), s.exam, PaperKind.SECTION, strict, listOf(part), startedAt = now(),
+            sourceSkillId = skillId, sourceId = sourceId)
+        savePaper(run)
+        return run.id
+    }
+
+    private fun livePaper(runId: String): PaperRun? = state.value.papers[runId]?.takeIf { it.active && !state.value.loading }
+
+    fun paperAnswer(runId: String, versionKey: String, text: String) {
+        val run = livePaper(runId) ?: return
+        val part = run.part ?: return
+        if (run.phase == PaperPhase.FINISHED || part.exercises.none { it.versionKey == versionKey } || run.answers[versionKey].orEmpty() == text) return
+        savePaper(run.copy(answers = run.answers + (versionKey to text)))
+    }
+
+    fun paperTick(runId: String, partId: String) {
+        val run = livePaper(runId) ?: return
+        val part = run.part?.takeIf { it.id == partId } ?: return
+        if (run.timeUp(part)) return
+        val next = when (run.phase) {
+            PaperPhase.WORKING -> run.copy(elapsedSeconds = run.elapsedSeconds + (part.id to run.elapsed(part) + 1))
+            PaperPhase.TRANSFER -> run.copy(transferElapsedSeconds = run.transferElapsedSeconds + (part.id to run.transferElapsed(part) + 1))
+            PaperPhase.FINISHED -> return
+        }
+        savePaper(next)
+    }
+
+    /** Keep working after the clock. The extra time is recorded; the answers remain ordinary evidence. */
+    fun paperOvertime(runId: String) {
+        val run = livePaper(runId) ?: return
+        val part = run.part ?: return
+        if (part.id !in run.overtimeParts) savePaper(run.copy(overtimeParts = run.overtimeParts + part.id))
+    }
+
+    /** One playback position per recording. Under exam conditions a finished recording cannot restart. */
+    fun paperAudio(runId: String, positionMs: Long, completed: Boolean) {
+        val run = livePaper(runId) ?: return
+        val part = run.part ?: return
+        val path = part.audioAssetPath ?: return
+        val previous = run.audio[path] ?: AudioProgress()
+        if (run.strict && previous.completed) return
+        val progress = AudioProgress(positionMs.coerceAtLeast(0), previous.completed || completed, true)
+        if (progress == previous) return
+        val phase = if (run.strict && progress.completed && run.phase == PaperPhase.WORKING && part.transferSeconds > 0) PaperPhase.TRANSFER else run.phase
+        savePaper(run.copy(audio = run.audio + (path to progress), phase = phase))
+    }
+
+    /** Marks the current part, saves one attempt per question and moves on; the last part finishes the sitting. */
+    fun submitPaperPart(runId: String) {
+        val s = state.value
+        val run = livePaper(runId) ?: return
+        val pack = s.pack ?: return
+        val part = run.part ?: return
+        if (part.id in run.submittedParts) return
+        val outcomes = PaperScoring.score(part, run.answers)
+        val attempts = PaperScoring.attempts(run, part, outcomes, pack, s.attempts, now(), today()) { UUID.randomUUID().toString() }
+        val last = run.partIndex + 1 >= run.parts.size
+        val next = run.copy(submittedParts = run.submittedParts + part.id,
+            partIndex = if (last) run.partIndex else run.partIndex + 1,
+            phase = if (last) PaperPhase.FINISHED else PaperPhase.WORKING,
+            finishedAt = if (last) now() else null)
+        mutableState.update { it.copy(attempts = it.attempts + attempts, papers = it.papers + (next.id to next)) }
+        enqueue {
+            val records = withContext(Dispatchers.Default) {
+                attempts.map { StoredRecord("attempt:${it.id}", "attempt", run.exam.name, storageJson.encodeToString(it)) } +
+                    StoredRecord("paper:${next.id}", "paper", run.exam.name, storageJson.encodeToString(next))
+            }
+            database.withTransaction { records.forEach { database.dao().put(it) } }
+        }
+    }
+
+    /** Leaves an unsubmitted sitting without marking it. Its typed answers stay in the saved record. */
+    fun abandonPaper(runId: String) {
+        val run = livePaper(runId) ?: return
+        savePaper(run.copy(abandoned = true))
+    }
+
     fun importContent(uri: Uri) {
         viewModelScope.launch {
             try {

@@ -106,8 +106,8 @@ fun IntensiveSupport(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, 
                             "Загружается исходная версия задания. Её ключ не заменяется ответом из новой версии."), style = StudyType.Small, color = c.inkSoft)
                     } else {
                         Text(exercise.prompt, style = StudyType.Reading.copy(fontSize = StudyType.Body.fontSize), color = c.ink)
-                        AnswerPair(l.label("You", "Вы"), attempt.answer, wrong = true)
-                        AnswerPair(l.label("Key", "Ключ"), exercise.acceptedAnswers.joinToString(" / "), wrong = false)
+                        AnswerPair(l.label("You", "Вы"), optionLabel(exercise, attempt.answer), wrong = true)
+                        AnswerPair(l.label("Key", "Ключ"), exercise.acceptedAnswers.joinToString(" / ") { optionLabel(exercise, it) }, wrong = false)
                         Text(exercise.explanation.text(l), style = StudyType.Small, color = c.ink)
                         exercise.evidence?.let { Text("${l.label("Evidence", "Подтверждение")}: $it", style = StudyType.Small, color = c.inkSoft) }
                         exercise.typicalErrors.firstOrNull()?.let { Text(it.text(l), style = StudyType.Small, color = c.inkSoft) }

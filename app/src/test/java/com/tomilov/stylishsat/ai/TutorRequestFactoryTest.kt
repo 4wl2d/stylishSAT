@@ -32,7 +32,8 @@ class TutorRequestFactoryTest {
 
     @Test fun everyClosedQuestionKeepsItsPreparedKeyAndEvidenceInTheMandatoryCore() {
         val closed = bank().exercises.filter { it.type !in listOf(ExerciseType.WRITING, ExerciseType.SPEAKING) }
-        assertEquals(768, closed.size)
+        // 768 package4 questions plus 67 package5 long-passage questions, including their shared lists, summaries and diagrams.
+        assertEquals(835, closed.size)
         closed.forEach { exercise -> Language.entries.forEach { language ->
             val request = TutorRequestFactory.create(exercise, exercise.acceptedAnswers.first(), language)
             val result = TutorPromptBuilder.build(request)

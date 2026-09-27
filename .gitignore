@@ -56,6 +56,7 @@ keystore.properties
 /tools/content/pilot/*
 !/tools/content/pilot/seed-v2.json
 !/tools/content/pilot/full-bank-v3.json
+!/tools/content/pilot/package4-index.json
 /tools/content/expansion/*
 !/tools/content/expansion/listening_work/
 /tools/content/expansion/listening_work/*

@@ -24,11 +24,12 @@ class PromptCandidateBudgetTest {
         assertEquals(1, Regex("English").findAll(value).count())
         return if (language == Language.RU) value.replace("English", "Russian") else value
     }
-    @Test fun candidateFitsAllTwelveFullSamplesAnd768ClosedQuestionsInBothLanguages() {
+    @Test fun candidateFitsAllTwelveFullSamplesAndEveryClosedQuestionInBothLanguages() {
         val pack = ContentPackCodec.decode(file("app/src/main/assets/content/seed-v1.json").readText())
         val closed = pack.exercises.filter { it.type !in setOf(ExerciseType.WRITING, ExerciseType.SPEAKING) }
         val writing = pack.exercises.filter { it.type == ExerciseType.WRITING && it.sampleAnswer != null }
-        assertEquals(768, closed.size); assertEquals(12, writing.size)
+        // 768 package4 questions plus 67 package5 long-passage questions.
+        assertEquals(835, closed.size); assertEquals(12, writing.size)
         for (manifest in manifests()) for (language in Language.entries) {
             val candidate = system(manifest, language)
             assertTrue(candidate.toByteArray().size <= TutorPromptBuilder.system(if (language == Language.RU) "ru" else "en").toByteArray().size)

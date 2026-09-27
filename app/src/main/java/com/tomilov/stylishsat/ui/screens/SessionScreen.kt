@@ -201,8 +201,8 @@ private fun ReviewStep(s: StudyUiState, vm: StudyViewModel, session: StudySessio
         MarkedText(l.label("Look back at your answer.", "Вернитесь к своему ответу."), StudyType.Headline)
         if (attempt != null) {
             Text(exercise.prompt, style = StudyType.Question.copy(fontSize = 18.sp, lineHeight = 27.sp), color = c.ink)
-            SelectionContainer { AnswerPair(l.label("You", "Вы"), attempt.answer, wrong = attempt.correct?.not()) }
-            if (exercise.acceptedAnswers.isNotEmpty()) AnswerPair(l.label("Key", "Ключ"), exercise.acceptedAnswers.joinToString(" / "), wrong = false)
+            SelectionContainer { AnswerPair(l.label("You", "Вы"), optionLabel(exercise, attempt.answer), wrong = attempt.correct?.not()) }
+            if (exercise.acceptedAnswers.isNotEmpty()) AnswerPair(l.label("Key", "Ключ"), exercise.acceptedAnswers.joinToString(" / ") { optionLabel(exercise, it) }, wrong = false)
             Explanation(exercise, l)
             exercise.sampleAnswer?.let { SampleAnswer(it, l) }
             exercise.sampleAudioAssetPath?.let { ListeningPlayer(it, l, sample = true) }
@@ -292,7 +292,12 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
             Block(padding = 20.dp) { SelectionContainer { Text(passage, style = StudyType.Reading.copy(fontSize = 17.sp, lineHeight = 28.sp), color = c.ink) } }
         }
         exercise.audioAssetPath?.let { ListeningPlayer(it, l) }
-        exercise.chart?.let { Chart(it) }
+        exercise.chart?.let { Chart(it, l) }
+        exercise.figure?.let { FigureView(it) }
+        exercise.group?.let { group ->
+            exercise.format?.let { Meta(formatLabel(it, l)) }
+            GroupContext(group, mapOf(exercise.id to 1))
+        }
         Text(exercise.prompt, style = StudyType.Question, color = c.ink)
         if (exercise.type == ExerciseType.SPEAKING) SpeakingPanel(s, vm)
         if (exercise.type == ExerciseType.MULTIPLE_CHOICE) {
@@ -300,7 +305,7 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
                 exercise.options.forEachIndexed { index, option ->
                     val selected = session.draft == option
                     val isKey = result != null && exercise.acceptedAnswers.any { AnswerChecker.normalize(it) == AnswerChecker.normalize(option) }
-                    OptionRow(('A'.code + index).toChar(), option, when {
+                    OptionRow(('A'.code + index).toChar(), optionLabel(exercise, option), when {
                         result == null -> if (selected) OptionState.Selected else OptionState.Idle
                         isKey -> OptionState.Key
                         selected -> OptionState.Wrong

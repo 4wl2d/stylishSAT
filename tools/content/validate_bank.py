@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import unicodedata
 import wave
 
@@ -33,6 +34,42 @@ def normalized(text):
     return ' '.join(unicodedata.normalize('NFKC', text).split())
 
 
+def canonical_sha(item):
+    return hashlib.sha256(json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+
+PACKAGE_VERSION = 5
+SCHEMA_VERSION = 3
+ORIGINAL_EXERCISES = 810
+LONG_READING = {'PRACTICE': 2, 'ASSESSMENT': 3}
+NEW_TASK1 = {'LINE': 1, 'PIE': 1, 'TABLE': 2, 'PROCESS': 1, 'MAP': 2}
+FORMATS = {'TRUE_FALSE_NOT_GIVEN', 'YES_NO_NOT_GIVEN', 'MATCHING_HEADINGS', 'MATCHING_INFORMATION', 'MATCHING_FEATURES',
+    'SUMMARY_COMPLETION', 'SENTENCE_COMPLETION', 'NOTE_COMPLETION', 'TABLE_COMPLETION', 'DIAGRAM_LABEL', 'MAP_LABEL',
+    'MULTIPLE_CHOICE', 'SHORT_ANSWER'}
+LIST_FORMATS = {'MATCHING_HEADINGS', 'MATCHING_INFORMATION', 'MATCHING_FEATURES', 'SUMMARY_COMPLETION', 'MAP_LABEL'}
+GAP = re.compile(r'\[\[([^\]]+)\]\]')
+
+
+def figure_refs(figure, where):
+    """Validate figure geometry; return gap markers used in node labels."""
+    fields(figure, {'kind', 'title', 'panels', 'caption'}, where)
+    require(figure['kind'] in {'PROCESS', 'MAP', 'DIAGRAM'} and figure['title'].strip() and figure['panels'], where + ': figure')
+    refs = []
+    for panel in figure['panels']:
+        fields(panel, {'title', 'nodes', 'links'}, where)
+        ids = set()
+        for node in panel['nodes']:
+            fields(node, {'id', 'label', 'x', 'y', 'width', 'height', 'shape'}, where)
+            width, height = node.get('width', 0.24), node.get('height', 0.14)
+            require(node['label'].strip() and node['id'] not in ids and node.get('shape', 'BOX') in {'BOX', 'ROUND', 'LABEL'}, where + ': node')
+            require(0 <= node['x'] and 0 <= node['y'] and width > 0 and height > 0 and node['x'] + width <= 1.0001 and node['y'] + height <= 1.0001, where + ': node outside panel')
+            ids.add(node['id']); refs += GAP.findall(node['label'])
+        for link in panel.get('links', []):
+            fields(link, {'from', 'to', 'label'}, where)
+            require(link['from'] in ids and link['to'] in ids and link['from'] != link['to'], where + ': link')
+    return refs
+
+
 def validate(path):
     pilot = validate_pilot(ROOT / 'tools/content/pilot/seed-v2.json')
     pack = read(path)
@@ -41,7 +78,7 @@ def validate(path):
         require(info == {'schemaVersion': 1, 'contentId': pack['id'], 'contentVersion': pack['version'],
             'contentSchemaVersion': pack['schemaVersion'], 'sha256': sha(path)}, 'Bundled version/hash metadata mismatch')
     fields(pack, PACK_FIELDS, 'pack')
-    require(pack['schemaVersion'] == 2 and pack['version'] == 4, 'Expected full bank schema2 / package4')
+    require(pack['schemaVersion'] == SCHEMA_VERSION and pack['version'] == PACKAGE_VERSION, f'Expected full bank schema{SCHEMA_VERSION} / package{PACKAGE_VERSION}')
     require(pack['reviewStatus'] == 'AI_DRAFT_MACHINE_VALIDATED', 'Human expert status must remain pending')
     bilingual(pack['title'], 'pack.title')
     skills = {s['id']: s for s in pack['skills']}
@@ -59,8 +96,15 @@ def validate(path):
         for key in ['title', 'body', 'workedExample']: bilingual(lesson[key], lesson['id'] + '.' + key)
         require(len(lesson['body']['en'].split()) >= 35 and len(lesson['workedExample']['en'].split()) >= 20, 'Substantive lesson content')
     items = pack['exercises']; by_id = {e['id']: e for e in items}
-    require(len(by_id) == len(items) == 810, 'Expected810 unique exercises')
-    require(Counter(e['skillId'] for e in items) == {
+    frozen = read(ROOT / 'tools/content/pilot/package4-index.json')
+    original_ids = [e['id'] for e in frozen['exercises']]
+    require(len(original_ids) == ORIGINAL_EXERCISES and [e['id'] for e in items[:ORIGINAL_EXERCISES]] == original_ids, 'Package4 exercises must stay first, in order')
+    additions = items[ORIGINAL_EXERCISES:]
+    long_reading = [e for e in additions if e['skillId'] == 'ielts_reading']
+    new_task1 = [e for e in additions if e['skillId'] == 'ielts_writing']
+    require(len(additions) == len(long_reading) + len(new_task1), 'Only long Reading passages and Task 1 visuals are added in package5')
+    require(len(by_id) == len(items), 'Exercise ids must be unique')
+    require(Counter(e['skillId'] for e in items[:ORIGINAL_EXERCISES]) == {
         **{key: 36 for key, s in skills.items() if s['exam'] == 'SAT'},
         'ielts_reading': 240, 'ielts_listening': 240, 'ielts_writing': 24, 'ielts_speaking': 18}, 'Full-bank quantities')
     listening = read(ROOT / 'tools/content/expansion/listening_work/audio-manifest.json')['clips']
@@ -68,7 +112,7 @@ def validate(path):
     spoken = read(ROOT / 'docs/content/speaking-audio-manifest.json')['samples']
     groups = {key: defaultdict(set) for key in ['familyId', 'sourceId', 'passage', 'audioAssetPath']}
     for item in items:
-        key = item['id']; fields(item, EX_FIELDS | {'sampleAudioAssetPath'}, key)
+        key = item['id']; fields(item, EX_FIELDS | {'sampleAudioAssetPath', 'format', 'group', 'figure', 'sourceTitle'}, key)
         require(item['exam'] == skills[item['skillId']]['exam'], key + ': exam mismatch')
         require(item['split'] in SPLITS and item['type'] in TYPES, key + ': enum')
         require(item['version'] > 0 and item['difficulty'] in [1, 2, 3] and item['expectedSeconds'] > 0, key + ': metadata')
@@ -79,8 +123,11 @@ def validate(path):
             for value in item.get(field, []): bilingual(value, key + '.' + field)
         for field, grouping in groups.items():
             if item.get(field): grouping[normalized(item[field])].add(item['split'])
+        if item.get('format') is not None: require(item['format'] in FORMATS, key + ': format')
         if item['type'] == 'MULTIPLE_CHOICE':
-            require(len(item['options']) == len(set(item['options'])) and (len(item['options']) == 4 if item['exam'] == 'SAT' else 3 <= len(item['options']) <= 4), key + ': option uniqueness')
+            listed = item.get('format') in LIST_FORMATS and bool(item.get('group', {}).get('options'))
+            require(len(item['options']) == len(set(item['options'])) and (len(item['options']) == 4 if item['exam'] == 'SAT' else (3 <= len(item['options']) <= 12 if listed else 3 <= len(item['options']) <= 4)), key + ': option uniqueness')
+            if listed: require(item['options'] == [o['key'] for o in item['group']['options']], key + ': list keys')
             require(len(item['acceptedAnswers']) == 1 and item['acceptedAnswers'][0] in item['options'], key + ': MC key')
         elif item['type'] == 'NUMERIC':
             require(item['acceptedAnswers'], key + ': no numeric key')
@@ -112,12 +159,32 @@ def validate(path):
             require(spoken[key]['transcript'] == item['sampleAnswer'], key + ': spoken sample transcript')
             require(compact[spoken[key]['assetPath']]['compactAssetPath'] == item['sampleAudioAssetPath'], key + ': spoken sample mapping')
         if item.get('chart'):
-            chart = item['chart']; fields(chart, {'title','xLabel','yLabel','unit','labels','series'}, key)
+            chart = item['chart']; fields(chart, {'title','xLabel','yLabel','unit','labels','series','kind'}, key)
             require(all(chart[k] for k in ['title', 'xLabel', 'yLabel', 'unit', 'labels', 'series']), key + ': chart metadata')
+            require(chart.get('kind', 'BAR') in {'BAR', 'LINE', 'PIE', 'TABLE'}, key + ': chart kind')
             for series in chart['series']:
                 fields(series, {'name', 'values'}, key)
                 require(len(series['values']) == len(chart['labels']) and all(isinstance(v, (int, float)) and math.isfinite(v) for v in series['values']), key + ': chart values')
+                if chart.get('kind') == 'PIE': require(all(v >= 0 for v in series['values']) and abs(sum(series['values']) - 100) < 0.01, key + ': pie shares')
+        if item.get('figure'):
+            require(item['type'] == 'WRITING' and not item.get('chart') and not figure_refs(item['figure'], key), key + ': Task 1 figure')
+        if item.get('group'):
+            group = item['group']; fields(group, {'id', 'instruction', 'options', 'text', 'figure'}, key)
+            require(group['id'].startswith(item['sourceId'] + ':') and group['instruction'].strip(), key + ': group identity')
+            for option in group.get('options', []):
+                fields(option, {'key', 'text'}, key); require(option['key'].strip() and option['text'].strip(), key + ': group option')
+            require(len({o['key'] for o in group.get('options', [])}) == len(group.get('options', [])), key + ': group keys')
     for field, grouping in groups.items(): require(all(len(s) == 1 for s in grouping.values()), field + ': split leakage')
+    members = defaultdict(list)
+    for position, item in enumerate(items):
+        if item.get('group'): members[item['group']['id']].append((position, item))
+    for group_id, entries in members.items():
+        first = entries[0][1]['group']
+        require(all(item['group'] == first for _, item in entries), group_id + ': group context differs')
+        require([p for p, _ in entries] == list(range(entries[0][0], entries[0][0] + len(entries))), group_id + ': members must be consecutive')
+        ids = {item['id'] for _, item in entries}
+        refs = GAP.findall(first.get('text') or '') + (figure_refs(first['figure'], group_id) if first.get('figure') else [])
+        require(set(refs) <= ids and len(refs) == len(set(refs)), group_id + ': gap markers')
     for skill in skills:
         subset = [e for e in items if e['skillId'] == skill]
         require({e['split'] for e in subset} == SPLITS, skill + ': missing split')
@@ -125,11 +192,26 @@ def validate(path):
             require(sum(e['split'] == 'DIAGNOSTIC' for e in subset) == 2, skill + ': diagnostic count')
             require(Counter(e['difficulty'] for e in subset) == {1: 12, 2: 12, 3: 12}, skill + ': difficulty quantities')
     for skill in ['ielts_reading', 'ielts_listening']:
-        counts = Counter(e['sourceId'] for e in items if e['skillId'] == skill)
+        counts = Counter(e['sourceId'] for e in items[:ORIGINAL_EXERCISES] if e['skillId'] == skill)
         require(len(counts) == 24 and set(counts.values()) == {10}, skill + ':24 sources x10 questions required')
+    # Package5: full-length Academic passages in the formats the short passages lacked.
+    long_sources = defaultdict(list)
+    for item in long_reading: long_sources[item['sourceId']].append(item)
+    require(Counter(v[0]['split'] for v in long_sources.values()) == LONG_READING, 'Long passage splits')
+    for source, questions in long_sources.items():
+        passage = questions[0]['passage']
+        require(source.startswith('reading-v5-') and all(q['passage'] == passage and q['familyId'] == source for q in questions), source + ': one passage')
+        require(700 <= len(passage.split()) <= 900 and 13 <= len(questions) <= 14, source + ': 700-900 words and 13-14 questions')
+        require(all(q.get('format') in FORMATS and q.get('sourceTitle') for q in questions), source + ': formats and title')
+    assessment_questions = sum(len(v) for v in long_sources.values() if v[0]['split'] == 'ASSESSMENT')
+    require(assessment_questions == 40, 'Three assessment passages provide one 40-question reading paper')
+    for fmt in ['TRUE_FALSE_NOT_GIVEN', 'YES_NO_NOT_GIVEN', 'MATCHING_HEADINGS', 'MATCHING_INFORMATION', 'MATCHING_FEATURES', 'SUMMARY_COMPLETION', 'DIAGRAM_LABEL']:
+        require(any(q.get('format') == fmt for q in long_reading), 'Missing reading format ' + fmt)
+    visuals = Counter((e.get('chart') or {}).get('kind') or e['figure']['kind'] for e in new_task1)
+    require(visuals == NEW_TASK1 and all(e.get('minWords') == 150 and len(e['criteria']) == 4 for e in new_task1), 'Task 1 visual coverage')
     writing = [e for e in items if e['type'] == 'WRITING']
-    require(sum(bool(e.get('chart')) for e in writing) == 12 and len(writing) == 24, 'Task1/Task2 count')
-    require(sum(bool(e.get('sampleAnswer')) for e in writing) == 12, '12 written samples')
+    require(sum(bool(e.get('chart')) for e in writing[:24]) == 12 and len(writing) == 24 + len(new_task1), 'Task1/Task2 count')
+    require(sum(bool(e.get('sampleAnswer')) for e in writing[:24]) == 12, '12 written samples')
     require(sum(bool(e.get('sampleAudioAssetPath')) for e in items) == 6, '6 spoken samples')
     paths = {e[field] for e in items for field in ['audioAssetPath', 'sampleAudioAssetPath'] if e.get(field)}
     media_hashes = {value['compactAssetPath']: value['sha256'] for value in compact.values()}
@@ -145,18 +227,28 @@ def validate(path):
         require(before == after or after['version'] > before['version'], 'Changed published item needs version increment')
         require(set(before['acceptedAnswers']) <= set(after['acceptedAnswers']), 'Previously published accepted answer removed')
     previous = read(ROOT / 'tools/content/pilot/full-bank-v3.json')
-    changed = []
     for before in previous['exercises']:
         after = by_id[before['id']]
         if before != after:
-            changed.append(before['id'])
             require(after['version'] > before['version'], 'Changed package3 item must increment its version')
-            require(before['acceptedAnswers'] == after['acceptedAnswers'], 'Package4 does not change mathematical keys')
-    require(changed == ['sat-data-v3-probability-without-replacement'], 'Unexpected changes relative to frozen package3')
+            require(set(before['acceptedAnswers']) <= set(after['acceptedAnswers']), 'Previously published accepted answer removed')
+    # Package4 is frozen as a per-exercise hash index: every change needs a newer exercise version.
+    require(frozen['contentVersion'] == 4, 'Package4 index')
+    changed = []
+    for before in frozen['exercises']:
+        after = by_id[before['id']]
+        require((after['split'], after['familyId'], after['sourceId']) == (before['split'], before['familyId'], before['sourceId']), 'Published split changed')
+        require(set(before['acceptedAnswers']) <= set(after['acceptedAnswers']), 'Previously published accepted answer removed')
+        if canonical_sha(after) != before['sha256']:
+            changed.append(before['id'])
+            require(after['version'] > before['version'], 'Changed package4 item must increment its version: ' + before['id'])
     return {'schemaVersion': 1, 'contentVersion': pack['version'], 'sha256': sha(path), 'reviewStatus': pack['reviewStatus'],
-        'counts': {'exercises': len(items), 'lessons': len(pack['lessons']), 'sat': 288, 'readingSources': 24,
-            'readingQuestions': 240, 'listeningSources': 24, 'listeningQuestions': 240, 'writingTask1': 12,
-            'writingTask2': 12, 'speakingSets': 18, 'writtenSamples': 12, 'spokenAudioSamples': 6, 'bundledAudioFiles': len(paths)},
+        'counts': {'exercises': len(items), 'lessons': len(pack['lessons']), 'sat': 288, 'readingSources': 24 + len(long_sources),
+            'readingQuestions': 240 + len(long_reading), 'longReadingPassages': len(long_sources), 'listeningSources': 24, 'listeningQuestions': 240,
+            'writingTask1': 12 + len(new_task1), 'writingTask2': 12, 'speakingSets': 18, 'writtenSamples': 12, 'spokenAudioSamples': 6,
+            'bundledAudioFiles': len(paths), 'changedSincePackage4': len(changed)},
+        'readingFormats': dict(sorted(Counter(e.get('format', 'UNLABELLED') for e in items if e['skillId'] == 'ielts_reading').items())),
+        'task1Visuals': dict(sorted(Counter((e.get('chart') or {}).get('kind', 'BAR') if e.get('chart') else e['figure']['kind'] for e in writing if e.get('chart') or e.get('figure')).items())),
         'bySkill': {skill: dict(Counter(e['split'] for e in items if e['skillId'] == skill)) for skill in skills},
         'preservedPilotValidationSha256': pilot['sha256'], 'machineChecksPassed': ['Strict structure and enums',
             'Requested quantities, domains, levels and split coverage', 'Bilingual staged help and lesson content',

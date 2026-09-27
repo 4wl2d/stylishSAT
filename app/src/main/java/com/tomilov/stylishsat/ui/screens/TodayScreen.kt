@@ -47,7 +47,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 
 @Composable
-fun TodayScreen(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, String?) -> Unit, plannedDay: (Int) -> Unit, resume: () -> Unit) {
+fun TodayScreen(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, String?) -> Unit, plannedDay: (Int) -> Unit, openPaper: (String) -> Unit, resume: () -> Unit) {
     val rhythm = rememberRhythm(s)
     var intensiveSheet by rememberSaveable { mutableStateOf(false) }
     var dayDetail by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -55,7 +55,7 @@ fun TodayScreen(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, Strin
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(top = 10.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)) {
         WeekStrip(rhythm, s.language)
-        Hero(s, vm, begin, plannedDay, resume)
+        Hero(s, vm, begin, plannedDay, openPaper, resume)
         TodayMeter(s, rhythm)
         QuickRow(s, vm, begin) { intensiveSheet = true }
         Drafts(s, vm, resume)
@@ -103,11 +103,12 @@ private fun WeekStrip(rhythm: Rhythm, l: Language) {
 
 /** Exactly one next step, always in the same place. */
 @Composable
-private fun Hero(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, String?) -> Unit, plannedDay: (Int) -> Unit, resume: () -> Unit) {
+private fun Hero(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, String?) -> Unit, plannedDay: (Int) -> Unit, openPaper: (String) -> Unit, resume: () -> Unit) {
     val l = s.language
     val c = Study.colors
     val pack = s.pack ?: return
     val session = s.session?.takeIf { !it.finished }
+    val section = s.paper?.takeIf { it.kind == PaperKind.SECTION }
     val plan = s.plan
     val skillName = { id: String -> pack.skills.find { it.id == id }?.title?.text(l) ?: id }
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(c.hero).padding(22.dp),
@@ -128,6 +129,13 @@ private fun Hero(s: StudyUiState, vm: StudyViewModel, begin: (ContentSplit, Stri
                 StepTrack(sessionMarks(s, session), onHero = true)
                 Detail(l.label("Step ${session.index + 1} of ${session.stepCount}", "Шаг ${session.index + 1} из ${session.stepCount}"))
                 Go(l.label("Continue", "Продолжить"), resume)
+            }
+            section != null -> {
+                val part = section.part
+                Label(l.label("In progress", "В процессе") + " · " + if (section.strict) l.label("Exam conditions", "Экзаменационный режим") else l.label("Section", "Секция"))
+                Title(part?.title ?: l.label("Section", "Секция"))
+                part?.let { Detail(l.label("${section.answered(it)} of ${it.exercises.size} answered", "Отвечено ${section.answered(it)} из ${it.exercises.size}")) }
+                Go(l.label("Continue", "Продолжить")) { openPaper(section.id) }
             }
             plan?.mode == PlanMode.INTENSIVE -> {
                 val block = plan.blocks.firstOrNull { !it.completed }

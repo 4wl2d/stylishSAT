@@ -5,6 +5,9 @@ Versions follow the [version policy](docs/VERSIONING.md).
 ## Unreleased
 
 - Refresh the README for the 0.4.0 study flow, distinguish it from the published 0.3.1 APK and label the older screenshots as an archive.
+- Full sections: every question for one IELTS Reading passage or Listening recording on one page, with one clock and one saved playback position. Exam conditions add a clock (90 seconds a question for Reading) and play a recording once, then give two minutes to check. Short drills remain the practice mode. Answers given together in one sitting are not counted as repeats of each other.
+- Content package 5 (schema 3): five full-length Academic passages of 864–891 words with 13–14 questions each, in formats the bank lacked — True/False/Not Given, Yes/No/Not Given, matching headings, matching information and features, summary completion from a word box, sentence and table completion, and diagram labelling. The three assessment passages (40 questions) are held back from single-item timed checks.
+- Seven new Task 1 visuals: line graph, pie charts, tables, a process diagram and before/after maps, drawn in the app with a values table for accessibility.
 
 ## 0.4.0 — 2026-09-27
 

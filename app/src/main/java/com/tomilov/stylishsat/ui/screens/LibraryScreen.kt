@@ -32,7 +32,7 @@ import com.tomilov.stylishsat.ui.theme.Study
 import com.tomilov.stylishsat.ui.theme.StudyType
 
 @Composable
-fun LibraryScreen(s: StudyUiState, begin: (ContentSplit, String?) -> Unit) {
+fun LibraryScreen(s: StudyUiState, begin: (ContentSplit, String?) -> Unit, startSection: (String, String, Boolean) -> Unit, openPaper: (String) -> Unit) {
     val pack = s.pack ?: return
     var skillIdValue by rememberSaveable(s.exam) { mutableStateOf<String?>(null) }
     var lessonIdValue by rememberSaveable(s.exam) { mutableStateOf<String?>(null) }
@@ -47,7 +47,7 @@ fun LibraryScreen(s: StudyUiState, begin: (ContentSplit, String?) -> Unit) {
     }, label = "library") { level ->
         when {
             level == 2 && lesson != null && skill != null -> LessonReader(s, skill, lesson, { lessonIdValue = null }) { begin(ContentSplit.PRACTICE, skill.id) }
-            level >= 1 && skill != null -> SkillPage(s, skill, states[skill.id], { skillIdValue = null }, { lessonIdValue = it }) { begin(ContentSplit.PRACTICE, skill.id) }
+            level >= 1 && skill != null -> SkillPage(s, skill, states[skill.id], { skillIdValue = null }, { lessonIdValue = it }, startSection, openPaper) { begin(ContentSplit.PRACTICE, skill.id) }
             else -> SkillList(s, states) { skillIdValue = it; lessonIdValue = null }
         }
     }
@@ -98,10 +98,12 @@ private fun SkillList(s: StudyUiState, states: Map<String, SkillState>, open: (S
 }
 
 @Composable
-private fun SkillPage(s: StudyUiState, skill: Skill, state: SkillState?, back: () -> Unit, openLesson: (String) -> Unit, practise: () -> Unit) {
+private fun SkillPage(s: StudyUiState, skill: Skill, state: SkillState?, back: () -> Unit, openLesson: (String) -> Unit,
+    startSection: (String, String, Boolean) -> Unit, openPaper: (String) -> Unit, practise: () -> Unit) {
     val l = s.language
     val c = Study.colors
     val lessons = s.pack?.lessons.orEmpty().filter { it.skillId == skill.id }
+    val sections = remember(s.pack, skill.id) { s.pack?.let { Sections.of(it, skill.exam, ContentSplit.PRACTICE, skill.id) }.orEmpty() }
     Column(Modifier.fillMaxSize()) {
         GlyphButton(Glyph.ArrowLeft, l.label("Back", "Назад"), back, Modifier.padding(start = 8.dp))
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -126,9 +128,43 @@ private fun SkillPage(s: StudyUiState, skill: Skill, state: SkillState?, back: (
                 }
                 Hairline()
             }
+            if (sections.isNotEmpty()) SectionList(s, sections, startSection, openPaper)
         }
-        StudyButton(l.label("Practise this skill", "Отработать навык"), practise, Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), arrow = true)
+        StudyButton(if (sections.isEmpty()) l.label("Practise this skill", "Отработать навык") else l.label("Short drills", "Короткие упражнения"), practise, Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), arrow = true)
     }
+}
+
+/** Whole passages and recordings. Drills stay available below as the short practice mode. */
+@Composable
+private fun SectionList(s: StudyUiState, sections: List<SourceSection>, startSection: (String, String, Boolean) -> Unit, openPaper: (String) -> Unit) {
+    val l = s.language
+    val c = Study.colors
+    val active = s.paper
+    SectionLabel(l.label("Full sections", "Целые секции"), Modifier.padding(top = 12.dp), "${sections.size}")
+    Text(l.label("Every question for one passage or recording on one page. Exam conditions add the clock and play a recording once.",
+        "Все вопросы к одному тексту или записи на одной странице. В экзаменационном режиме идёт таймер, а запись звучит один раз."),
+        style = StudyType.Small, color = c.inkSoft)
+    sections.forEach { section ->
+        val done = remember(s.attempts, section) { Sections.answered(section, s.attempts) }
+        val formats = section.exercises.mapNotNull { it.format }.distinct()
+        val open = active?.takeIf { it.sourceId == section.sourceId && it.sourceSkillId == section.skillId }
+        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(c.raised).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(section.title, style = StudyType.Title.copy(fontSize = 18.sp), color = c.ink)
+            Meta(listOfNotNull(
+                l.label("${section.exercises.size} questions", "вопросов: ${section.exercises.size}"),
+                if (section.listening) l.label("recording", "запись") else l.label("${section.words} words", "${section.words} слов"),
+                if (done > 0) l.label("$done answered before", "ранее отвечено: $done") else l.label("new", "новая"),
+            ).joinToString(" · "))
+            if (formats.isNotEmpty()) Text(formats.joinToString(" · ") { formatLabel(it, l) }, style = StudyType.Small.copy(fontSize = 13.sp), color = c.inkSoft)
+            if (open != null) StudyButton(l.label("Continue", "Продолжить"), { openPaper(open.id) }, Modifier.fillMaxWidth(), compact = true, arrow = true)
+            else Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StudyButton(l.label("Practise", "Практика"), { startSection(section.skillId, section.sourceId, false) }, Modifier.weight(1f), compact = true, enabled = active == null)
+                StudyButton(l.label("Exam conditions", "Как на экзамене"), { startSection(section.skillId, section.sourceId, true) }, Modifier.weight(1f), tone = Tone.Quiet, compact = true, enabled = active == null)
+            }
+        }
+    }
+    if (active != null && sections.none { it.sourceId == active.sourceId }) Text(l.label("Finish the open section or exam before starting another.", "Завершите открытую секцию или экзамен, прежде чем начинать новую."),
+        style = StudyType.Small, color = c.inkSoft)
 }
 
 @Composable

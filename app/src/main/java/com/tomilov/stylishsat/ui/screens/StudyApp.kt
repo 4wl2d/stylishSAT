@@ -43,7 +43,7 @@ fun Language.label(en: String, ru: String) = if (this == Language.RU) ru else en
 
 enum class Tab { Today, Library, Progress }
 
-private enum class Screen { Splash, Failed, Onboarding, Session, Settings, Tabs }
+private enum class Screen { Splash, Failed, Onboarding, Session, Paper, Settings, Tabs }
 
 @Composable
 fun StudyApp(vm: StudyViewModel) {
@@ -51,6 +51,7 @@ fun StudyApp(vm: StudyViewModel) {
     var tab by rememberSaveable { mutableStateOf(Tab.Today) }
     var practice by rememberSaveable { mutableStateOf(false) }
     var settingsOpen by rememberSaveable { mutableStateOf(false) }
+    var paperIdValue by rememberSaveable { mutableStateOf<String?>(null) }
     val l = s.language
     val c = Study.colors
     val activeSession = { vm.state.value.session?.let { !it.finished } == true }
@@ -59,17 +60,21 @@ fun StudyApp(vm: StudyViewModel) {
         if (activeSession()) { practice = true; settingsOpen = false }
     }
     val plannedDay: (Int) -> Unit = { day -> vm.startPlannedDay(day); if (activeSession()) practice = true }
+    val openPaper: (String) -> Unit = { id -> paperIdValue = id; settingsOpen = false }
+    val startSection: (String, String, Boolean) -> Unit = { skill, source, strict -> vm.startSection(skill, source, strict)?.let(openPaper) }
     val onboarding = !s.loading && s.pack != null && !s.settings.onboarded && s.attempts.isEmpty() &&
         s.sessions.isEmpty() && s.plans.isEmpty() && s.dailyPlans.isEmpty()
     val screen = when {
         s.pack == null -> if (s.loading) Screen.Splash else Screen.Failed
         // A draft being restored keeps loading visible; the old finished session must not flash first.
+        paperIdValue?.let { it in s.papers } == true && !s.loading -> Screen.Paper
         practice && s.session != null && !s.loading -> Screen.Session
         onboarding -> Screen.Onboarding
         settingsOpen -> Screen.Settings
         else -> Screen.Tabs
     }
     BackHandler(screen == Screen.Session) { practice = false }
+    BackHandler(screen == Screen.Paper) { paperIdValue = null }
     BackHandler(screen == Screen.Settings) { settingsOpen = false }
     BackHandler(screen == Screen.Tabs && tab != Tab.Today) { tab = Tab.Today }
     val tabs = rememberSaveableStateHolder()
@@ -87,14 +92,15 @@ fun StudyApp(vm: StudyViewModel) {
                 Screen.Session -> SessionScreen(s, vm, Modifier.fillMaxSize(),
                     close = { practice = false; tab = Tab.Today },
                     again = { practice = false; begin(ContentSplit.PRACTICE, null) })
+                Screen.Paper -> PaperScreen(s, vm, paperIdValue.orEmpty()) { paperIdValue = null; tab = Tab.Today }
                 Screen.Settings -> SettingsScreen(s, vm) { settingsOpen = false }
                 Screen.Tabs -> Column(Modifier.fillMaxSize()) {
                     TopBar(s, vm, onStreak = { tab = Tab.Progress }, onSettings = { settingsOpen = true })
                     Box(Modifier.weight(1f)) {
                         tabs.SaveableStateProvider(tab) {
                             when (tab) {
-                                Tab.Today -> TodayScreen(s, vm, begin, plannedDay) { practice = true }
-                                Tab.Library -> LibraryScreen(s, begin)
+                                Tab.Today -> TodayScreen(s, vm, begin, plannedDay, openPaper) { practice = true }
+                                Tab.Library -> LibraryScreen(s, begin, startSection, openPaper)
                                 Tab.Progress -> ProgressScreen(s)
                             }
                         }
