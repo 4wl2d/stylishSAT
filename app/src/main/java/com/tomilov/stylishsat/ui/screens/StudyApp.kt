@@ -41,7 +41,7 @@ import java.util.Locale
 
 fun Language.label(en: String, ru: String) = if (this == Language.RU) ru else en
 
-enum class Tab { Today, Library, Progress }
+enum class Tab { Today, Library, Exam, Progress }
 
 private enum class Screen { Splash, Failed, Onboarding, Session, Paper, Revision, Review, Notebook, Settings, Tabs }
 
@@ -108,7 +108,11 @@ fun StudyApp(vm: StudyViewModel) {
                 Screen.Revision -> RevisionScreen(s, vm, revisionWorkValue.orEmpty()) { revisionWorkValue = null }
                 Screen.Review -> AttemptReviewScreen(s, vm, reviewAttemptValue.orEmpty(), openRevision) { reviewAttemptValue = null }
                 Screen.Notebook -> NotebookScreen(s, vm, openAttempt, followUps) { notebookOpen = false }
-                Screen.Paper -> PaperScreen(s, vm, paperIdValue.orEmpty()) { paperIdValue = null; tab = Tab.Today }
+                Screen.Paper -> PaperScreen(s, vm, paperIdValue.orEmpty(), openRevision) {
+                    // An exam paper returns to the Exam tab; a section returns to where it was opened.
+                    if (s.papers[paperIdValue.orEmpty()]?.kind?.let { it != PaperKind.SECTION } == true) tab = Tab.Exam
+                    paperIdValue = null
+                }
                 Screen.Settings -> SettingsScreen(s, vm) { settingsOpen = false }
                 Screen.Tabs -> Column(Modifier.fillMaxSize()) {
                     TopBar(s, vm, onStreak = { tab = Tab.Progress }, onSettings = { settingsOpen = true })
@@ -117,6 +121,7 @@ fun StudyApp(vm: StudyViewModel) {
                             when (tab) {
                                 Tab.Today -> TodayScreen(s, vm, begin, plannedDay, openPaper, continueRevision, followUps) { practice = true }
                                 Tab.Library -> LibraryScreen(s, begin, startSection, openPaper)
+                                Tab.Exam -> ExamScreen(s, vm, openPaper)
                                 Tab.Progress -> ProgressScreen(s, openRevision, openAttempt) { notebookOpen = true }
                             }
                         }
@@ -182,6 +187,7 @@ private fun BottomBar(selected: Tab, l: Language, onSelect: (Tab) -> Unit) {
             listOf(
                 Triple(Tab.Today, Glyph.Today, l.label("Today", "Сегодня")),
                 Triple(Tab.Library, Glyph.Library, l.label("Library", "Библиотека")),
+                Triple(Tab.Exam, Glyph.Sheet, l.label("Exam", "Экзамен")),
                 Triple(Tab.Progress, Glyph.Progress, l.label("Progress", "Прогресс")),
             ).forEach { (tab, glyph, title) ->
                 val on = tab == selected

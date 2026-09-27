@@ -22,6 +22,7 @@ import com.tomilov.stylishsat.ui.theme.Study
 enum class Glyph {
     Today, Library, Progress, Settings, Close, Check, Cross, Play, Pause, Stop, Mic, ArrowRight, ArrowLeft,
     ChevronRight, ChevronDown, Flame, Clock, Search, More, Plus, Bulb, Headphones, Calendar, Download, Spark, Bolt, Dot,
+    Bookmark, Sheet, Calculator, Sigma, Marker, Note, Strike, Loop,
 }
 
 @Composable
@@ -108,5 +109,22 @@ private fun DrawScope.drawGlyph(glyph: Glyph, tint: Color, filled: Boolean) {
         }
         Glyph.Bolt -> poly(13.5f, 2f, 4.5f, 13.5f, 11.5f, 13.5f, 10.5f, 22f, 19.5f, 10f, 12.5f, 10f, close = true, fill = filled)
         Glyph.Dot -> dot(12f, 12f, 3.5f)
+        Glyph.Bookmark -> poly(6.5f, 3.5f, 17.5f, 3.5f, 17.5f, 20.5f, 12f, 16f, 6.5f, 20.5f, close = true, fill = filled)
+        Glyph.Sheet -> { box(5f, 3f, 14f, 18f, 2.2f); line(8.5f, 8f, 15.5f, 8f); line(8.5f, 12f, 15.5f, 12f); line(8.5f, 16f, 12.5f, 16f) }
+        Glyph.Calculator -> {
+            box(5f, 2.8f, 14f, 18.4f, 2.4f); box(8f, 5.8f, 8f, 3.6f, 0.8f, true)
+            dot(9f, 12.8f, 1.2f); dot(12f, 12.8f, 1.2f); dot(15f, 12.8f, 1.2f); dot(9f, 16.8f, 1.2f); dot(12f, 16.8f, 1.2f); dot(15f, 16.8f, 1.2f)
+        }
+        Glyph.Sigma -> poly(17.5f, 5f, 6.5f, 5f, 12.5f, 12f, 6.5f, 19f, 17.5f, 19f)
+        Glyph.Marker -> {
+            rotate(35f, p(12f, 12f)) { box(9f, 2.5f, 6f, 13f, 1.4f, filled); poly(9.5f, 15.5f, 12f, 20.5f, 14.5f, 15.5f) }
+            line(4f, 21f, 20f, 21f, 2.4f)
+        }
+        Glyph.Note -> { poly(4f, 20f, 5f, 15.5f, 16f, 4.5f, 19.5f, 8f, 8.5f, 19f, close = true); line(13.5f, 7f, 17f, 10.5f) }
+        Glyph.Strike -> { box(3.5f, 7f, 17f, 10f, 5f); line(3f, 12f, 21f, 12f, 2.2f) }
+        Glyph.Loop -> {
+            drawArc(tint, 200f, 250f, false, p(4.5f, 4.5f), Size(15f * u, 15f * u), style = stroke)
+            poly(3.8f, 7.2f, 5.2f, 11.2f, 9f, 9.4f)
+        }
     }
 }

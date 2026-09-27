@@ -2,11 +2,14 @@ package com.tomilov.stylishsat.domain
 
 import kotlinx.serialization.Serializable
 
-/** A sitting with several questions answered together: a source section now, exam papers later. */
-@Serializable enum class PaperKind { SECTION }
+/** A sitting with several questions answered together: one source section, or an uncalibrated exam paper. */
+@Serializable enum class PaperKind { SECTION, SAT, IELTS_READING, IELTS_LISTENING, IELTS_WRITING }
 
-/** WORKING: answering. TRANSFER: a recording has finished and the check time runs. FINISHED: marked. */
-@Serializable enum class PaperPhase { WORKING, TRANSFER, FINISHED }
+/** WORKING: answering. TRANSFER: recordings have finished and the check time runs. BREAK: between SAT sections. FINISHED: marked. */
+@Serializable enum class PaperPhase { WORKING, TRANSFER, BREAK, FINISHED }
+
+/** Which second module a first-module raw result led to. An uncalibrated practice rule, not the official routing. */
+@Serializable enum class ModuleRoute { HIGHER, LOWER }
 
 @Serializable
 data class AudioProgress(val positionMs: Long = 0, val completed: Boolean = false, val started: Boolean = false)
@@ -19,9 +22,21 @@ data class PaperPart(
     val exercises: List<Exercise>,
     val timeLimitSeconds: Int? = null,
     val transferSeconds: Int = 0,
+    /** SAT modules show one question per screen with a navigator, flags and a review page. */
+    val oneAtATime: Boolean = false,
+    /** Exam stage such as RW1, MATH2, READING or TASK1. */
+    val stage: String? = null,
+    val route: ModuleRoute? = null,
+    /** Questions short of the standard length because too few fresh items remained. */
+    val shortfall: Int = 0,
+    /** A break offered after this part, before the next one starts. */
+    val breakAfterSeconds: Int = 0,
 ) {
     val audioAssetPath: String? get() = exercises.firstNotNullOfOrNull { it.audioAssetPath }
     val passage: String? get() = exercises.firstNotNullOfOrNull { it.passage }
+    /** Recordings in play order; a listening paper plays each once. */
+    val audioPaths: List<String> get() = exercises.mapNotNull { it.audioAssetPath }.distinct()
+    val sourceIds: List<String> get() = exercises.map { it.sourceId }.distinct()
 }
 
 @Serializable
@@ -47,6 +62,15 @@ data class PaperRun(
     val abandoned: Boolean = false,
     val sourceSkillId: String? = null,
     val sourceId: String? = null,
+    /** Current question in a one-at-a-time module. */
+    val itemIndex: Int = 0,
+    /** Questions marked for review, by [Exercise.versionKey]. */
+    val flagged: List<String> = emptyList(),
+    /** The module review page is open. */
+    val reviewing: Boolean = false,
+    /** SAT stages still to be built; a second module is chosen from the first module's raw result. */
+    val plannedStages: List<String> = emptyList(),
+    val breakElapsedSeconds: Int = 0,
 ) {
     val part: PaperPart? get() = parts.getOrNull(partIndex)
     val finished: Boolean get() = finishedAt != null
@@ -56,12 +80,17 @@ data class PaperRun(
     fun transferElapsed(part: PaperPart): Int = transferElapsedSeconds[part.id] ?: 0
     /** Seconds left on the part's clock, negative once over; null when the part is untimed. */
     fun remaining(part: PaperPart): Int? = when {
+        phase == PaperPhase.BREAK -> parts.getOrNull(partIndex - 1)?.breakAfterSeconds?.let { it - breakElapsedSeconds }
         phase == PaperPhase.TRANSFER && part.transferSeconds > 0 -> part.transferSeconds - transferElapsed(part)
         else -> part.timeLimitSeconds?.let { it - elapsed(part) }
     }
-    fun timeUp(part: PaperPart): Boolean = remaining(part)?.let { it <= 0 } == true && part.id !in overtimeParts
+    fun timeUp(part: PaperPart): Boolean = phase != PaperPhase.BREAK && remaining(part)?.let { it <= 0 } == true && part.id !in overtimeParts
     fun answered(part: PaperPart): Int = part.exercises.count { answers[it.versionKey].orEmpty().isNotBlank() }
 }
+
+/** Exercise snapshots of a sitting, stored apart from its small, frequently saved state. */
+@Serializable
+data class PaperPartsRecord(val runId: String, val parts: List<PaperPart>)
 
 /** Marking stays with [AnswerChecker]; a sitting only adds how blanks and malformed entries are recorded. */
 object PaperScoring {

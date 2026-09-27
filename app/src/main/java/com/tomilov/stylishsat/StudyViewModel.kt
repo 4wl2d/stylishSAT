@@ -155,7 +155,9 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
                 val courses = decode("course_progress") { storageJson.decodeFromString<CourseProgress>(it) }
                 val drafts = decode("draft") { storageJson.decodeFromString<StudyDraft>(it) }
                 val plans = decode("plan") { storageJson.decodeFromString<StudyPlan>(it) }
-                val papers = decode("paper") { storageJson.decodeFromString<PaperRun>(it) }
+                val paperParts = decode("paper_parts") { storageJson.decodeFromString<PaperPartsRecord>(it) }.associateBy { it.runId }
+                // Early sittings stored their parts inline; later ones keep them in a separate record.
+                val papers = decode("paper") { storageJson.decodeFromString<PaperRun>(it) }.map { run -> paperParts[run.id]?.let { run.copy(parts = it.parts) } ?: run }
                 val revisions = decode("revision") { storageJson.decodeFromString<WritingRevision>(it) }
                 val notebook = decode("notebook") { storageJson.decodeFromString<NotebookEntry>(it) }
                 mutableState.update { it.copy(
@@ -707,9 +709,18 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         persist("feedback:${feedback.id}", "feedback", s.exam, feedback)
         saveSession(session.copy(externalFeedback = text))
     }
+    /** The clock ticks every second, so only the small state is rewritten each time; part snapshots are written when they change. */
     private fun savePaper(run: PaperRun) {
+        val partsChanged = state.value.papers[run.id]?.parts !== run.parts
         mutableState.update { it.copy(papers = it.papers + (run.id to run)) }
-        persist("paper:${run.id}", "paper", run.exam, run)
+        enqueue {
+            val light = withContext(Dispatchers.Default) { storageJson.encodeToString(run.copy(parts = emptyList())) }
+            val parts = if (partsChanged) withContext(Dispatchers.Default) { storageJson.encodeToString(PaperPartsRecord(run.id, run.parts)) } else null
+            database.withTransaction {
+                parts?.let { database.dao().put(StoredRecord("paper_parts:${run.id}", "paper_parts", run.exam.name, it)) }
+                database.dao().put(StoredRecord("paper:${run.id}", "paper", run.exam.name, light))
+            }
+        }
     }
 
     /** Opens every question for one passage or recording. Returns the run id, or null if it could not start. */
@@ -737,6 +748,65 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         return run.id
     }
 
+    /** Starts an uncalibrated exam paper. SAT second modules are built later from the first module's raw result. */
+    fun startExam(kind: PaperKind, satSections: List<ExamPapers.SatSection> = ExamPapers.SatSection.entries): String? {
+        var s = state.value
+        if (s.loading || kind == PaperKind.SECTION) return null
+        val pack = s.pack ?: return null
+        val exam = if (kind == PaperKind.SAT) Exam.SAT else Exam.IELTS
+        if (s.exam != exam) return null
+        if (s.paper != null) {
+            mutableState.update { it.copy(error = if (it.language == Language.RU)
+                "Сначала завершите открытую секцию или экзамен. Ответы в ней сохранены."
+                else "Finish the open section or exam first. Its answers are saved.") }
+            return null
+        }
+        if (s.session?.let { !it.finished } == true) {
+            if (!finishForNow()) return null
+            s = state.value
+        }
+        val stages = if (kind == PaperKind.SAT) ExamPapers.satStages(satSections) else emptyList()
+        val parts = when (kind) {
+            PaperKind.SAT -> listOf(ExamPapers.satModule(pack, s.attempts, stages.first(), null))
+            PaperKind.IELTS_READING -> listOfNotNull(ExamPapers.ieltsReading(pack, s.attempts))
+            PaperKind.IELTS_LISTENING -> listOfNotNull(ExamPapers.ieltsListening(pack, s.attempts))
+            PaperKind.IELTS_WRITING -> ExamPapers.ieltsWriting(pack, s.attempts)
+            PaperKind.SECTION -> emptyList()
+        }.filter { it.exercises.isNotEmpty() }
+        if (parts.isEmpty()) {
+            mutableState.update { it.copy(error = if (it.language == Language.RU) "Для этой части не осталось новых заданий." else "No unseen items remain for this paper.") }
+            return null
+        }
+        val run = PaperRun(UUID.randomUUID().toString(), exam, kind, strict = true, parts = parts, startedAt = now(), plannedStages = stages.drop(1))
+        savePaper(run)
+        return run.id
+    }
+
+    /** Moves within a one-at-a-time module; leaving the review page on the way. */
+    fun paperGo(runId: String, index: Int) {
+        val run = livePaper(runId) ?: return
+        val part = run.part ?: return
+        val target = index.coerceIn(0, (part.exercises.size - 1).coerceAtLeast(0))
+        if (run.itemIndex != target || run.reviewing) savePaper(run.copy(itemIndex = target, reviewing = false))
+    }
+
+    fun paperFlag(runId: String, versionKey: String) {
+        val run = livePaper(runId) ?: return
+        if (run.part?.exercises?.none { it.versionKey == versionKey } != false) return
+        savePaper(run.copy(flagged = if (versionKey in run.flagged) run.flagged - versionKey else run.flagged + versionKey))
+    }
+
+    fun paperReview(runId: String, open: Boolean) {
+        val run = livePaper(runId) ?: return
+        if (run.reviewing != open) savePaper(run.copy(reviewing = open))
+    }
+
+    /** Ends a break early or after its clock; the next module starts with its own clock. */
+    fun endBreak(runId: String) {
+        val run = livePaper(runId)?.takeIf { it.phase == PaperPhase.BREAK } ?: return
+        savePaper(run.copy(phase = PaperPhase.WORKING))
+    }
+
     private fun livePaper(runId: String): PaperRun? = state.value.papers[runId]?.takeIf { it.active && !state.value.loading }
 
     fun paperAnswer(runId: String, versionKey: String, text: String) {
@@ -749,11 +819,15 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
     fun paperTick(runId: String, partId: String) {
         val run = livePaper(runId) ?: return
         val part = run.part?.takeIf { it.id == partId } ?: return
+        if (run.phase == PaperPhase.BREAK) {
+            if ((run.remaining(part) ?: 0) > 0) savePaper(run.copy(breakElapsedSeconds = run.breakElapsedSeconds + 1))
+            return
+        }
         if (run.timeUp(part)) return
         val next = when (run.phase) {
             PaperPhase.WORKING -> run.copy(elapsedSeconds = run.elapsedSeconds + (part.id to run.elapsed(part) + 1))
             PaperPhase.TRANSFER -> run.copy(transferElapsedSeconds = run.transferElapsedSeconds + (part.id to run.transferElapsed(part) + 1))
-            PaperPhase.FINISHED -> return
+            PaperPhase.BREAK, PaperPhase.FINISHED -> return
         }
         savePaper(next)
     }
@@ -765,17 +839,19 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         if (part.id !in run.overtimeParts) savePaper(run.copy(overtimeParts = run.overtimeParts + part.id))
     }
 
-    /** One playback position per recording. Under exam conditions a finished recording cannot restart. */
-    fun paperAudio(runId: String, positionMs: Long, completed: Boolean) {
+    /** One playback position per recording. Under exam conditions a finished recording cannot restart; after the last one the check time begins. */
+    fun paperAudio(runId: String, path: String, positionMs: Long, completed: Boolean) {
         val run = livePaper(runId) ?: return
         val part = run.part ?: return
-        val path = part.audioAssetPath ?: return
+        if (path !in part.audioPaths) return
         val previous = run.audio[path] ?: AudioProgress()
         if (run.strict && previous.completed) return
         val progress = AudioProgress(positionMs.coerceAtLeast(0), previous.completed || completed, true)
         if (progress == previous) return
-        val phase = if (run.strict && progress.completed && run.phase == PaperPhase.WORKING && part.transferSeconds > 0) PaperPhase.TRANSFER else run.phase
-        savePaper(run.copy(audio = run.audio + (path to progress), phase = phase))
+        val audio = run.audio + (path to progress)
+        val allPlayed = part.audioPaths.all { audio[it]?.completed == true }
+        val phase = if (run.strict && allPlayed && run.phase == PaperPhase.WORKING && part.transferSeconds > 0) PaperPhase.TRANSFER else run.phase
+        savePaper(run.copy(audio = audio, phase = phase))
     }
 
     /** Marks the current part, saves one attempt per question and moves on; the last part finishes the sitting. */
@@ -787,16 +863,26 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         if (part.id in run.submittedParts) return
         val outcomes = PaperScoring.score(part, run.answers)
         val attempts = PaperScoring.attempts(run, part, outcomes, pack, s.attempts, now(), today()) { UUID.randomUUID().toString() }
-        val last = run.partIndex + 1 >= run.parts.size
-        val next = run.copy(submittedParts = run.submittedParts + part.id,
+        // A SAT second module is assembled only now, from the first module's raw result.
+        val stage = run.plannedStages.firstOrNull()
+        val built = stage?.let {
+            val route = if (it.endsWith("2")) ExamPapers.route(outcomes) else null
+            ExamPapers.satModule(pack, s.attempts + attempts, it, route, run.exercises).takeIf { module -> module.exercises.isNotEmpty() }
+        }
+        val parts = run.parts + listOfNotNull(built)
+        val last = run.partIndex + 1 >= parts.size
+        val next = run.copy(parts = parts, plannedStages = if (built != null) run.plannedStages.drop(1) else emptyList(),
+            submittedParts = run.submittedParts + part.id,
             partIndex = if (last) run.partIndex else run.partIndex + 1,
-            phase = if (last) PaperPhase.FINISHED else PaperPhase.WORKING,
+            phase = when { last -> PaperPhase.FINISHED; part.breakAfterSeconds > 0 -> PaperPhase.BREAK; else -> PaperPhase.WORKING },
+            itemIndex = 0, reviewing = false, breakElapsedSeconds = 0,
             finishedAt = if (last) now() else null)
         mutableState.update { it.copy(attempts = it.attempts + attempts, papers = it.papers + (next.id to next)) }
         enqueue {
             val records = withContext(Dispatchers.Default) {
                 attempts.map { StoredRecord("attempt:${it.id}", "attempt", run.exam.name, storageJson.encodeToString(it)) } +
-                    StoredRecord("paper:${next.id}", "paper", run.exam.name, storageJson.encodeToString(next))
+                    StoredRecord("paper_parts:${next.id}", "paper_parts", run.exam.name, storageJson.encodeToString(PaperPartsRecord(next.id, next.parts))) +
+                    StoredRecord("paper:${next.id}", "paper", run.exam.name, storageJson.encodeToString(next.copy(parts = emptyList())))
             }
             database.withTransaction { records.forEach { database.dao().put(it) } }
         }
