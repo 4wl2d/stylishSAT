@@ -256,6 +256,10 @@ class StudyViewModel @JvmOverloads constructor(application: Application, databas
         mutableState.update { it.copy(settings = it.settings.copy(language = language)) }
         enqueue { settings.language(language) }
     }
+    fun setReduceMotion(value: Boolean) {
+        mutableState.update { it.copy(settings = it.settings.copy(reduceMotion = value)) }
+        enqueue { settings.reduceMotion(value) }
+    }
     /** Ends first-run setup. Exam and language were applied live; minutes go through the normal profile save. */
     fun finishOnboarding(dailyMinutes: Int? = null) {
         val s = state.value

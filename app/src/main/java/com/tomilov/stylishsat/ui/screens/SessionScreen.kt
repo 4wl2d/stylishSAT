@@ -4,12 +4,21 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
@@ -21,6 +30,8 @@ import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -31,11 +42,15 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -43,7 +58,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -56,7 +73,9 @@ import com.tomilov.stylishsat.StudyViewModel
 import com.tomilov.stylishsat.domain.*
 import com.tomilov.stylishsat.speech.RecorderState
 import com.tomilov.stylishsat.ui.components.*
+import com.tomilov.stylishsat.ui.theme.LocalReducedMotion
 import com.tomilov.stylishsat.ui.theme.Study
+import com.tomilov.stylishsat.ui.theme.StudyMotion
 import com.tomilov.stylishsat.ui.theme.StudyType
 import kotlinx.coroutines.delay
 
@@ -117,8 +136,16 @@ fun SessionScreen(s: StudyUiState, vm: StudyViewModel, modifier: Modifier, openR
                 }
             }
         }
+        val reduced = LocalReducedMotion.current
         AnimatedContent(session, Modifier.weight(1f), contentKey = { it.phase() }, transitionSpec = {
-            (fadeIn(tween(180)) + slideInHorizontally(tween(240)) { it / 10 }) togetherWith fadeOut(tween(100))
+            when {
+                reduced -> fadeIn(StudyMotion.fade(160)) togetherWith fadeOut(StudyMotion.fade(90))
+                // The summary lands like a card being placed; every other step slides on like a page turn.
+                targetState.finished -> (fadeIn(StudyMotion.fade(200, 60)) + scaleIn(StudyMotion.settle(), 0.9f)) togetherWith
+                    (fadeOut(StudyMotion.fade(120)) + scaleOut(StudyMotion.settle(), 1.04f))
+                else -> (slideInHorizontally(StudyMotion.page) { it / 4 } + fadeIn(StudyMotion.fade(180, 30))) togetherWith
+                    (slideOutHorizontally(StudyMotion.page) { -it / 6 } + fadeOut(StudyMotion.fade(110)))
+            }
         }, label = "step") { target ->
             // An outgoing page renders its own snapshot; only the live page gets the live editor.
             val live = target.phase() == session.phase()
@@ -138,11 +165,12 @@ private fun SessionClock(session: StudySession, exercise: Exercise) {
     val c = Study.colors
     val elapsed = session.previousWorkSeconds + session.activeSeconds
     val limit = session.timeLimitSeconds
-    val (text, color) = if (limit != null && session.result == null && !session.continuedWithoutTimeLimit) {
-        val remaining = (limit - elapsed).coerceAtLeast(0)
-        clock(remaining) to if (remaining <= 10) c.bad else c.ink
-    } else clock(elapsed) to if (exercise.expectedSeconds in 1 until elapsed) c.warn else c.inkSoft
-    Row(Modifier.padding(end = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+    val remaining = limit?.takeIf { session.result == null && !session.continuedWithoutTimeLimit }?.let { (it - elapsed).coerceAtLeast(0) }
+    val (text, target) = if (remaining != null) clock(remaining) to if (remaining <= 10) c.bad else c.ink
+        else clock(elapsed) to if (exercise.expectedSeconds in 1 until elapsed) c.warn else c.inkSoft
+    val color by animateColorAsState(target, StudyMotion.fade(300), label = "clock")
+    // The last ten seconds tick visibly; otherwise the clock stays still so it doesn't pull focus.
+    Row(Modifier.padding(end = 2.dp).pop(remaining?.takeIf { it in 1..10 }, from = 1.18f), verticalAlignment = Alignment.CenterVertically) {
         GlyphIcon(Glyph.Clock, tint = color, size = 15.dp)
         Spacer(Modifier.width(4.dp))
         Text(text, style = StudyType.Mono, color = color)
@@ -176,12 +204,12 @@ private fun LessonStep(s: StudyUiState, vm: StudyViewModel, session: StudySessio
         StudyButton(if (session.activity != null) l.label("Got it", "Понятно") else l.label("Start practice", "К практике"),
             { vm.lessonSeen(session.stepKey) }, Modifier.fillMaxWidth(), arrow = true)
     }) {
-        Meta(listOfNotNull(skill?.title?.text(l), l.label("Lesson", "Урок"), (session.activity?.minutes ?: lesson?.estimatedMinutes)?.let { minutes(it, l) }).joinToString(" · "))
-        MarkedText(lesson?.title?.text(l) ?: l.label("Before you start", "Перед практикой"), StudyType.Headline)
-        if (session.activity?.continuation == true) Meta(l.label("Continued from last time", "Продолжение с прошлого раза"), color = c.ink)
+        Meta(listOfNotNull(skill?.title?.text(l), l.label("Lesson", "Урок"), (session.activity?.minutes ?: lesson?.estimatedMinutes)?.let { minutes(it, l) }).joinToString(" · "), Modifier.rise(0))
+        MarkedText(lesson?.title?.text(l) ?: l.label("Before you start", "Перед практикой"), StudyType.Headline, Modifier.rise(1), delayMillis = 260)
+        if (session.activity?.continuation == true) Meta(l.label("Continued from last time", "Продолжение с прошлого раза"), Modifier.rise(1), color = c.ink)
         lesson?.let {
-            SelectionContainer { Text(it.body.text(l), style = StudyType.Reading, color = c.ink) }
-            MarginNote {
+            SelectionContainer(Modifier.rise(2)) { Text(it.body.text(l), style = StudyType.Reading, color = c.ink) }
+            MarginNote(Modifier.rise(3)) {
                 Meta(l.label("Worked example", "Разобранный пример"))
                 SelectionContainer { Text(it.workedExample.text(l), style = StudyType.Reading.copy(fontSize = 17.sp, lineHeight = 27.sp), color = c.ink) }
             }
@@ -198,10 +226,10 @@ private fun ReviewStep(s: StudyUiState, vm: StudyViewModel, session: StudySessio
     StepFrame(actions = {
         StudyButton(l.label("Review done", "Разбор завершён"), { vm.lessonSeen(session.stepKey) }, Modifier.fillMaxWidth(), arrow = true)
     }) {
-        Meta(listOfNotNull(s.pack?.skills?.find { it.id == exercise.skillId }?.title?.text(l), l.label("Review", "Разбор")).joinToString(" · "))
-        MarkedText(l.label("Look back at your answer.", "Вернитесь к своему ответу."), StudyType.Headline)
+        Meta(listOfNotNull(s.pack?.skills?.find { it.id == exercise.skillId }?.title?.text(l), l.label("Review", "Разбор")).joinToString(" · "), Modifier.rise(0))
+        MarkedText(l.label("Look back at your answer.", "Вернитесь к своему ответу."), StudyType.Headline, Modifier.rise(1), delayMillis = 260)
         if (attempt != null) {
-            Text(exercise.prompt, style = StudyType.Question.copy(fontSize = 18.sp, lineHeight = 27.sp), color = c.ink)
+            Text(exercise.prompt, Modifier.rise(2), style = StudyType.Question.copy(fontSize = 18.sp, lineHeight = 27.sp), color = c.ink)
             SelectionContainer { AnswerPair(l.label("You", "Вы"), optionLabel(exercise, attempt.answer), wrong = attempt.correct?.not()) }
             if (exercise.acceptedAnswers.isNotEmpty()) AnswerPair(l.label("Key", "Ключ"), exercise.acceptedAnswers.joinToString(" / ") { optionLabel(exercise, it) }, wrong = false)
             Explanation(exercise, l)
@@ -229,9 +257,12 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
     val resultAnchor = remember { BringIntoViewRequester() }
     val density = LocalDensity.current
     var announcedValue by remember(session.stepKey) { mutableStateOf(result != null) }
+    // Celebration and head-shakes belong to the moment of checking, not to a result shown again later.
+    var liveValue by remember(session.stepKey) { mutableStateOf(false) }
     LaunchedEffect(result) {
         if (result != null && !announcedValue) {
             announcedValue = true
+            liveValue = true
             haptic.performHapticFeedback(if (result.correct == false) HapticFeedbackType.Reject else HapticFeedbackType.Confirm)
             delay(60)
             resultAnchor.bringIntoView(Rect(0f, 0f, 1f, with(density) { 220.dp.toPx() }))
@@ -240,6 +271,9 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
     val typed = answerState?.text?.toString() ?: session.draft
     val saveTyped = { if (answerState != null && exercise.type != ExerciseType.MULTIPLE_CHOICE) vm.draft(answerState.text.toString(), session.stepKey) }
     val open = exercise.type == ExerciseType.WRITING || exercise.type == ExerciseType.SPEAKING
+    val ready = (if (exercise.type == ExerciseType.MULTIPLE_CHOICE) session.draft.isNotBlank() else typed.isNotBlank()) && !recording && answerState != null
+    val wrongNow = if (liveValue && result?.correct == false) session.stepKey else null
+    val rightNow = if (liveValue && result?.correct == true) session.stepKey else null
 
     StepFrame(scroll, actions = {
         if (result == null) {
@@ -253,22 +287,21 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
             if (secondary.isNotEmpty()) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 secondary.forEach { (text, enabled, action) -> StudyButton(text, action, Modifier.weight(1f), tone = Tone.Quiet, compact = true, enabled = enabled) }
             }
-            val ready = (if (exercise.type == ExerciseType.MULTIPLE_CHOICE) session.draft.isNotBlank() else typed.isNotBlank()) && !recording && answerState != null
             StudyButton(if (open) l.label("Submit for review", "Сохранить и разобрать") else l.label("Check", "Проверить"),
                 { saveTyped(); vm.submit() }, Modifier.fillMaxWidth(), enabled = ready)
-        } else ResultBar(result, exercise, session, l, vm::next)
+        } else ResultBar(result, exercise, session, l, wrongNow, rightNow, vm::next)
     }) {
         val skill = pack.skills.find { it.id == exercise.skillId }
-        Meta(listOfNotNull(skill?.title?.text(l), modeLabel(session.mode, l), if (session.mode == ContentSplit.PRACTICE) l.label("level ${exercise.difficulty}", "уровень ${exercise.difficulty}") else null).joinToString(" · "))
+        Meta(listOfNotNull(skill?.title?.text(l), modeLabel(session.mode, l), if (session.mode == ContentSplit.PRACTICE) l.label("level ${exercise.difficulty}", "уровень ${exercise.difficulty}") else null).joinToString(" · "), Modifier.rise(0))
         val chips = buildList {
             if (session.activity?.continuation == true || session.resumingDraft) add(l.label("Draft restored", "Черновик восстановлен"))
             if (session.timeLimitSeconds != null && result == null) add(if (session.continuedWithoutTimeLimit) l.label("No limit now", "Без лимита") else l.label("Timed · pauses when you leave", "На время · пауза при выходе"))
             if (session.activity?.let { !it.isLesson && it.remainingMinutes > 0 } == true) add(l.label("Spans several days", "На несколько дней"))
         }
-        if (chips.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (chips.isNotEmpty()) Row(Modifier.rise(0), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             chips.forEach { Meta(it, Modifier.clip(RoundedCornerShape(50)).background(c.sunken).padding(horizontal = 10.dp, vertical = 5.dp), color = c.ink, maxLines = 1) }
         }
-        if (session.answerLockedByTimeLimit && result == null) Block(color = c.badSoft) {
+        if (session.answerLockedByTimeLimit && result == null) Block(Modifier.popIn(from = 0.92f), color = c.badSoft) {
             Text(l.label("Time's up. Your answer is saved.", "Время вышло. Ответ сохранён."), style = StudyType.Title, color = c.ink)
             Text(l.label("Check it now, keep going without the limit, or save it for later. Nothing is graded automatically.",
                 "Проверьте его, продолжите без лимита или сохраните на потом. Автоматически ничего не оценивается."), style = StudyType.Small, color = c.ink)
@@ -277,7 +310,7 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
         if (session.mode == ContentSplit.PRACTICE && result == null) {
             val checks = remember(s.pack, s.attempts, exercise) { StudyPlanner.practiceChecks(pack, exercise, s.attempts) }
             if (checks.isNotEmpty()) {
-                if (session.reviewGuidanceViewed) MarginNote(rule = c.inkSoft) {
+                if (session.reviewGuidanceViewed) MarginNote(Modifier.rise(), rule = c.inkSoft) {
                     Meta(l.label("Check before answering · counted as a hint", "Проверьте перед ответом · считается подсказкой"))
                     checks.forEach { Text("• ${it.text(l)}", style = StudyType.Small, color = c.ink) }
                 } else Row(Modifier.fillMaxWidth().tapSurface(RoundedCornerShape(16.dp), c.sunken, enabled = !session.answerLockedByTimeLimit) { vm.reviewGuidance(session.stepKey) }
@@ -328,14 +361,16 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
                     val selected = session.draft == option
                     val isKey = result != null && exercise.acceptedAnswers.any { AnswerChecker.normalize(it) == AnswerChecker.normalize(option) }
                     val struck = option in session.eliminated
-                    OptionRow(('A'.code + index).toChar(), optionLabel(exercise, option), when {
+                    val state = when {
                         result == null -> if (selected) OptionState.Selected else OptionState.Idle
                         isKey -> OptionState.Key
                         selected -> OptionState.Wrong
                         else -> OptionState.Dimmed
-                    }, answerEnabled, struck && result == null, eliminatingValue && answerEnabled,
+                    }
+                    OptionRow(('A'.code + index).toChar(), optionLabel(exercise, option), state, answerEnabled, struck && result == null, eliminatingValue && answerEnabled,
                         if (struck) l.label("Restore choice ${'A' + index}", "Вернуть вариант ${'A' + index}") else l.label("Eliminate choice ${'A' + index}", "Вычеркнуть вариант ${'A' + index}"),
-                        { vm.sessionEliminate(option, session.stepKey) }) {
+                        { vm.sessionEliminate(option, session.stepKey) },
+                        Modifier.rise(index + 1, 10.dp).shake(wrongNow.takeIf { state == OptionState.Wrong })) {
                         if (!selected) haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
                         if (struck) vm.sessionEliminate(option, session.stepKey)
                         vm.draft(option, session.stepKey)
@@ -345,7 +380,12 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
         } else if (answerState != null) {
             OutlinedTextField(state = answerState, enabled = answerEnabled,
                 label = { Text(if (exercise.type == ExerciseType.SPEAKING) l.label("Transcript · review or type", "Транскрипт · проверьте или введите") else l.label("Your answer", "Ваш ответ")) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().shake(wrongNow),
+                // A short answer can be checked straight from the keyboard.
+                keyboardOptions = if (open) KeyboardOptions.Default else KeyboardOptions(imeAction = ImeAction.Done),
+                onKeyboardAction = if (open) null else KeyboardActionHandler { hideKeyboard ->
+                    if (ready && answerEnabled) { saveTyped(); vm.submit() } else hideKeyboard()
+                },
                 textStyle = if (open) StudyType.Reading.copy(fontSize = 17.sp, lineHeight = 27.sp) else StudyType.Body.copy(fontSize = 18.sp),
                 lineLimits = if (open) TextFieldLineLimits.MultiLine(minHeightInLines = 7, maxHeightInLines = 14) else TextFieldLineLimits.SingleLine,
                 supportingText = { Text(when {
@@ -359,12 +399,12 @@ private fun ExerciseStep(s: StudyUiState, vm: StudyViewModel, session: StudySess
             exercise.criteria.forEach { Text("• ${it.text(l)}", style = StudyType.Small, color = c.ink) }
         }
         if (session.mode == ContentSplit.PRACTICE && result == null) exercise.hints.take(session.hintsUsed).forEachIndexed { index, hint ->
-            MarginNote {
+            MarginNote(Modifier.rise()) {
                 Meta(l.label("Hint ${index + 1}", "Подсказка ${index + 1}"))
                 Text(hint.text(l), style = StudyType.Body, color = c.ink)
             }
         }
-        if (result != null) Column(Modifier.bringIntoViewRequester(resultAnchor), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        if (result != null) Column(Modifier.bringIntoViewRequester(resultAnchor).rise(1), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Hairline()
             // The bar already says right or wrong; show the checker's message only when it adds a reason.
             if (result.status == AnswerStatus.NEEDS_REVIEW || result.status == AnswerStatus.INCORRECT && result.errorType != "KEY_MISMATCH")
@@ -403,37 +443,42 @@ private enum class OptionState { Idle, Selected, Key, Wrong, Dimmed }
 
 @Composable
 private fun OptionRow(letter: Char, text: String, state: OptionState, enabled: Boolean, struck: Boolean = false, eliminating: Boolean = false,
-    eliminateLabel: String = "", eliminate: () -> Unit = {}, onClick: () -> Unit) {
+    eliminateLabel: String = "", eliminate: () -> Unit = {}, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val c = Study.colors
-    val background by animateColorAsState(when (state) {
-        OptionState.Key -> c.marker
+    val reduced = LocalReducedMotion.current
+    // The key is marked the way the app marks everything important: a highlighter stroke drawn across it.
+    val sweep by animateFloatAsState(if (state == OptionState.Key) 1f else 0f,
+        if (reduced) snap() else tween(440, 40, StudyMotion.Emphasized), label = "keySweep")
+    val base = when (state) {
         OptionState.Wrong -> c.badSoft
         OptionState.Dimmed -> c.paper
         else -> c.raised
-    }, tween(160), label = "option")
-    val border = when (state) {
-        OptionState.Selected -> BorderStroke(2.dp, c.ink)
-        OptionState.Wrong -> BorderStroke(2.dp, c.bad)
-        OptionState.Key -> BorderStroke(2.dp, c.marker)
-        else -> BorderStroke(1.dp, c.line)
     }
-    val content = when (state) {
-        OptionState.Key -> c.onMarker
-        OptionState.Dimmed -> c.inkSoft
-        else -> c.ink
-    }
-    Row(Modifier.fillMaxWidth().heightIn(min = 60.dp)
-        .tapSurface(RoundedCornerShape(18.dp), background, enabled, border, role = Role.RadioButton, onClick = onClick)
+    val edgeWidth by animateDpAsState(if (state == OptionState.Idle || state == OptionState.Dimmed) 1.dp else 2.dp, StudyMotion.settle(), label = "optionEdgeWidth")
+    val edge by animateColorAsState(when (state) {
+        OptionState.Selected -> c.ink
+        OptionState.Wrong -> c.bad
+        OptionState.Key -> c.marker
+        else -> c.line
+    }, StudyMotion.fade(), label = "optionEdge")
+    val faded by animateColorAsState(if (state == OptionState.Dimmed) c.inkSoft else c.ink, StudyMotion.fade(), label = "optionInk")
+    val content = if (state == OptionState.Key) lerp(c.ink, c.onMarker, sweep) else faded
+    val marker = c.marker
+    Row(modifier.fillMaxWidth().heightIn(min = 60.dp)
+        .tapSurface(RoundedCornerShape(18.dp), base, enabled, BorderStroke(edgeWidth, edge), role = Role.RadioButton, onClick = onClick)
+        .drawBehind { if (sweep > 0f) drawRect(marker, size = Size(size.width * sweep, size.height)) }
         .semantics { selected = state == OptionState.Selected || state == OptionState.Wrong }
         .padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-        val (badge, badgeContent) = when (state) {
+        val (badgeTarget, badgeContent) = when (state) {
             OptionState.Idle -> c.sunken to c.ink
             OptionState.Selected -> c.ink to c.paper
             OptionState.Key -> c.onMarker to c.marker
             OptionState.Wrong -> c.bad to c.paper
             OptionState.Dimmed -> c.paper to c.inkFaint
         }
-        Box(Modifier.size(32.dp).clip(CircleShape).background(badge).then(if (state == OptionState.Dimmed) Modifier.border(1.dp, c.line, CircleShape) else Modifier),
+        val badge by animateColorAsState(badgeTarget, StudyMotion.fade(140), label = "badge")
+        Box(Modifier.pop(state.takeIf { it != OptionState.Idle && it != OptionState.Dimmed }).size(32.dp).clip(CircleShape).drawBehind { drawRect(badge) }
+            .then(if (state == OptionState.Dimmed) Modifier.border(1.dp, c.line, CircleShape) else Modifier),
             contentAlignment = Alignment.Center) {
             when (state) {
                 OptionState.Key -> GlyphIcon(Glyph.Check, tint = badgeContent, size = 16.dp)
@@ -449,7 +494,7 @@ private fun OptionRow(letter: Char, text: String, state: OptionState, enabled: B
 }
 
 @Composable
-private fun ResultBar(result: AnswerResult, exercise: Exercise, session: StudySession, l: Language, next: () -> Unit) {
+private fun ResultBar(result: AnswerResult, exercise: Exercise, session: StudySession, l: Language, wrongNow: Any?, rightNow: Any?, next: () -> Unit) {
     val c = Study.colors
     val (background, glyph, title) = when {
         result.correct == true -> Triple(c.marker, Glyph.Check, l.label("Correct", "Верно"))
@@ -459,15 +504,22 @@ private fun ResultBar(result: AnswerResult, exercise: Exercise, session: StudySe
     }
     val content = if (result.correct == true) c.onMarker else c.ink
     val shown = remember { MutableTransitionState(false).apply { targetState = true } }
-    AnimatedVisibility(shown, enter = slideInVertically(tween(220)) { it / 2 } + fadeIn(tween(160))) {
-        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(26.dp)).background(background).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(Modifier.padding(start = 6.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-                GlyphIcon(glyph, tint = if (result.correct == false) c.bad else content, size = 22.dp)
-                Spacer(Modifier.width(10.dp))
-                Text(title, style = StudyType.Title, color = content)
+    val enter = if (LocalReducedMotion.current) fadeIn(StudyMotion.fade(140))
+        else slideInVertically(spring(dampingRatio = 0.7f, stiffness = 700f, visibilityThreshold = IntOffset.VisibilityThreshold)) { it / 2 } +
+            fadeIn(StudyMotion.fade(140)) + scaleIn(StudyMotion.settle(), 0.94f)
+    AnimatedVisibility(shown, enter = enter) {
+        Box {
+            Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(26.dp)).background(background).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(Modifier.padding(start = 6.dp, top = 2.dp).shake(wrongNow), verticalAlignment = Alignment.CenterVertically) {
+                    GlyphIcon(glyph, Modifier.popIn(90, 0.2f), tint = if (result.correct == false) c.bad else content, size = 22.dp)
+                    Spacer(Modifier.width(10.dp))
+                    Text(title, style = StudyType.Title, color = content)
+                }
+                StudyButton(if (session.index + 1 == session.stepCount) l.label("Finish", "Завершить") else l.label("Continue", "Дальше"), next,
+                    Modifier.fillMaxWidth(), tone = if (result.correct == true) Tone.Night else Tone.Ink, arrow = true)
             }
-            StudyButton(if (session.index + 1 == session.stepCount) l.label("Finish", "Завершить") else l.label("Continue", "Дальше"), next,
-                Modifier.fillMaxWidth(), tone = if (result.correct == true) Tone.Night else Tone.Ink, arrow = true)
+            // A small spark from the tick; the full celebration waits for the end of the session.
+            Burst(rightNow, Modifier.matchParentSize(), count = 18, spread = 0.9f, power = 0.5f, originX = 0.09f, originY = 0.2f, lifetime = 0.8f)
         }
     }
 }
@@ -501,10 +553,11 @@ fun Disclosure(title: String, badge: String?, initiallyOpen: Boolean = false, co
             verticalAlignment = Alignment.CenterVertically) {
             Text(title, Modifier.weight(1f), style = StudyType.Strong, color = c.ink)
             badge?.let { Meta(it); Spacer(Modifier.width(8.dp)) }
-            val turn by animateFloatAsState(if (openValue) 180f else 0f, tween(180), label = "chevron")
-            GlyphIcon(Glyph.ChevronDown, Modifier.rotate(turn), tint = c.inkSoft, size = 18.dp)
+            val turn by animateFloatAsState(if (openValue) 180f else 0f, StudyMotion.bounce(), label = "chevron")
+            GlyphIcon(Glyph.ChevronDown, Modifier.graphicsLayer { rotationZ = turn }, tint = c.inkSoft, size = 18.dp)
         }
-        AnimatedVisibility(openValue) {
+        AnimatedVisibility(openValue, enter = expandVertically(StudyMotion.size) + fadeIn(StudyMotion.fade(180, 40)),
+            exit = shrinkVertically(StudyMotion.size) + fadeOut(StudyMotion.fade(100))) {
             Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp), content = content)
         }
     }
@@ -521,43 +574,46 @@ private fun FinishedStep(s: StudyUiState, session: StudySession, close: () -> Un
     val right = attempts.count { it.correct == true }
     val seconds = attempts.sumOf { it.elapsedSeconds }
     val marks = remember(s.attempts, session) { sessionMarks(s, session) }
-    StepFrame(actions = {
-        if (!session.stoppedEarly && session.mode != ContentSplit.DIAGNOSTIC)
-            StudyButton(l.label("Another round", "Ещё раунд"), again, Modifier.fillMaxWidth(), tone = Tone.Quiet, glyph = Glyph.Plus)
-        StudyButton(l.label("Done", "Готово"), close, Modifier.fillMaxWidth(), arrow = true)
-    }) {
-        Spacer(Modifier.height(24.dp))
-        Meta(when {
-            session.stoppedEarly -> l.label("Saved for later", "Сохранено на потом")
-            session.courseDay != null -> l.label("Day ${session.courseDay} complete", "День ${session.courseDay} пройден")
-            else -> modeLabel(session.mode, l) + " · " + l.label("complete", "завершено")
-        }, color = c.ink)
-        if (!session.stoppedEarly && checked > 0) {
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text("$right", style = StudyType.Display.copy(fontSize = 112.sp, lineHeight = 104.sp), color = c.ink)
-                Text("/$checked", Modifier.padding(bottom = 14.dp), style = StudyType.Display.copy(fontSize = 44.sp, lineHeight = 44.sp), color = c.inkFaint)
-            }
-            MarkedText(l.label("correct", "верно"), StudyType.Title)
-        } else {
+    // Finishing is worth a moment of celebration, once: not again after rotation or when the summary is reopened.
+    var celebratedValue by rememberSaveable(session.id) { mutableStateOf(false) }
+    val burst = remember(session.id) { session.id.takeIf { !celebratedValue && !session.stoppedEarly } }
+    LaunchedEffect(session.id) { celebratedValue = true }
+    val haptic = LocalHapticFeedback.current
+    LaunchedEffect(burst) { if (burst != null) haptic.performHapticFeedback(HapticFeedbackType.Confirm) }
+    Box(Modifier.fillMaxSize()) {
+        StepFrame(actions = {
+            if (!session.stoppedEarly && session.mode != ContentSplit.DIAGNOSTIC)
+                StudyButton(l.label("Another round", "Ещё раунд"), again, Modifier.fillMaxWidth().rise(6), tone = Tone.Quiet, glyph = Glyph.Plus)
+            StudyButton(l.label("Done", "Готово"), close, Modifier.fillMaxWidth().rise(7), arrow = true)
+        }) {
+            Spacer(Modifier.height(24.dp))
+            Meta(when {
+                session.stoppedEarly -> l.label("Saved for later", "Сохранено на потом")
+                session.courseDay != null -> l.label("Day ${session.courseDay} complete", "День ${session.courseDay} пройден")
+                else -> modeLabel(session.mode, l) + " · " + l.label("complete", "завершено")
+            }, Modifier.rise(0), color = c.ink)
+            val scored = !session.stoppedEarly && checked > 0
             val done = marks.count { it != Mark.Todo && it != Mark.Now }
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text("$done", style = StudyType.Display.copy(fontSize = 112.sp, lineHeight = 104.sp), color = c.ink)
-                Text("/${session.stepCount}", Modifier.padding(bottom = 14.dp), style = StudyType.Display.copy(fontSize = 44.sp, lineHeight = 44.sp), color = c.inkFaint)
+            Row(Modifier.rise(1).semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.Bottom) {
+                CountUp(if (scored) right else done, StudyType.Display.copy(fontSize = 112.sp, lineHeight = 104.sp))
+                Text("/${if (scored) checked else session.stepCount}", Modifier.padding(bottom = 14.dp), style = StudyType.Display.copy(fontSize = 44.sp, lineHeight = 44.sp), color = c.inkFaint)
             }
-            MarkedText(l.label("steps done", "шагов пройдено"), StudyType.Title)
+            MarkedText(if (scored) l.label("correct", "верно") else l.label("steps done", "шагов пройдено"), StudyType.Title, Modifier.rise(2), delayMillis = 380)
+            StepTrack(marks, Modifier.rise(3), reveal = true)
+            Row(Modifier.fillMaxWidth().padding(top = 8.dp).rise(4)) {
+                Stat(if (seconds > 0) clock(seconds) else "—", l.label("answer time", "время ответов"))
+                StatCount(rhythm.streak, l.label("day streak", "дней подряд"))
+            }
+            if (session.stoppedEarly) Text(if (session.courseDay != null) l.label("Unfinished work continues in the next days of your route. It stays ungraded until you submit it.", "Незавершённая работа продолжится в следующих днях маршрута и останется без оценки до отправки.")
+                else l.label("Unfinished answers stay ungraded. Continue them from Today.", "Незаконченные ответы остаются без оценки. Продолжите их на странице «Сегодня»."), Modifier.rise(5), style = StudyType.Body, color = c.inkSoft)
+            Row(Modifier.rise(5), verticalAlignment = Alignment.CenterVertically) {
+                val dot by animateColorAsState(if (s.pendingWrites == 0) c.good else c.warn, StudyMotion.fade(240), label = "saved")
+                Box(Modifier.size(8.dp).pop(s.pendingWrites == 0).clip(CircleShape).drawBehind { drawRect(dot) })
+                Spacer(Modifier.width(8.dp))
+                Meta(if (s.pendingWrites == 0) l.label("Saved on this device", "Сохранено на устройстве") else l.label("Saving…", "Сохраняем…"))
+            }
         }
-        StepTrack(marks)
-        Row(Modifier.fillMaxWidth().padding(top = 8.dp)) {
-            Stat(if (seconds > 0) clock(seconds) else "—", l.label("answer time", "время ответов"))
-            Stat("${rhythm.streak}", l.label("day streak", "дней подряд"))
-        }
-        if (session.stoppedEarly) Text(if (session.courseDay != null) l.label("Unfinished work continues in the next days of your route. It stays ungraded until you submit it.", "Незавершённая работа продолжится в следующих днях маршрута и останется без оценки до отправки.")
-            else l.label("Unfinished answers stay ungraded. Continue them from Today.", "Незаконченные ответы остаются без оценки. Продолжите их на странице «Сегодня»."), style = StudyType.Body, color = c.inkSoft)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(8.dp).clip(CircleShape).background(if (s.pendingWrites == 0) c.good else c.warn))
-            Spacer(Modifier.width(8.dp))
-            Meta(if (s.pendingWrites == 0) l.label("Saved on this device", "Сохранено на устройстве") else l.label("Saving…", "Сохраняем…"))
-        }
+        Burst(burst, Modifier.fillMaxSize(), originY = 0.22f)
     }
 }
 

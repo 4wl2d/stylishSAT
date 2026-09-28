@@ -36,9 +36,9 @@ Menus, lessons and explanations support English and Russian. Exam prompts and an
 - **Progress:** independent answer accuracy, a 17-week activity map, skill progress and saved answer history for the selected exam. Activity and minutes come from saved answers.
 - **Mistake notebook:** wrong and skipped answers reopen the exact question version with the key and explanation; write why it went wrong and queue a fresh question from the same family.
 - **Writing revisions:** check a submitted essay against its own task checklist, mark each point yourself, write new versions and compare them word by word. No band is assigned.
-- **Settings:** daily-minute presets, the exam date, goal and known result that shape the route, optional model downloads, content imports, saved recordings, and an encrypted export and restore of your data. **About** contains privacy, content-status, grading and license information.
+- **Settings:** daily-minute presets, the exam date, goal and known result that shape the route, a calmer-motion switch, optional model downloads, content imports, saved recordings, and an encrypted export and restore of your data. **About** contains privacy, content-status, grading and license information.
 
-The interface uses a paper-and-ink palette, a highlighter accent and a dark theme that follows the Android system setting.
+The interface uses a paper-and-ink palette, a highlighter accent and a dark theme that follows the Android system setting. Motion is quick and purposeful: sessions rise over Today, pages follow the predictive back gesture, the answer key is marked with a drawn highlighter stroke and finished sessions count up their score. **Calmer motion**, or Android's *Remove animations*, replaces slides with fades and turns off confetti, shakes and staggered entrances.
 
 <details>
 <summary>Archived screenshots — 0.3.0 interface</summary>

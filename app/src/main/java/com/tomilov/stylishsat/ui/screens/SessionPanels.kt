@@ -80,7 +80,7 @@ fun ListeningPlayer(assetPath: String, l: Language, sample: Boolean = false) {
                 else l.label("Transcript opens after you answer.", "Транскрипт откроется после ответа."), style = StudyType.Small, color = c.inkSoft)
             if (errorValue.isNotEmpty()) Text(errorValue, style = StudyType.Small, color = c.bad)
         }
-        GlyphIcon(Glyph.Headphones, tint = c.inkFaint, size = 20.dp)
+        if (playingValue) Waves(true, color = c.ink) else GlyphIcon(Glyph.Headphones, tint = c.inkFaint, size = 20.dp)
     }
 }
 
@@ -119,7 +119,7 @@ fun SpeakingPanel(s: StudyUiState, vm: StudyViewModel) {
                     if (active != null) scope.launch { vm.runtime.recorder.stop()?.let { vm.attachRecording(it.file.absolutePath, stepKey) } }
                     else if (context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) beginRecording()
                     else permission.launch(Manifest.permission.RECORD_AUDIO)
-                }, tint = if (active != null) androidx.compose.ui.graphics.Color.White else c.paper, background = if (active != null) c.bad else c.ink,
+                }, Modifier.pulseRing(active != null, c.bad), tint = if (active != null) androidx.compose.ui.graphics.Color.White else c.paper, background = if (active != null) c.bad else c.ink,
                 size = 60.dp, enabled = !transcribingValue, filled = true)
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
