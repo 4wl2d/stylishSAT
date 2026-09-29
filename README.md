@@ -11,7 +11,7 @@
 
 <p align="center"><a href="https://github.com/4wl2d/stylishSAT/releases/latest">Download APK</a> · <a href="docs/INSTALL.md">Installation</a> · <a href="docs/README.ru.md">Русский</a> · <a href="CHANGELOG.md">Changelog</a></p>
 
-**Source version: 0.4.0.** This README describes the redesigned study flow in the current source. The latest published APK is [0.3.1](https://github.com/4wl2d/stylishSAT/releases/tag/v0.3.1); the 0.4.0 redesign has not been released yet.
+**Source version: 0.5.0.** This README describes the study tools and motion in the current source. The latest published APK is [0.3.1](https://github.com/4wl2d/stylishSAT/releases/tag/v0.3.1); the 0.5.0 changes have not been released yet.
 
 ## Your next study session, ready offline
 
@@ -55,7 +55,7 @@ These screenshots show the earlier interface, captured from the signed 0.3.0 rel
 
 ## Install and start
 
-Download the published APK from [Releases](https://github.com/4wl2d/stylishSAT/releases/latest) on an Android 10+ ARM64 or x86_64 device. See [installation and updates](docs/INSTALL.md), especially if you already use a local debug build. In 0.3.1, choose your exam and study preferences in Settings. To try the redesigned 0.4.0 flow before its release, build this source; its first-run setup leads into the diagnostic or Today.
+Download the published APK from [Releases](https://github.com/4wl2d/stylishSAT/releases/latest) on an Android 10+ ARM64 or x86_64 device. See [installation and updates](docs/INSTALL.md), especially if you already use a local debug build. In 0.3.1, choose your exam and study preferences in Settings. To try the 0.5.0 study tools and motion before release, build this source; its first-run setup leads into the diagnostic or Today.
 
 Lessons, exercises, prepared explanations and bundled audio work without model downloads. Optional on-device Gemma 4 E2B IT and Whisper base.en models add text feedback and speech transcription on eligible ARM64 devices in the 8 GB RAM class. They download separately (~2.74 GB combined). You can also preview, copy or share a prompt to ChatGPT manually and save returned feedback. AI and external feedback never change answer keys, grades or mastery.
 
@@ -63,21 +63,21 @@ Lessons, exercises, prepared explanations and bundled audio work without model d
 
 The learning bank contains AI-authored, machine-validated draft content. Independent editorial review, expert AI-quality acceptance and student testing remain pending. Closed answers are checked deterministically; accuracy and skill progress are training indicators. StylishSAT does not provide calibrated SAT scores, IELTS bands or pronunciation assessment. Read [content scope](docs/CONTENT.md). The [release validation record](docs/RELEASE_VALIDATION.md) documents 0.3.1 and earlier evidence.
 
-No ads, analytics, automatic uploads or cloud sync. Learning data stays in private app storage and is excluded from Android backup; uninstalling removes it. This source adds a passphrase-encrypted export file you keep yourself (no account, no cloud); the published APKs up to 0.4.0 have no export. [Privacy](docs/PRIVACY.md).
+No ads, analytics, automatic uploads or cloud sync. Learning data stays in private app storage and is excluded from Android backup; uninstalling removes it. The 0.5.0 source adds a passphrase-encrypted export file you keep yourself (no account, no cloud); the published 0.3.1 APK and 0.4.0 builds have no export. [Privacy](docs/PRIVACY.md).
 
 ## Build and contribute
 
 ```sh
 git clone git@github.com:4wl2d/stylishSAT.git
 cd stylishSAT
-git switch feature/app-redesign-study-flow
+git switch feature/study-tools-and-motion
 mkdir -p build
 python3 tools/release/check_repository.py
 python3 tools/content/validate_bank.py --report build/content-validation.json
 ./gradlew :app:testReleaseUnitTest :app:lintRelease :app:assembleRelease
 ```
 
-While the redesign is in [PR #16](https://github.com/4wl2d/stylishSAT/pull/16), use the feature-branch checkout above. After it is merged, use `main`.
+While the 0.5.0 changes are in [PR #18](https://github.com/4wl2d/stylishSAT/pull/18), use the feature-branch checkout above. After it is merged, use `main`.
 
 Use JDK 25 and the checked-in Gradle wrapper. The pinned Android components are SDK platform 37.0, Build Tools 37.0.0, NDK 28.2.13676358 and CMake 3.22.1. Set `ANDROID_HOME` or `sdk.dir` in an ignored `local.properties`; first builds need internet. No model is needed for these checks.
 

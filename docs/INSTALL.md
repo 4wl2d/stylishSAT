@@ -20,7 +20,7 @@ Install a newer official release over the previous official release to retain da
 
 Older local debug/draft APKs use another key and cannot be updated in place with this release. Do not uninstall a draft containing data you need: uninstalling deletes progress, drafts, recordings and models, and 0.4.0 and earlier have no backup/export feature. Keep it and install the public release on another device or Android user profile.
 
-Builds after 0.4.0 add Settings → Your data: export an encrypted file with a passphrase, then restore it after reinstalling or on another device. Models are not included and download again. See [privacy](PRIVACY.md).
+Version 0.5.0 adds Settings → Your data: export an encrypted file with a passphrase, then restore it after reinstalling or on another device. Models are not included and download again. See [privacy](PRIVACY.md).
 
 ## Verify a download
 

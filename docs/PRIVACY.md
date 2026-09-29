@@ -8,7 +8,7 @@ Microphone access is optional. You can enter a transcript manually. Deliberately
 
 Uninstalling or clearing storage deletes learning data/models. There is no account, cloud sync or automatic backup.
 
-## Encrypted export (unreleased; in builds after 0.4.0)
+## Encrypted export (0.5.0; not yet released)
 
 Settings → Your data → Export encrypted file writes one file to a location you choose with Android's file picker. It contains every private record (answers, drafts, writing revisions, plans and course progress, the mistake notebook, exam sittings, feedback), the older content versions your answers refer to, and your Speaking recordings. Downloaded models and app settings are not included.
 
