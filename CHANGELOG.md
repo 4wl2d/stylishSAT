@@ -4,6 +4,8 @@ Versions follow the [version policy](docs/VERSIONING.md).
 
 ## Unreleased
 
+- Reject unsafe backup recording destinations before writing, including symlinks outside the restore directory and dot-only paths.
+
 ## 0.5.0 — 2026-09-29
 
 - Update the README for the 0.5.0 study flow, distinguish it from the published 0.3.1 APK and label the older screenshots as an archive.

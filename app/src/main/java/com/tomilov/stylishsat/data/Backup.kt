@@ -8,6 +8,9 @@ import java.io.FilterOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
+import java.nio.file.Files
+import java.nio.file.LinkOption
+import java.nio.file.StandardOpenOption
 import java.security.GeneralSecurityException
 import java.security.SecureRandom
 import java.util.Base64
@@ -219,6 +222,7 @@ object BackupArchive {
     /** Recordings are streamed into [scratch]; the caller moves them only after the whole stream has authenticated. */
     fun read(input: InputStream, scratch: File): BackupContents {
         scratch.mkdirs()
+        val baseDir = scratch.canonicalFile
         var manifest: BackupManifest? = null
         val records = mutableListOf<StoredRecord>()
         val packs = mutableListOf<StoredPack>()
@@ -234,9 +238,16 @@ object BackupArchive {
                 name == "packs.jsonl" -> zip.bufferedReader().lineSequence().filter { it.isNotBlank() }.forEach { line ->
                     json.decodeFromString<PackLine>(line).let { packs += StoredPack(it.id, it.version, it.payload) } }
                 name.startsWith("recordings/") && safeName.matches(name.removePrefix("recordings/")) && !entry.isDirectory -> {
-                    val target = File(scratch, name.removePrefix("recordings/"))
-                    target.outputStream().use { zip.copyTo(it) }
-                    recordings[target.name] = target
+                    val fileName = name.removePrefix("recordings/")
+                    if (fileName == "." || fileName == "..") throw BackupException(BackupException.Reason.UNSAFE_ENTRY)
+                    val target = File(baseDir, fileName).canonicalFile
+                    val targetPath = target.toPath()
+                    // Canonicalization can leave a dangling symlink unresolved.
+                    if (target == baseDir || !targetPath.startsWith(baseDir.toPath()) || Files.isSymbolicLink(targetPath))
+                        throw BackupException(BackupException.Reason.UNSAFE_ENTRY)
+                    Files.newOutputStream(targetPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING, LinkOption.NOFOLLOW_LINKS).use { zip.copyTo(it) }
+                    recordings[fileName] = target
                 }
                 else -> throw BackupException(BackupException.Reason.UNSAFE_ENTRY)
             }

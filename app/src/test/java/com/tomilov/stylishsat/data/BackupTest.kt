@@ -5,6 +5,10 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.file.Files
 import java.security.SecureRandom
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -20,6 +24,15 @@ class BackupTest {
         BackupCrypto.decrypt(ByteArrayInputStream(sealed), passphrase.toCharArray()).use { it.readBytes() }
 
     private fun reason(block: () -> Unit): BackupException.Reason = try { block(); fail("expected failure"); error("unreachable") } catch (e: BackupException) { e.reason }
+
+    private fun archiveWithRecording(name: String, bytes: ByteArray): ByteArray = ByteArrayOutputStream().also { out ->
+        val manifest = BackupManifest(createdAtEpochMillis = 5, appVersion = "test", recordingsDirectory = "/old/recordings",
+            records = 0, packs = 0, recordings = 1)
+        ZipOutputStream(out).use { zip ->
+            zip.putNextEntry(ZipEntry("backup.json")); zip.write(Json.encodeToString(manifest).toByteArray()); zip.closeEntry()
+            zip.putNextEntry(ZipEntry(name)); zip.write(bytes); zip.closeEntry()
+        }
+    }.toByteArray()
 
     @Test fun roundTripsAcrossFrameBoundariesAndEmptyInput() {
         val random = java.util.Random(7)
@@ -69,6 +82,83 @@ class BackupTest {
             }.toByteArray()
             assertEquals(BackupException.Reason.UNSAFE_ENTRY, reason { BackupArchive.read(ByteArrayInputStream(evil), File(dir, "scratch2")) })
             assertFalse(File(dir.parentFile, "escape.wav").exists())
+        } finally { dir.deleteRecursively() }
+    }
+
+    @Test fun archiveRefusesTraversalAndDotEntriesWithoutChangingOutsideFiles() {
+        val dir = Files.createTempDirectory("backup-unsafe").toFile()
+        try {
+            val extraction = File(dir, "extract").apply { mkdirs() }
+            val original = byteArrayOf(7, 8, 9)
+            val outside = File(dir, "outside.wav").apply { writeBytes(original) }
+            val parent = File(extraction, "outside.wav").apply { writeBytes(original) }
+            val names = listOf("../outside.wav", "../../outside.wav", outside.absolutePath, "..\\outside.wav",
+                "%2e%2e%2foutside.wav", "nested/outside.wav", "a".repeat(129), ".", "..")
+            names.forEachIndexed { index, name ->
+                val archive = archiveWithRecording("recordings/$name", byteArrayOf(1, 2, 3))
+                assertEquals(name, BackupException.Reason.UNSAFE_ENTRY, reason {
+                    BackupArchive.read(ByteArrayInputStream(archive), File(extraction, "scratch-$index"))
+                })
+                assertArrayEquals(original, outside.readBytes())
+                assertArrayEquals(original, parent.readBytes())
+            }
+        } finally { dir.deleteRecursively() }
+    }
+
+    @Test fun archiveRefusesRecordingSymlinkIntoSiblingDirectory() {
+        val dir = Files.createTempDirectory("backup-symlink").toFile()
+        try {
+            for (alreadyExists in listOf(true, false)) {
+                val scratch = File(dir, "scratch-$alreadyExists").apply { mkdirs() }
+                val sibling = File(dir, "scratch-$alreadyExists-other").apply { mkdirs() }
+                val original = byteArrayOf(7, 8, 9)
+                val outside = File(sibling, "speaking-1.wav")
+                if (alreadyExists) outside.writeBytes(original)
+                Files.createSymbolicLink(File(scratch, "speaking-1.wav").toPath(), outside.toPath())
+                val archive = archiveWithRecording("recordings/speaking-1.wav", byteArrayOf(1, 2, 3))
+                val failure = runCatching { BackupArchive.read(ByteArrayInputStream(archive), scratch) }.exceptionOrNull()
+                if (alreadyExists) assertArrayEquals("An unsafe entry must not overwrite the outside file", original, outside.readBytes())
+                else assertFalse("An unsafe entry must not create an outside file", outside.exists())
+                assertEquals(BackupException.Reason.UNSAFE_ENTRY, (failure as? BackupException)?.reason)
+            }
+        } finally { dir.deleteRecursively() }
+    }
+
+    @Test fun archiveRefusesRecordingAliasToScratchDirectory() {
+        val dir = Files.createTempDirectory("backup-self-alias").toFile()
+        try {
+            val scratch = File(dir, "scratch").apply { mkdirs() }
+            Files.createSymbolicLink(File(scratch, "self.wav").toPath(), scratch.toPath())
+            val archive = archiveWithRecording("recordings/self.wav", byteArrayOf(1, 2, 3))
+            assertEquals(BackupException.Reason.UNSAFE_ENTRY, reason { BackupArchive.read(ByteArrayInputStream(archive), scratch) })
+        } finally { dir.deleteRecursively() }
+    }
+
+    @Test fun archiveRestoresValidNamesThroughAliasedScratchDirectory() {
+        val dir = Files.createTempDirectory("backup-root-alias").toFile()
+        try {
+            val actual = File(dir, "actual").apply { mkdirs() }
+            val scratch = File(dir, "scratch")
+            Files.createSymbolicLink(scratch.toPath(), actual.toPath())
+            val name = "speaking..-1_a.wav"
+            val bytes = byteArrayOf(1, 2, 3)
+            val restored = BackupArchive.read(ByteArrayInputStream(archiveWithRecording("recordings/$name", bytes)), scratch)
+            assertEquals(setOf(name), restored.recordings.keys)
+            assertArrayEquals(bytes, restored.recordings.getValue(name).readBytes())
+            assertEquals(File(actual, name).canonicalFile, restored.recordings.getValue(name).canonicalFile)
+        } finally { dir.deleteRecursively() }
+    }
+
+    @Test fun archivePreservesEntryNameForAliasInsideScratch() {
+        val dir = Files.createTempDirectory("backup-child-alias").toFile()
+        try {
+            val scratch = File(dir, "scratch").apply { mkdirs() }
+            val actual = File(scratch, "actual.wav").apply { writeBytes(byteArrayOf(7, 8, 9)) }
+            Files.createSymbolicLink(File(scratch, "alias.wav").toPath(), actual.toPath())
+            val bytes = byteArrayOf(1, 2, 3)
+            val restored = BackupArchive.read(ByteArrayInputStream(archiveWithRecording("recordings/alias.wav", bytes)), scratch)
+            assertEquals(setOf("alias.wav"), restored.recordings.keys)
+            assertArrayEquals(bytes, restored.recordings.getValue("alias.wav").readBytes())
         } finally { dir.deleteRecursively() }
     }
 
