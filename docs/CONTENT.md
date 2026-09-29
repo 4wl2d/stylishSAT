@@ -1,10 +1,16 @@
 # Learning content
 
-810 exercises and 48 bilingual mini-lessons: 288 SAT questions, 24 IELTS Reading passages × 10 questions, 24 Listening recordings × 10 questions, 24 Writing tasks, and 18 Speaking sets. Also included: 12 written samples and six spoken samples.
+884 exercises and 48 bilingual mini-lessons: 288 SAT questions; 24 short IELTS Reading passages × 10 questions plus five full-length Academic passages (864–891 words, 13–14 questions each); 24 Listening recordings × 10 questions; 31 Writing tasks; and 18 Speaking sets. Also included: 12 written samples and six spoken samples.
 
-Questions/answers are in English; UI, lessons and explanations support Russian/English. Audio was synthesized from original project scripts with eSpeak NG. The app includes 27 compact Ogg/Opus files and three WAVs. Large duplicate masters and local authoring work are excluded from Git; manifests retain provenance/checksums.
+Every Writing task has a 4–6 point self-check list written for that task: the views and position a Task 2 prompt asks for, or the overview, comparisons and figures a Task 1 visual requires. Learners mark their own response against it and save revised versions; the app compares versions but never assigns a band.
+
+Every Reading passage and Listening recording can be practised as a full section, with all of its questions on one page, or as short drills. The full-length passages use True/False/Not Given, Yes/No/Not Given, matching headings, matching information and features, summary completion from a word box, sentence and table completion, and diagram labelling. Their three assessment passages form one 40-question paper and are not used for single-item timed checks. Task 1 covers bar, line, pie and table charts, a process diagram and before/after maps.
+
+Questions/answers are in English; UI, lessons and explanations support Russian/English. Content package 7 re-records all 24 Listening recordings and six Speaking samples from the unchanged scripts with Piper neural voices: each speaker in a conversation has their own voice, and the recordings mix British and American English (one British and four American voices; no other accents yet). The Exam tab's Listening paper opens with a conversation and uses the reserved assessment recordings, which include both accents. Every transcript segment names its speaker and start time. A Whisper base.en transcription check found a mean word error rate of 2.9% (worst file 5.9%) against the scripts (eSpeak NG: 7.2%); this catches gross synthesis faults only. The audio is still synthetic and has had no human listening review. Earlier eSpeak NG files stay bundled so answers to earlier exercise versions reopen with the recording they used. [listening-voices-manifest.json](content/listening-voices-manifest.json) records voices, settings, checksums and timings; large masters and local authoring work are excluded from Git.
 
 Materials were authored with AI assistance and remain `AI_DRAFT_MACHINE_VALIDATED`. Structural, checksum, exact-key and version-preservation checks do not establish human editorial acceptance, semantic independence or educational effectiveness. Expert content review, expert AI-quality acceptance and student testing are pending.
+
+Exam mode assembles papers from unseen items: SAT modules follow the Digital SAT lengths and clocks, with a second module chosen from the first module's raw result by a simple practice rule, not the official adaptive design. Papers report raw counts and time only.
 
 The deterministic checker owns closed-answer results. Writing/Speaking receive practice feedback without calibrated SAT scores, IELTS bands or pronunciation assessment. Optional models can make mistakes; prepared material remains useful without them.
 

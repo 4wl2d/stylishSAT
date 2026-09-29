@@ -33,7 +33,7 @@ Runtime tests require explicit setup/models and are separate from deterministic 
 | Path under app/src/main | Responsibility |
 | --- | --- |
 | java/.../domain | Content contracts, exact marking, adaptive/course planning |
-| java/.../data | Room history, imports, FTS retrieval, preferences |
+| java/.../data | Room history, imports, encrypted backup and restore, FTS retrieval, preferences |
 | java/.../StudyViewModel.kt | Ordered persistence, sessions, drafts |
 | java/.../ui | Compose screens and bilingual presentation |
 | java/.../ai | Verified downloads, bounded prompts, local tutor |

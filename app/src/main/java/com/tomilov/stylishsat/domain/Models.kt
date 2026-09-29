@@ -36,11 +36,15 @@ data class Lesson(
     val estimatedMinutes: Int = 8,
 )
 
+/** One timed stretch of a recording; [speaker] names who is talking in multi-voice recordings (schema 3). */
 @Serializable
-data class TranscriptSegment(val startMs: Long, val endMs: Long, val text: String)
+data class TranscriptSegment(val startMs: Long, val endMs: Long, val text: String, val speaker: String? = null)
 
 @Serializable
 data class ChartSeries(val name: String, val values: List<Double>)
+
+/** Schema 3 adds line, pie and table views of the same labelled series. */
+@Serializable enum class ChartKind { BAR, LINE, PIE, TABLE }
 
 @Serializable
 data class ChartData(
@@ -50,6 +54,52 @@ data class ChartData(
     val unit: String,
     val labels: List<String>,
     val series: List<ChartSeries>,
+    val kind: ChartKind = ChartKind.BAR,
+)
+
+/** Question formats name the task a learner sees; marking still follows [ExerciseType]. */
+@Serializable enum class QuestionFormat {
+    TRUE_FALSE_NOT_GIVEN, YES_NO_NOT_GIVEN, MATCHING_HEADINGS, MATCHING_INFORMATION, MATCHING_FEATURES,
+    SUMMARY_COMPLETION, SENTENCE_COMPLETION, NOTE_COMPLETION, TABLE_COMPLETION, DIAGRAM_LABEL, MAP_LABEL,
+    MULTIPLE_CHOICE, SHORT_ANSWER,
+}
+
+@Serializable enum class FigureKind { PROCESS, MAP, DIAGRAM }
+@Serializable enum class NodeShape { BOX, ROUND, LABEL }
+
+/** Positions are fractions of the panel, so a figure scales without a bitmap. */
+@Serializable
+data class FigureNode(
+    val id: String,
+    val label: String,
+    val x: Float,
+    val y: Float,
+    val width: Float = 0.24f,
+    val height: Float = 0.14f,
+    val shape: NodeShape = NodeShape.BOX,
+)
+
+@Serializable data class FigureLink(val from: String, val to: String, val label: String = "")
+@Serializable data class FigurePanel(val title: String = "", val nodes: List<FigureNode>, val links: List<FigureLink> = emptyList())
+@Serializable data class Figure(val kind: FigureKind, val title: String, val panels: List<FigurePanel>, val caption: String = "")
+
+@Serializable data class GroupOption(val key: String, val text: String)
+
+/** What a task check asks the learner to confirm about their own response. */
+@Serializable enum class CheckKind { TASK_PART, VIEW, POSITION, SUPPORT, OVERVIEW, COMPARISON, DATA, ACCURACY }
+
+/** One yes/no question about the learner's response to this exact task, e.g. "Did you explain view B?". */
+@Serializable data class TaskCheck(val id: String, val kind: CheckKind, val text: LocalizedText)
+
+/** Shared context for several questions: an instruction, a lettered list, a gapped text or a figure.
+ * Gaps and figure labels refer to member questions as [[exercise-id]]. */
+@Serializable
+data class QuestionGroup(
+    val id: String,
+    val instruction: String,
+    val options: List<GroupOption> = emptyList(),
+    val text: String? = null,
+    val figure: Figure? = null,
 )
 
 @Serializable
@@ -82,7 +132,15 @@ data class Exercise(
     val sampleAnswer: String? = null,
     val chart: ChartData? = null,
     val sampleAudioAssetPath: String? = null,
-)
+    val format: QuestionFormat? = null,
+    val group: QuestionGroup? = null,
+    val figure: Figure? = null,
+    val sourceTitle: String? = null,
+    val taskChecklist: List<TaskCheck> = emptyList(),
+) {
+    /** Exact identity of the answered version. */
+    val versionKey: String get() = "$id@$version"
+}
 
 @Serializable
 data class ContentPack(
@@ -140,6 +198,8 @@ data class Attempt(
     val recordingPaths: List<String> = emptyList(),
     val timeLimitSeconds: Int? = null,
     val continuedWithoutTimeLimit: Boolean = false,
+    /** Attempts answered together in one section or exam sitting; siblings in a run are not repeats of each other. */
+    val runId: String? = null,
 ) {
     val independent: Boolean get() = !isRepeat && hintsUsed == 0 && correct != null
 }
@@ -218,6 +278,8 @@ data class StudyPlan(
     val blocks: List<PlanBlock> = emptyList(),
     val contentVersion: Int? = null,
     val plannerVersion: Int = 0,
+    /** Course shape from the exam date, goal and known result; absent in plans saved before routes existed. */
+    val route: CourseRoute? = null,
 )
 
 @Serializable

@@ -1,0 +1,2230 @@
+{
+ "schemaVersion": 1,
+ "contentVersion": 7,
+ "synthetic": true,
+ "humanVoiceSample": false,
+ "reviewStatus": "SYNTHETIC_MACHINE_VALIDATED_EXPERT_LISTENING_REVIEW_PENDING",
+ "scope": "Replaces the eSpeak NG audio for all 24 Listening recordings and 6 spoken Speaking samples. Earlier exercise versions keep their original eSpeak files, which stay bundled.",
+ "engine": {
+  "synthesizer": {
+   "name": "Piper",
+   "package": "piper-tts 1.8.0",
+   "license": "GPL-3.0-or-later",
+   "source": "https://github.com/OHF-voice/piper1-gpl",
+   "buildTimeOnly": true
+  },
+  "voiceCatalog": {
+   "repository": "https://huggingface.co/rhasspy/piper-voices",
+   "revision": "c10ece1aade47bb51c153c893d14e5bf8e5b7117",
+   "repositoryLicense": "MIT"
+  },
+  "encoder": {
+   "version": "ffmpeg version 7.0.2-static https://johnvansickle.com/ffmpeg/  Copyright (c) 2000-2024 the FFmpeg developers",
+   "codec": "Opus",
+   "container": "Ogg",
+   "arguments": "-af aresample=48000:resampler=swr -ac 1 -c:a libopus -b:a 32k -vbr constrained -application voip -frame_duration 20 -compression_level 10 -map_metadata -1 -fflags +bitexact -flags:a +bitexact"
+  },
+  "assembly": {
+   "masterSampleRate": 22050,
+   "perTurnRmsTarget": 0.075,
+   "peakCeiling": 0.95,
+   "leadInSeconds": 0.3,
+   "tailSeconds": 0.4,
+   "pauseBetweenSentencesSeconds": 0.22,
+   "pauseSameSpeakerSeconds": 0.45,
+   "pauseSpeakerChangeSeconds": 0.7,
+   "transcriptPolicy": "Each transcript segment is synthesized unchanged by its assigned voice; segment times are the exact sample offsets of the assembled master."
+  }
+ },
+ "voices": {
+  "GB_F": {
+   "model": "en_GB-cori-high",
+   "name": "Cori",
+   "accent": "British English",
+   "lengthScale": 1.0,
+   "modelFile": "en/en_GB/cori/high/en_GB-cori-high.onnx",
+   "modelBytes": 114219352,
+   "modelMd5": "3474a80133d9a03e6870d2ac42c18806",
+   "modelSha256": "470b4dd634c98f8a4850d7626ffc3dfc90774628eeef6605a6dd8f88f30a5903",
+   "trainingData": "LibriVox recordings, public domain",
+   "modelCard": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_GB/cori/high/MODEL_CARD",
+   "distributed": false
+  },
+  "US_F1": {
+   "model": "en_US-kristin-medium",
+   "name": "Kristin",
+   "accent": "American English",
+   "lengthScale": 0.97,
+   "modelFile": "en/en_US/kristin/medium/en_US-kristin-medium.onnx",
+   "modelBytes": 63531379,
+   "modelMd5": "5fed42d2296baca042e2bf74785db725",
+   "modelSha256": "5849957f929cbf720c258f8458692d6103fff2f0e3d3b19c8259474bb06a18d4",
+   "trainingData": "LibriVox recordings, public domain",
+   "modelCard": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/kristin/medium/MODEL_CARD",
+   "distributed": false
+  },
+  "US_F2": {
+   "model": "en_US-ljspeech-high",
+   "name": "LJ Speech",
+   "accent": "American English",
+   "lengthScale": 1.12,
+   "modelFile": "en/en_US/ljspeech/high/en_US-ljspeech-high.onnx",
+   "modelBytes": 114199011,
+   "modelMd5": "dad093b5d2cff6a5fda99883ceda09d1",
+   "modelSha256": "5d4f08ba6a2a48c44592eed3ce56bf85e9de3dd4e20df90541ae68a8310c029a",
+   "trainingData": "LJ Speech dataset, public domain",
+   "modelCard": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/ljspeech/high/MODEL_CARD",
+   "distributed": false
+  },
+  "US_M1": {
+   "model": "en_US-john-medium",
+   "name": "John",
+   "accent": "American English",
+   "lengthScale": 0.9,
+   "modelFile": "en/en_US/john/medium/en_US-john-medium.onnx",
+   "modelBytes": 63531379,
+   "modelMd5": "70480857f21f2560f3a232722023b36d",
+   "modelSha256": "789c6c875726e627ddee93d51d8727859abe9c091c3d141591f4b83c2072e988",
+   "trainingData": "LibriVox recordings, public domain",
+   "modelCard": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/john/medium/MODEL_CARD",
+   "distributed": false
+  },
+  "US_M2": {
+   "model": "en_US-norman-medium",
+   "name": "Norman",
+   "accent": "American English",
+   "lengthScale": 1.05,
+   "modelFile": "en/en_US/norman/medium/en_US-norman-medium.onnx",
+   "modelBytes": 63531379,
+   "modelMd5": "829cea515dc724d694b83b71e8083f9f",
+   "modelSha256": "b9739443232a80a59c7d18810dd856899bf16a7964725f5ab81ea49b1351cb71",
+   "trainingData": "LibriVox recordings, public domain",
+   "modelCard": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/norman/medium/MODEL_CARD",
+   "distributed": false
+  }
+ },
+ "machineChecks": {
+  "asr": {
+   "model": "faster-whisper base.en (int8, beam 5)",
+   "metric": "word error rate against the exact script after number normalization",
+   "purpose": "Detects gross synthesis failures only; it is not a human listening review.",
+   "meanWer": 0.0287,
+   "maxWer": 0.0593,
+   "previousEspeakMeanWer": 0.0721
+  }
+ },
+ "clips": {
+  "listening-a-theatre": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-a-theatre.ogg",
+   "bytes": 140290,
+   "sha256": "e92295da830b8a1b4b3d07e69a6371b54aa574ee4065009f20dad528100dd306",
+   "durationMs": 35794,
+   "decodedDurationMs": 35794,
+   "masterPcmSha256": "961891d8bb79234312e2655f40d9d0a3951e39d0d341e3756ff0236c169b89f4",
+   "peak": 0.5882,
+   "split": "ASSESSMENT",
+   "speakers": [
+    {
+     "label": "Theatre manager",
+     "voice": "US_F2",
+     "model": "en_US-ljspeech-high",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "58ffa168aac380d491226a1efb47e9fa7470d6171fd21c03511cb63f017d0bc2",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 5965,
+     "text": "Thank you for volunteering at the community theatre. This is a synthetic practice recording.",
+     "speaker": "Theatre manager"
+    },
+    {
+     "startMs": 6415,
+     "endMs": 13276,
+     "text": "The training takes place in the studio, not on the main stage. The stage is being repaired this week.",
+     "speaker": "Theatre manager"
+    },
+    {
+     "startMs": 13726,
+     "endMs": 20215,
+     "text": "There will be eighteen volunteers. We originally expected twenty, but two people have withdrawn.",
+     "speaker": "Theatre manager"
+    },
+    {
+     "startMs": 20665,
+     "endMs": 27921,
+     "text": "Your first duty is to check tickets at the door. Later, you will help visitors find their seats.",
+     "speaker": "Theatre manager"
+    },
+    {
+     "startMs": 28371,
+     "endMs": 35394,
+     "text": "Please wear a black shirt. We will lend you a name badge, and you should return it to the office at the end of the evening.",
+     "speaker": "Theatre manager"
+    }
+   ],
+   "asr": {
+    "newWer": 0.022,
+    "espeakWer": 0.0549
+   }
+  },
+  "listening-d-workshop": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-d-workshop.ogg",
+   "bytes": 137765,
+   "sha256": "be20003a0566c287b20ff2efeac3f5f4326f45a86d8af42feb05e2f8b3ba7ef6",
+   "durationMs": 35887,
+   "decodedDurationMs": 35887,
+   "masterPcmSha256": "fce632983239fcee4c504c796b6ea69a39a64039d2e3e1f6329b49905c0171d9",
+   "peak": 0.6636,
+   "split": "DIAGNOSTIC",
+   "speakers": [
+    {
+     "label": "Organiser",
+     "voice": "US_M1",
+     "model": "en_US-john-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "08caeb0edd43cf9dd127672a0a9468021f3cfae9906e172777c87b9cd303f2a9",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 5292,
+     "text": "Welcome to the North Hall repair workshop. This is a synthetic practice recording.",
+     "speaker": "Organiser"
+    },
+    {
+     "startMs": 5742,
+     "endMs": 13926,
+     "text": "Our next session is on Saturday. It was advertised for Friday, but the hall is being used for a concert that evening.",
+     "speaker": "Organiser"
+    },
+    {
+     "startMs": 14376,
+     "endMs": 20366,
+     "text": "The workshop begins at ten in the morning. Please arrive a little earlier so we can check your booking.",
+     "speaker": "Organiser"
+    },
+    {
+     "startMs": 20816,
+     "endMs": 27631,
+     "text": "Bring one small broken item and a notebook. We will provide the tools, so you do not need to bring any.",
+     "speaker": "Organiser"
+    },
+    {
+     "startMs": 28081,
+     "endMs": 35487,
+     "text": "The session costs twelve pounds. Tea is included, but lunch is not. Book at the reception desk before Thursday.",
+     "speaker": "Organiser"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0213,
+    "espeakWer": 0.0851
+   }
+  },
+  "listening-p-fieldtrip": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-p-fieldtrip.ogg",
+   "bytes": 137411,
+   "sha256": "c31b2d8e033fe5f62525cb94962f29a5be4d3348e327a13faba0cc218e6f7daa",
+   "durationMs": 35818,
+   "decodedDurationMs": 35818,
+   "masterPcmSha256": "eb09362963e4a5ecef7ea220840aee58921092bdf576de14509b4b3ac26a1590",
+   "peak": 0.521,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Lecturer",
+     "voice": "US_F1",
+     "model": "en_US-kristin-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "8179809bfcd743107774f25af0f6704473abaea61d755eb7254bf9bd74e168d9",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 6058,
+     "text": "Here are the arrangements for our wetland field trip. This is a synthetic practice recording.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 6508,
+     "endMs": 13926,
+     "text": "We will meet at the east gate of the science building. Please do not wait at the main entrance, where another group will be gathering.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 14376,
+     "endMs": 20134,
+     "text": "The bus leaves at nine fifteen. The journey takes about forty minutes, depending on traffic.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 20584,
+     "endMs": 26818,
+     "text": "You must bring waterproof boots because the paths may be muddy. We have spare binoculars for anyone who needs them.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 27268,
+     "endMs": 35418,
+     "text": "In the afternoon, we will measure the water depth at three points. Last year we measured temperature, but this year the focus is depth.",
+     "speaker": "Lecturer"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0404,
+    "espeakWer": 0.0707
+   }
+  },
+  "listening-v3-allotment-orientation": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-allotment-orientation.ogg",
+   "bytes": 627167,
+   "sha256": "e93906324036e398a358d4ff688bbd344adaaf97525c7e3965a4f4fc259af46d",
+   "durationMs": 157757,
+   "decodedDurationMs": 157757,
+   "masterPcmSha256": "88311fc55872612f630a63cc7dcddaa510184053988b18c7142a47a13ac239ad",
+   "peak": 0.4952,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Allotment secretary",
+     "voice": "GB_F",
+     "model": "en_GB-cori-high",
+     "accent": "British English"
+    }
+   ],
+   "transcriptSha256": "85630e2624bb5168ed37fac5ed6a6f924d3b7a87d665f21a98316a8298723db9",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 17284,
+     "text": "Welcome to the Eastbrook allotments. This is a synthetic practice recording introducing a fictional community garden. Each new member receives a numbered plot and access to shared facilities. Your plot number appears on a wooden marker at the nearest corner, so please check it before moving any equipment.",
+     "speaker": "Allotment secretary"
+    },
+    {
+     "startMs": 17734,
+     "endMs": 33928,
+     "text": "The annual membership covers water use and maintenance of the paths. Seeds are not included because members choose what they want to grow. Our noticeboard sometimes advertises seed exchanges, but those are informal arrangements between members rather than a guaranteed part of the membership package.",
+     "speaker": "Allotment secretary"
+    },
+    {
+     "startMs": 34378,
+     "endMs": 47775,
+     "text": "There are two water taps. Use the one beside the shed during your first month, because the tap near the boundary is being replaced. Both locations are marked on the map, but a temporary sign points to the tap that is currently available.",
+     "speaker": "Allotment secretary"
+    },
+    {
+     "startMs": 48225,
+     "endMs": 62098,
+     "text": "Please fill a watering can rather than attaching a hose. This helps members notice how much water they are using and keeps hoses from lying across the narrow paths. Several cans are stored outside the shed, and you should return them there after watering your plot.",
+     "speaker": "Allotment secretary"
+    },
+    {
+     "startMs": 62548,
+     "endMs": 78522,
+     "text": "The large compost bins stand behind the hedge. You may add vegetable peelings and untreated plant material, but please keep cooked food out. We turn the contents on volunteer mornings so that the material breaks down evenly instead of remaining in separate layers throughout the year.",
+     "speaker": "Allotment secretary"
+    },
+    {
+     "startMs": 78972,
+     "endMs": 92798,
+     "text": "If you borrow tools, write your plot number in the notebook inside the shed. This is not a charge for borrowing; it simply helps us locate a tool when someone else needs it. Do not lend shared tools to people working outside the allotment site.",
+     "speaker": "Allotment secretary"
+    },
+    {
+     "startMs": 93248,
+     "endMs": 108073,
+     "text": "Our first shared work morning is on the nineteenth of this month. It was originally planned for the twelfth, but several members are unavailable then. We will clear the entrance path and repair a bench before stopping for tea, so there will be jobs suitable for different abilities.",
+     "speaker": "Allotment secretary"
+    },
+    {
+     "startMs": 108523,
+     "endMs": 123708,
+     "text": "Children are welcome when accompanied by an adult. The shallow pond is fenced, but adults remain responsible for supervising children throughout a visit. Please do not interpret the fence as permission to leave younger visitors alone while you work at the far end of your plot.",
+     "speaker": "Allotment secretary"
+    },
+    {
+     "startMs": 124158,
+     "endMs": 139795,
+     "text": "We ask members to keep the paths clear. A wheelbarrow may be left beside your plot briefly while unloading, but it should not remain there overnight. Emergency access is the main concern; the rule is not simply intended to make photographs of the garden look tidy.",
+     "speaker": "Allotment secretary"
+    },
+    {
+     "startMs": 140245,
+     "endMs": 157357,
+     "text": "Finally, check the noticeboard near the gate before each visit. Urgent messages are also sent by email, but the board contains routine updates and offers from other members. If your contact details change, tell the secretary so important messages do not continue going to an unused address.",
+     "speaker": "Allotment secretary"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0348,
+    "espeakWer": 0.0609
+   }
+  },
+  "listening-v3-archive-interview-plan": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-archive-interview-plan.ogg",
+   "bytes": 672907,
+   "sha256": "a0180330803653d2af19548755430900d9a84962ec7576296b364dfe156c6389",
+   "durationMs": 169586,
+   "decodedDurationMs": 169586,
+   "masterPcmSha256": "3125c9e9f81d7a769b9cc6d3c169334d8919c0500122de8c1851f305664661f0",
+   "peak": 0.6407,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Student A",
+     "voice": "GB_F",
+     "model": "en_GB-cori-high",
+     "accent": "British English"
+    },
+    {
+     "label": "Student B",
+     "voice": "US_M1",
+     "model": "en_US-john-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "a757a7c3c2cb81922b79d2c07b806ab8804de6bcd726198f1cbe07f96aa7a01f",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 16054,
+     "text": "This is a synthetic practice discussion about a fictional archive project. We need to interview a former resident of the riverside housing estate. The archive already has maps and building plans, but it lacks accounts of everyday life, so that should be the focus of our conversation.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 16754,
+     "endMs": 32867,
+     "text": "I have contacted a woman who lived there for twenty years. She is willing to take part but would prefer a short first meeting before we switch on the recorder. That seems reasonable, because she wants to understand the project rather than arrive expecting an ordinary social visit.",
+     "speaker": "Student B"
+    },
+    {
+     "startMs": 33567,
+     "endMs": 48821,
+     "text": "At the first meeting, we should explain that she may decline any question. We must also ask separately whether the recording can be made publicly accessible. Agreeing to speak with us is not automatically the same as agreeing that unknown listeners may hear the recording in the future.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 49521,
+     "endMs": 66529,
+     "text": "For prompts, I could bring a photograph of the estate’s courtyard. A picture may help her recall where people gathered, without requiring us to suggest a particular answer. We should avoid treating her response as incorrect simply because it differs from the caption written on the archive’s copy.",
+     "speaker": "Student B"
+    },
+    {
+     "startMs": 67229,
+     "endMs": 82971,
+     "text": "Let us start with open questions about a typical day. A question such as whether everyone was friendly would push towards a general judgement too soon. Asking what she did after returning from work should make space for concrete events and for experiences we have not anticipated.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 83671,
+     "endMs": 101119,
+     "text": "We also need to decide how to handle dates. If she is uncertain, we can record an approximate period rather than press her to choose an exact year. Later, we may compare that recollection with other sources, while keeping clear which part comes from memory and which from a document.",
+     "speaker": "Student B"
+    },
+    {
+     "startMs": 101819,
+     "endMs": 117898,
+     "text": "I will take responsibility for monitoring the recorder. That does not mean interrupting every time someone pauses. Silence can give an interviewee time to remember, and filling it immediately with another question may cut off an account just as the speaker is deciding how to continue.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 118598,
+     "endMs": 134909,
+     "text": "Afterwards, we should produce a transcript and send it to her for checking. She may correct a name that we heard wrongly or point out a section she does not want shared. We need to keep a record of agreed changes instead of silently rewriting the account into our own preferred wording.",
+     "speaker": "Student B"
+    },
+    {
+     "startMs": 135608,
+     "endMs": 152140,
+     "text": "For the archive description, we should include the interview date and location, along with the agreed access conditions. Those details help future users understand the source. A polished summary alone would not explain where the account came from or whether all of it may be quoted publicly.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 152840,
+     "endMs": 169186,
+     "text": "Our next step is to confirm the introductory meeting for Wednesday. The actual recorded interview can be arranged afterwards; it is not fixed for that day. I will write a clear message so she does not think she needs to prepare a complete account before our first short conversation.",
+     "speaker": "Student B"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0228,
+    "espeakWer": 0.0685
+   }
+  },
+  "listening-v3-boathouse-hire": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-boathouse-hire.ogg",
+   "bytes": 610697,
+   "sha256": "6e912a9b975b16aaf2db2cd912c0ada71bca3e67c03b4918a3a250e827be4032",
+   "durationMs": 156056,
+   "decodedDurationMs": 156056,
+   "masterPcmSha256": "9e8ee3174f9b29a6365abdefd323ec96b87f4789f355e0366b5ca68fd518a7fe",
+   "peak": 0.5951,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Boathouse staff",
+     "voice": "GB_F",
+     "model": "en_GB-cori-high",
+     "accent": "British English"
+    },
+    {
+     "label": "Caller",
+     "voice": "US_M1",
+     "model": "en_US-john-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "084c463fee2c762e1fa7bee597c43fb63bc486d3aa0307806aa76efc3e4582a0",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 15914,
+     "text": "Hello, Riverside Boathouse speaking. This is a synthetic practice conversation about a booking. We hire several kinds of small boats, but the rowing boats are undergoing repairs this week. Canoes are still available, and they are suitable for the sheltered route near the island.",
+     "speaker": "Boathouse staff"
+    },
+    {
+     "startMs": 16614,
+     "endMs": 31728,
+     "text": "That sounds good. There will be four of us, including two teenagers, and we would prefer to travel together. Your website shows a family canoe with four seats. If that is still available, I would like to book it for the afternoon rather than the morning.",
+     "speaker": "Caller"
+    },
+    {
+     "startMs": 32428,
+     "endMs": 47182,
+     "text": "I can reserve the family canoe for you. The hire charge is twenty-eight pounds for ninety minutes. That includes the paddles and safety equipment. A longer session costs more, but ninety minutes should be comfortable if you follow the marked route and stop briefly at the island.",
+     "speaker": "Boathouse staff"
+    },
+    {
+     "startMs": 47882,
+     "endMs": 62881,
+     "text": "We will take that session. I originally wanted to start at two, but our bus arrives too late for the briefing. Three o’clock would work better. We can be at the boathouse fifteen minutes before then, which gives us time to put our bags away.",
+     "speaker": "Caller"
+    },
+    {
+     "startMs": 63581,
+     "endMs": 77290,
+     "text": "Three is available. Please report to the wooden kiosk beside the boat ramp, not the café farther along the bank. Our booking list and equipment are kept at the kiosk. The café staff cannot check you in, even though both businesses use the same car park.",
+     "speaker": "Boathouse staff"
+    },
+    {
+     "startMs": 77990,
+     "endMs": 93743,
+     "text": "I know the café, so that will help us find you. One teenager has not used a canoe before. I am pleased the confirmation says beginners receive a demonstration. We are interested in learning the basic technique, not racing the other boats along the river.",
+     "speaker": "Caller"
+    },
+    {
+     "startMs": 94443,
+     "endMs": 109349,
+     "text": "Everyone receives a short demonstration, and each person must wear a life jacket throughout the trip. We provide jackets in different sizes and check the fit before departure. You may bring your own waterproof coat, but it cannot replace the required life jacket.",
+     "speaker": "Boathouse staff"
+    },
+    {
+     "startMs": 110049,
+     "endMs": 125036,
+     "text": "Understood. We will leave valuable items at home. The booking page also mentions lockers, which would be useful for a phone and a change of clothes. I will bring a small padlock because the page says the lockers themselves do not have fitted locks.",
+     "speaker": "Caller"
+    },
+    {
+     "startMs": 125736,
+     "endMs": 139643,
+     "text": "One last point about the route: turn back when you reach the stone bridge. Going beyond it would take you outside our supervised area. The island is before the bridge, so you can still stop there, provided you keep enough time to return before your session ends.",
+     "speaker": "Boathouse staff"
+    },
+    {
+     "startMs": 140343,
+     "endMs": 155656,
+     "text": "Thank you for explaining everything. I will pay the deposit online this evening and look out for the confirmation message. If heavy wind prevents the trip, I understand that you will contact us by text, rather than expecting us to check the website while we are travelling.",
+     "speaker": "Caller"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0593,
+    "espeakWer": 0.0659
+   }
+  },
+  "listening-v3-building-shade": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-building-shade.ogg",
+   "bytes": 673693,
+   "sha256": "98e2c536f4ff69d8ce5c6c956bde0decbd5a6fc09983757a1a5823c4bcd63d0e",
+   "durationMs": 169239,
+   "decodedDurationMs": 169239,
+   "masterPcmSha256": "c36a1bb4d9133868b5dbdd1ee3ed9b5c8bee0e1bc3b8e5235bfb90f32570165b",
+   "peak": 0.6993,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Lecturer",
+     "voice": "US_M2",
+     "model": "en_US-norman-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "7ed02a0074ea82c65d2c5abf095df28675d2877992609d94d1500a0fa4d9ea4a",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 18585,
+     "text": "This is a synthetic practice lecture describing an invented classroom investigation. Students compared shaded and unshaded surfaces near their school to discuss how buildings experience summer heat. The exercise concerned surface temperature, not the temperature of the surrounding air, which would require a different measurement arrangement.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 19035,
+     "endMs": 33627,
+     "text": "The group chose two sections of the same brick wall. One was shaded by a temporary screen while the other remained exposed. Using the same material helped avoid a comparison in which differences in colour or composition might be confused with the effect of shade.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 34077,
+     "endMs": 50098,
+     "text": "Measurements were taken at noon on each observation day. A few students suggested starting as soon as they arrived at school, but their teacher wanted the timing to be consistent. A convenient schedule is useful only if it still allows the comparison the investigation is designed to make.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 50548,
+     "endMs": 66545,
+     "text": "Before collecting data, the students marked the measurement points with small pieces of tape. Returning to those positions reduced variation caused by measuring a different patch of wall each day. The tape was placed beside each point so the instrument still measured the brick itself.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 66995,
+     "endMs": 82168,
+     "text": "The teacher reminded everyone to record the cloud cover as well. A cloudy day might reduce the difference between shaded and exposed sections. Recording that condition would not remove its effect, but it would help readers understand why results might differ across observation days.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 82618,
+     "endMs": 97222,
+     "text": "In the fictional data, the shaded section was cooler on most days. On one heavily overcast day the readings were almost equal. The students kept that result in their report instead of deleting it simply because it was less consistent with the pattern they expected to find.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 97672,
+     "endMs": 113159,
+     "text": "When presenting the findings, the group used a line graph to show changes across days. Each section of wall had its own line. Clear labels were more useful than decorative effects, because readers needed to follow the same section consistently from the first observation to the last.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 113609,
+     "endMs": 133414,
+     "text": "The screen was removed after the observation period so the class could discuss reversibility. The teacher did not claim the temporary screen was the best permanent solution for every building. Maintenance, wind exposure, and access requirements would also matter when considering a real installation outside this classroom example.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 133864,
+     "endMs": 150430,
+     "text": "For a follow-up study, students suggested repeating the observations in winter. That would help them explore whether the same shading arrangement has different consequences in another season. They would keep the measurement positions and timing comparable, while clearly describing any changes in the procedure.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 150880,
+     "endMs": 168839,
+     "text": "Finally, the report separates observations from interpretations. The instrument readings belong in the results section. Possible explanations, including the role of cloud cover, belong in the discussion. Readers can then see what was measured directly and what the class inferred from those measurements.",
+     "speaker": "Lecturer"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0218,
+    "espeakWer": 0.0808
+   }
+  },
+  "listening-v3-canteen-survey": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-canteen-survey.ogg",
+   "bytes": 781612,
+   "sha256": "7bb891084ebe86a9fd8df8331b8ca7a84270145e229b695d70109d2c53c325a7",
+   "durationMs": 192936,
+   "decodedDurationMs": 192936,
+   "masterPcmSha256": "862e1d9f9b6c248a5c40e58724b26dae472f10516cbf69049c882785506c7276",
+   "peak": 0.6377,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Lecturer",
+     "voice": "US_F2",
+     "model": "en_US-ljspeech-high",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "25da4e3e9b038e21ee43ea56a15e85f16d0a22a77a6bb6c4ce5e654257bf121d",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 19966,
+     "text": "This is a synthetic practice lecture about a fictional student research project. The team investigated why customers left food on their plates in a campus canteen. Their aim was to understand waste after purchase, so they did not measure ingredients discarded in the kitchen before meals were served.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 20416,
+     "endMs": 39153,
+     "text": "The students observed the canteen for five weekdays. They deliberately avoided a festival week because special menus and visiting groups might have made the results less typical. Their report acknowledges that one ordinary week still cannot represent every season or every type of campus event.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 39603,
+     "endMs": 57772,
+     "text": "At the collection station, customers placed their plates on a tray. The students first removed bones and other inedible material, then weighed the remaining food. This separation mattered because a heavy collection of bones would otherwise appear to be a large amount of food that someone could have eaten.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 58222,
+     "endMs": 76007,
+     "text": "The team also offered a short questionnaire. They asked customers to select their main reason for leaving food, rather than write a long account. This made participation quick, but it meant the researchers had to decide on useful answer categories before they knew every possible explanation.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 76457,
+     "endMs": 95508,
+     "text": "In the invented results used for this exercise, large portions were the most frequently selected reason. Poor flavour was mentioned less often than the researchers had expected. They therefore changed the emphasis of their presentation instead of keeping an argument that their own observations did not support.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 95958,
+     "endMs": 114614,
+     "text": "There was an important limitation: people who returned an empty plate could still decline the questionnaire. The respondents might therefore differ from those who did not respond. We should not assume that offering every customer a form automatically produces a representative set of completed responses.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 115064,
+     "endMs": 133697,
+     "text": "To improve their measurement procedure, the students tested the scales using a standard weight each morning. This check could reveal a change in the instrument, but it could not correct a poorly chosen questionnaire category. Different parts of a research design need different kinds of quality checks.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 134147,
+     "endMs": 153302,
+     "text": "The report compared waste from meals with different portion options. However, customers chose their own meals, so the comparison did not randomly assign portion size. Someone selecting a larger meal might also differ in appetite or available lunch time, which complicates a simple causal explanation.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 153752,
+     "endMs": 173267,
+     "text": "For a future pilot, the team proposed offering a smaller default serving while allowing customers to request more. They recommended testing that change before introducing it permanently. Their proposal aimed to preserve choice, rather than forcing everyone to accept the same quantity regardless of appetite.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 173717,
+     "endMs": 192536,
+     "text": "The final presentation will include a chart of the reported reasons and a separate table of measured weights. Keeping these forms of evidence distinct is essential. A questionnaire records what people say, while the scales record a physical quantity; neither should be silently substituted for the other.",
+     "speaker": "Lecturer"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0129,
+    "espeakWer": 0.0603
+   }
+  },
+  "listening-v3-charity-walk-briefing": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-charity-walk-briefing.ogg",
+   "bytes": 640329,
+   "sha256": "c0cb48187142fa5f7af5ea722c8193f9b65bea31ce2564e8527d5f3c8771f6b1",
+   "durationMs": 160392,
+   "decodedDurationMs": 160392,
+   "masterPcmSha256": "dedc2c937ffbb62926ec04d75f37855782c20b14c50264ab6d91b8f751d13835",
+   "peak": 0.6189,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Event organiser",
+     "voice": "US_M1",
+     "model": "en_US-john-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "6602e2baaca24b63f162697941a99b543c73ad105252019fbe7cf7949b2a9f84",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 18468,
+     "text": "Thank you for helping with our fictional charity walk. This is a synthetic practice recording for route volunteers. The event raises funds for a community kitchen, and participants will follow a marked route through the town. Your role is to guide walkers, not to collect donations along the path.",
+     "speaker": "Event organiser"
+    },
+    {
+     "startMs": 18918,
+     "endMs": 33313,
+     "text": "Collect your volunteer pack from the school gym between eight and half past eight. Registration was originally planned for the playground, but rain is forecast. The gym entrance is on the side street, and a member of staff will direct you there from the main gate.",
+     "speaker": "Event organiser"
+    },
+    {
+     "startMs": 33763,
+     "endMs": 48309,
+     "text": "Each pack contains a route map and an emergency contact card. Keep the card with you throughout the event rather than leaving it in your bag at registration. The number on it reaches the event control team, which can coordinate a response across the whole route.",
+     "speaker": "Event organiser"
+    },
+    {
+     "startMs": 48759,
+     "endMs": 63050,
+     "text": "The first walkers leave at nine. Volunteers need to reach their positions twenty minutes earlier, so please leave the gym promptly after collecting your pack. We will not delay the whole event because someone stops for breakfast on the way to their assigned point.",
+     "speaker": "Event organiser"
+    },
+    {
+     "startMs": 63500,
+     "endMs": 78940,
+     "text": "At junctions, point to the direction shown on your map. Do not create a shortcut even if it seems easier, because the control team needs to know where participants are travelling. The planned route also avoids a road where repairs have narrowed the pavement this week.",
+     "speaker": "Event organiser"
+    },
+    {
+     "startMs": 79390,
+     "endMs": 96560,
+     "text": "The water station is beside the library. Last year it stood at the fountain, but that area is now occupied by maintenance equipment. Tell walkers about the library station before they reach the turning, particularly if they are looking for the location they remember from last year.",
+     "speaker": "Event organiser"
+    },
+    {
+     "startMs": 97010,
+     "endMs": 113611,
+     "text": "If a walker wishes to stop, contact event control and remain with the person until further instructions arrive. Volunteers should not offer transport in their own cars. The event has an arranged collection procedure so that the team can account for everyone who leaves the route early.",
+     "speaker": "Event organiser"
+    },
+    {
+     "startMs": 114061,
+     "endMs": 129153,
+     "text": "Please record the approximate number of walkers passing your position at fifteen-minute intervals. We do not need names at each junction. These counts help us see how the group is spreading out and decide whether a later station is likely to need additional supplies.",
+     "speaker": "Event organiser"
+    },
+    {
+     "startMs": 129603,
+     "endMs": 144218,
+     "text": "A cyclist wearing an orange vest will follow the final walker. Remain at your position until that cyclist passes, even if the route has looked empty for several minutes. A gap in the group does not prove that everyone has already gone through your junction.",
+     "speaker": "Event organiser"
+    },
+    {
+     "startMs": 144668,
+     "endMs": 159992,
+     "text": "After the cyclist passes, return the route signs to the school gym. You may keep the printed map, but the signs will be used again. Hand your count sheet to the coordinator before leaving so the information is available when the team reviews the event tomorrow.",
+     "speaker": "Event organiser"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0282,
+    "espeakWer": 0.0564
+   }
+  },
+  "listening-v3-collection-catalogue": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-collection-catalogue.ogg",
+   "bytes": 670866,
+   "sha256": "7b6349d841b5a850a153565e87c5f23b83078d39c4931736745d04c0ad245de1",
+   "durationMs": 168612,
+   "decodedDurationMs": 168612,
+   "masterPcmSha256": "7be346a9d3c906ba120852c643a015edeacc047e2cdf3d0797b4fa6fe11982b1",
+   "peak": 0.4993,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Museum trainer",
+     "voice": "GB_F",
+     "model": "en_GB-cori-high",
+     "accent": "British English"
+    }
+   ],
+   "transcriptSha256": "2e00a1ead9155e29420731cee3ddbe7c82f4208a28ae0c39c033beec9467017f",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 17539,
+     "text": "Welcome to this training session for our fictional local museum. This is a synthetic practice recording. Today you will catalogue donated household objects, beginning with the wooden box on each table. Leave fragile glass objects for trained staff until you have completed the introductory handling session.",
+     "speaker": "Museum trainer"
+    },
+    {
+     "startMs": 17989,
+     "endMs": 34381,
+     "text": "Every object receives an identification number before anyone writes a description. Please copy that number from the label into the top field of the form. Do not create a new number because the existing label looks untidy; the old number connects the object with earlier records.",
+     "speaker": "Museum trainer"
+    },
+    {
+     "startMs": 34831,
+     "endMs": 52767,
+     "text": "Record the main material next. If an object combines wood and metal, list both instead of deciding that the smaller component is unimportant. Where you are uncertain, write unknown and ask the supervisor. Guessing may make the record look complete while reducing its reliability for future users.",
+     "speaker": "Museum trainer"
+    },
+    {
+     "startMs": 53217,
+     "endMs": 71234,
+     "text": "For dimensions, use millimetres throughout the form. Another department uses centimetres, but mixing units within our catalogue would create errors. Measure the greatest length, width, and height, and note separately if an irregular shape makes one of those measurements difficult to define.",
+     "speaker": "Museum trainer"
+    },
+    {
+     "startMs": 71684,
+     "endMs": 88332,
+     "text": "Photograph the object against the grey background provided. A patterned tablecloth might look attractive, but it can hide the outline and distract attention from small details. The background should remain the same across the photographs so differences between objects are easier to recognise.",
+     "speaker": "Museum trainer"
+    },
+    {
+     "startMs": 88782,
+     "endMs": 103177,
+     "text": "Place a scale beside the object in at least one photograph. This gives later viewers a direct size reference even if the image is enlarged or reduced. Keep the scale in the same plane as the relevant surface where possible, rather than far behind the object.",
+     "speaker": "Museum trainer"
+    },
+    {
+     "startMs": 103627,
+     "endMs": 119450,
+     "text": "The condition section records damage that you can observe, such as a crack or missing handle. It is not the place to speculate about who caused the damage. Describe what is visible, and leave historical explanations for a separate field supported by appropriate evidence.",
+     "speaker": "Museum trainer"
+    },
+    {
+     "startMs": 119900,
+     "endMs": 135015,
+     "text": "A donor may have provided a story about the object. Preserve that account in the donor notes, but make clear who supplied it. An interesting story can guide further research without being treated as an independently verified fact merely because it appears in a museum record.",
+     "speaker": "Museum trainer"
+    },
+    {
+     "startMs": 135465,
+     "endMs": 151927,
+     "text": "When you finish a record, save it as a draft. The supervisor will check the number, units, and photographs before approving it for public access. This review is part of our normal procedure and does not imply that the volunteer who entered the information has done poor work.",
+     "speaker": "Museum trainer"
+    },
+    {
+     "startMs": 152377,
+     "endMs": 168212,
+     "text": "At the end of the session, place each object in its labelled tray. Return the measuring equipment to the cabinet and leave the cameras on the charging shelf. Please do not pack the cameras into the cabinet, because tomorrow’s group needs fully charged batteries before its session begins.",
+     "speaker": "Museum trainer"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0263,
+    "espeakWer": 0.0833
+   }
+  },
+  "listening-v3-cycle-loan": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-cycle-loan.ogg",
+   "bytes": 631524,
+   "sha256": "99dd54a72d5e4af2a1c4a245369634c9e07b8b4c178401fcc939c4d9319b303a",
+   "durationMs": 160388,
+   "decodedDurationMs": 160388,
+   "masterPcmSha256": "c69645d31fa5be00d00c23d2e35cf85784cf2c1bcaf56a1acdd652ad732a07e1",
+   "peak": 0.6798,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Transport officer",
+     "voice": "US_M2",
+     "model": "en_US-norman-medium",
+     "accent": "American English"
+    },
+    {
+     "label": "Student",
+     "voice": "GB_F",
+     "model": "en_GB-cori-high",
+     "accent": "British English"
+    }
+   ],
+   "transcriptSha256": "9df21936ef5077c7052c8098ca77ae7bd4eb375b0bde942a2619ff7ae82ed27a",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 17388,
+     "text": "Hello, campus transport office. This is a synthetic practice conversation about our fictional bicycle loan scheme. We lend bicycles to students who need transport for a term. The electric models are all allocated, but standard city bicycles are still available for collection later this week.",
+     "speaker": "Transport officer"
+    },
+    {
+     "startMs": 18088,
+     "endMs": 31798,
+     "text": "A city bicycle would suit me. My student number is already in your system because I applied last month. I will use the bicycle to travel between the main campus and the language centre, which is too far to reach comfortably during the short break between classes.",
+     "speaker": "Student"
+    },
+    {
+     "startMs": 32498,
+     "endMs": 48658,
+     "text": "The loan lasts ten weeks. At the end, you may request an extension, but we cannot promise it before checking the next waiting list. Please do not assume that continuing to use the bicycle without contacting us automatically renews the agreement for another term.",
+     "speaker": "Transport officer"
+    },
+    {
+     "startMs": 49358,
+     "endMs": 63347,
+     "text": "That is long enough for my first set of classes. I saw a deposit of forty pounds on an older poster, but your email says thirty pounds. I will follow the email, unless the amount has changed again since it was sent yesterday afternoon.",
+     "speaker": "Student"
+    },
+    {
+     "startMs": 64047,
+     "endMs": 79858,
+     "text": "Thirty pounds is correct. It is refundable when the bicycle is returned according to the loan conditions. We provide a lock with every bicycle, and you must use it whenever you leave the bicycle unattended. A lightweight cable brought from home is not an alternative to that issued lock.",
+     "speaker": "Transport officer"
+    },
+    {
+     "startMs": 80558,
+     "endMs": 93455,
+     "text": "I will use the supplied lock. I would also like to know about lights because some of my classes finish after sunset. I can see a front light in the photograph, but I cannot tell whether the rear one is included or whether I need to buy it separately.",
+     "speaker": "Student"
+    },
+    {
+     "startMs": 94155,
+     "endMs": 110025,
+     "text": "Both lights are included and will be checked at collection. You should inspect them regularly afterwards and report any fault through the maintenance form on our website. Do not email a tutor about bicycle repairs, because teaching staff cannot add a job to the transport team’s maintenance schedule.",
+     "speaker": "Transport officer"
+    },
+    {
+     "startMs": 110725,
+     "endMs": 126246,
+     "text": "That is clear. My earliest free time for collection is Friday afternoon. I had hoped to come on Wednesday, but a laboratory session now occupies that slot. If Friday works, I can also stay for the short adjustment session mentioned in the confirmation message.",
+     "speaker": "Student"
+    },
+    {
+     "startMs": 126946,
+     "endMs": 143697,
+     "text": "Friday is fine. Come to the workshop behind the sports hall rather than the main transport office. A technician will adjust the saddle and explain the return procedure. Bring your student card, because we must confirm your identity before releasing the bicycle and recording its serial number.",
+     "speaker": "Transport officer"
+    },
+    {
+     "startMs": 144397,
+     "endMs": 159988,
+     "text": "I will bring my card and the deposit confirmation. One final point: I understand that I must return the bicycle before leaving campus for an extended placement. I cannot pass it to a friend, even temporarily, because the agreement remains in my name until it is formally closed.",
+     "speaker": "Student"
+    }
+   ],
+   "asr": {
+    "newWer": 0.028,
+    "espeakWer": 0.0237
+   }
+  },
+  "listening-v3-flat-enquiry": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-flat-enquiry.ogg",
+   "bytes": 609481,
+   "sha256": "6e715faf04e5caca83e3a71fe6f3d5faf9b99be1d0f85f6882753ef10a466af4",
+   "durationMs": 155486,
+   "decodedDurationMs": 155486,
+   "masterPcmSha256": "707cc6569505e068e32938aaf1bb3e076c58cb9b01938810e71fcc35a8be10e8",
+   "peak": 0.648,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Accommodation officer",
+     "voice": "GB_F",
+     "model": "en_GB-cori-high",
+     "accent": "British English"
+    },
+    {
+     "label": "Researcher",
+     "voice": "US_M2",
+     "model": "en_US-norman-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "404b8bc4faaa2cd6c8d7e7573cbb39a9c74367d7baa350e0fb2608cb5a258af4",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 15948,
+     "text": "Hello, you have reached the accommodation office. This is a synthetic practice conversation about a fictional room listing. You asked about the room on Market Street, but someone reserved it this morning. We still have a room on Willow Road, close to the same bus route.",
+     "speaker": "Accommodation officer"
+    },
+    {
+     "startMs": 16648,
+     "endMs": 31182,
+     "text": "Willow Road could work well for me. I am arriving for a six-month research placement, and I would rather share a flat than live alone. I see the available room is on the second floor. That is fine, because I do not have much luggage to carry upstairs.",
+     "speaker": "Researcher"
+    },
+    {
+     "startMs": 31882,
+     "endMs": 48274,
+     "text": "The rent is five hundred and forty pounds per month. That includes water and heating, but electricity is paid separately according to the meter. Internet access is included as well. We explain the separate electricity arrangement in the contract so there should be no surprise after you move in.",
+     "speaker": "Accommodation officer"
+    },
+    {
+     "startMs": 48974,
+     "endMs": 64030,
+     "text": "That arrangement seems reasonable. The photograph shows a desk, which I will need for reading. I do not see a chair beside it, though. According to the written description, the owner will provide a chair before the room becomes available, so I will not need to buy one.",
+     "speaker": "Researcher"
+    },
+    {
+     "startMs": 64730,
+     "endMs": 80588,
+     "text": "That is correct. The kitchen is shared by three tenants, including you. There are separate shelves in the refrigerator, although cooking equipment is shared. The current tenants have agreed to label their own food, which has worked better than trying to divide all purchases equally.",
+     "speaker": "Accommodation officer"
+    },
+    {
+     "startMs": 81288,
+     "endMs": 96483,
+     "text": "I am happy to label my food. My main concern is getting to the university early for experiments. The listing says there is a direct bus, but cycling might be more reliable. I noticed a covered bicycle store behind the building, and I would use that regularly.",
+     "speaker": "Researcher"
+    },
+    {
+     "startMs": 97183,
+     "endMs": 112020,
+     "text": "Access to the bicycle store comes with the room key. There is no parking space for a car, however, and the street has a residents-only restriction. This has not caused difficulty for the current tenants because neither owns a car, but I want to make it clear before you decide.",
+     "speaker": "Accommodation officer"
+    },
+    {
+     "startMs": 112720,
+     "endMs": 126708,
+     "text": "I will not have a car, so that is not a problem. I would like to view the room next Thursday. I first suggested the morning in my email, but my train arrives at lunchtime. An appointment at half past two would leave enough time to reach your office.",
+     "speaker": "Researcher"
+    },
+    {
+     "startMs": 127408,
+     "endMs": 140015,
+     "text": "Half past two is available. Meet our representative at the bakery on the corner, because the main entrance is difficult to find from the street. She will carry a folder with the office name on it and take you through the side passage to the building.",
+     "speaker": "Accommodation officer"
+    },
+    {
+     "startMs": 140715,
+     "endMs": 155086,
+     "text": "Thank you. I will bring the reference letter you requested from my previous landlord. I understand that you do not need a payment at the viewing. If I decide to take the room, the deposit can be arranged afterwards through the office’s secure payment system.",
+     "speaker": "Researcher"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0316,
+    "espeakWer": 0.0526
+   }
+  },
+  "listening-v3-gallery-orientation": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-gallery-orientation.ogg",
+   "bytes": 681804,
+   "sha256": "7ed7b30fadffb66c07cc9fc27947972dbc45ab38b606a9cad7b0c411df841ba0",
+   "durationMs": 171155,
+   "decodedDurationMs": 171155,
+   "masterPcmSha256": "558b68f914c1ef441f15f10dbb47b8be1ba76308378da83aa51feaa01f0c7e37",
+   "peak": 0.5595,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Gallery guide",
+     "voice": "US_F1",
+     "model": "en_US-kristin-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "ddc405e706c356327b2db21a33da2b1e03ad195aa94beeafadce4f69c4ba386a",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 19571,
+     "text": "Welcome to the Harbour Gallery. This is a synthetic practice recording introducing a fictional exhibition. The photographs you will see today document ordinary working spaces in our town. Rather than famous monuments, the photographer chose kitchens, workshops, and small offices that visitors normally never enter.",
+     "speaker": "Gallery guide"
+    },
+    {
+     "startMs": 20021,
+     "endMs": 33046,
+     "text": "Please begin in the blue room on your right. The printed map calls it the green room because the walls were repainted after the map was produced. We have placed a temporary sign at the doorway so that nobody follows the outdated colour description by mistake.",
+     "speaker": "Gallery guide"
+    },
+    {
+     "startMs": 33496,
+     "endMs": 50736,
+     "text": "The first sequence was photographed at dawn, before most employees arrived. That timing allowed the photographer to show how light moves across empty rooms. It also avoided interrupting anyone at work, although avoiding interruption was not the main artistic reason for choosing the early hour.",
+     "speaker": "Gallery guide"
+    },
+    {
+     "startMs": 51186,
+     "endMs": 68425,
+     "text": "Some visitors assume these images were taken with a phone. In fact, the photographer used a film camera for the entire project. Working with a limited number of exposures encouraged careful decisions about position and timing instead of taking many nearly identical photographs in quick succession.",
+     "speaker": "Gallery guide"
+    },
+    {
+     "startMs": 68875,
+     "endMs": 83886,
+     "text": "You will notice a short quotation below each photograph. These words come from interviews with the people who use the room, rather than comments written by the photographer. Reading them after viewing the image can change what you notice about an object near the edge of the frame.",
+     "speaker": "Gallery guide"
+    },
+    {
+     "startMs": 84336,
+     "endMs": 102469,
+     "text": "At the end of the first room, a table holds contact sheets. They display small versions of several exposures together. Visitors can compare the selected photograph with alternatives and see that choosing an image is part of the creative process, not merely something done after the important work finishes.",
+     "speaker": "Gallery guide"
+    },
+    {
+     "startMs": 102919,
+     "endMs": 120914,
+     "text": "Please continue through the narrow doorway into the second room. A recording of workshop sounds plays quietly there, but headphones are available if you want to hear individual details. The sound was recorded separately from the photographs, so it is not evidence that a particular image captures that exact moment.",
+     "speaker": "Gallery guide"
+    },
+    {
+     "startMs": 121364,
+     "endMs": 137767,
+     "text": "The largest photograph in that room shows an empty bakery. Its apparent warmth comes from afternoon sunlight rather than electric lighting. The photographer returned on several days until the light reached the back wall, which is why the project took longer than the number of final images might suggest.",
+     "speaker": "Gallery guide"
+    },
+    {
+     "startMs": 138217,
+     "endMs": 154226,
+     "text": "If you wish to sketch, pencils are allowed in both rooms. Please keep paint and ink in your bag because accidental marks could damage the display surfaces. Photography without a flash is also permitted, provided you leave enough room for other visitors to move through the narrow doorway.",
+     "speaker": "Gallery guide"
+    },
+    {
+     "startMs": 154676,
+     "endMs": 170755,
+     "text": "A discussion with the photographer begins at four in the lecture room upstairs. You do not need to reserve a seat, but space is limited. The shop closes before the discussion finishes, so buy a catalogue beforehand if you would like to bring one for the photographer to sign.",
+     "speaker": "Gallery guide"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0232,
+    "espeakWer": 0.08
+   }
+  },
+  "listening-v3-heritage-route": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-heritage-route.ogg",
+   "bytes": 655876,
+   "sha256": "259128b3bfa9c5da9c7bcbca9572368f5bddb72c0e75ab4310dcd06738a433f6",
+   "durationMs": 165279,
+   "decodedDurationMs": 165279,
+   "masterPcmSha256": "eec71bb56ca07068759b3ad4266cd7569cbfdc41ff3ce3f29112ff1b8575e1b1",
+   "peak": 0.6889,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Tour narrator",
+     "voice": "US_M2",
+     "model": "en_US-norman-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "565c51523d4c32bd019dc8ed4d21ef5dfd563e21095041fa91130351bd9aefc0",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 15438,
+     "text": "Welcome to this fictional self-guided heritage route. This is a synthetic practice recording. The walk begins at the clock tower in the market square and takes about an hour without long stops. You may pause the recording whenever you want to look more closely at a building.",
+     "speaker": "Tour narrator"
+    },
+    {
+     "startMs": 15888,
+     "endMs": 30933,
+     "text": "From the tower, walk towards the narrow lane between the bookshop and the café. Do not follow the wider road beside the bank, because it leads away from the historic quarter. The lane has a blue street sign at its entrance, which should make it easy to identify.",
+     "speaker": "Tour narrator"
+    },
+    {
+     "startMs": 31383,
+     "endMs": 47729,
+     "text": "The first stop is a former schoolhouse. The building now contains a furniture workshop, but the tall windows remain from its earlier use. They admitted daylight to the classrooms at a time when electric lighting was unavailable, so their size reflects a practical need rather than decoration alone.",
+     "speaker": "Tour narrator"
+    },
+    {
+     "startMs": 48179,
+     "endMs": 65534,
+     "text": "Continue to the small bridge and stop before crossing it. On the left you can see a stone channel beside the stream. This channel carried water towards a mill that no longer stands. The surviving structure provides evidence of an activity that is otherwise difficult to picture in the modern street.",
+     "speaker": "Tour narrator"
+    },
+    {
+     "startMs": 65984,
+     "endMs": 82805,
+     "text": "Cross the bridge and turn right at the next junction. A temporary barrier blocks the left-hand pavement while repairs continue. Follow the pedestrian signs rather than stepping into the road to keep to an older printed route. The detour rejoins the main walk beside the garden wall.",
+     "speaker": "Tour narrator"
+    },
+    {
+     "startMs": 83255,
+     "endMs": 99717,
+     "text": "The garden belonged to a merchant’s house, although the house itself has been converted into flats. Please remain outside the gate because the garden is private. The view from the pavement is sufficient to see the original boundary wall and the pattern of paths leading away from the central bed.",
+     "speaker": "Tour narrator"
+    },
+    {
+     "startMs": 100167,
+     "endMs": 116524,
+     "text": "Farther along the street, the old post office has a carved bird above its doorway. Several nearby buildings carry dates, but this one does not. The bird is the easiest feature to use when locating it, especially if you are following the route during the busy afternoon shopping period.",
+     "speaker": "Tour narrator"
+    },
+    {
+     "startMs": 116974,
+     "endMs": 131323,
+     "text": "Inside the visitor centre opposite, a model shows the district before the main road was widened. Admission to the centre is free, although there is a charge for guided tours. Our route does not require you to buy a tour ticket in order to see the model.",
+     "speaker": "Tour narrator"
+    },
+    {
+     "startMs": 131773,
+     "endMs": 148374,
+     "text": "When you leave the centre, follow the pavement towards the railway arch. The final section passes through the arch and opens onto a riverside path. Bicycles use this path as well, so please keep to one side when stopping to take photographs or listen to the last part of the commentary.",
+     "speaker": "Tour narrator"
+    },
+    {
+     "startMs": 148824,
+     "endMs": 164879,
+     "text": "The walk finishes at the public library, where toilets and drinking water are available during opening hours. If you need to return to the clock tower, follow the signs for the market square. That return journey is not part of the historical commentary you have just completed.",
+     "speaker": "Tour narrator"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0308,
+    "espeakWer": 0.0698
+   }
+  },
+  "listening-v3-instrument-loan": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-instrument-loan.ogg",
+   "bytes": 704800,
+   "sha256": "eee64cc88d4dd23da82ecdb018bcd7f3ee38d4fb0185997b42331840d789ae1f",
+   "durationMs": 177117,
+   "decodedDurationMs": 177117,
+   "masterPcmSha256": "2a869753cf30aa6d71be4a69c04484d645a82472203ca4c72ac7f95a1ab1dddd",
+   "peak": 0.6089,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Music office",
+     "voice": "US_F2",
+     "model": "en_US-ljspeech-high",
+     "accent": "American English"
+    },
+    {
+     "label": "Parent",
+     "voice": "US_M1",
+     "model": "en_US-john-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "8632f1df5adb473c4f574fac2aa4767ed10b63871fad0d98aceffb70e917174c",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 18096,
+     "text": "Hello, community music office. This is a synthetic practice conversation about a fictional instrument loan. You asked whether your daughter could borrow a violin, and one is now available. We will need her teacher to confirm the correct size before we complete the loan agreement.",
+     "speaker": "Music office"
+    },
+    {
+     "startMs": 18796,
+     "endMs": 34282,
+     "text": "That is helpful. Her teacher has already recommended a three-quarter size instrument. She has tried a full-size one, but it was uncomfortable. I can bring the teacher’s note to the office, so you do not have to rely only on what I remember from the lesson.",
+     "speaker": "Parent"
+    },
+    {
+     "startMs": 34982,
+     "endMs": 53998,
+     "text": "Please bring the note. The loan fee is eighteen pounds per month, and the case is included. A refundable deposit is separate from that monthly amount. We will list both clearly on the agreement so that you can distinguish the continuing charge from money held until the instrument is returned.",
+     "speaker": "Music office"
+    },
+    {
+     "startMs": 54698,
+     "endMs": 70962,
+     "text": "I understand the difference. My main question is whether the bow is included, because the teacher said a suitable bow matters as much as the instrument. I do not want to purchase one and then discover that the loan package already provides everything she needs for her first lessons.",
+     "speaker": "Parent"
+    },
+    {
+     "startMs": 71662,
+     "endMs": 89261,
+     "text": "Yes, a bow is included. Rosin is included too, but your daughter will need her own shoulder rest, fitted with the teacher’s help. Different players find different supports comfortable, so we leave that choice to the teacher rather than supplying one model to every borrower.",
+     "speaker": "Music office"
+    },
+    {
+     "startMs": 89961,
+     "endMs": 105633,
+     "text": "That makes sense. We would like to collect the instrument on Saturday if possible. I originally wrote Friday on the application, but her teacher can join us only the following day. Having the teacher there would allow us to check the fit before taking the instrument home.",
+     "speaker": "Parent"
+    },
+    {
+     "startMs": 106333,
+     "endMs": 125766,
+     "text": "Saturday morning is fine. Come to the rehearsal room behind the main office. We use that space for collections so borrowers can try an instrument without disturbing staff on the telephone. The main office remains the place to return completed paperwork after you have finished checking the fit.",
+     "speaker": "Music office"
+    },
+    {
+     "startMs": 126466,
+     "endMs": 141814,
+     "text": "We will do that. I have also read the care instructions about keeping the violin away from heaters. Our daughter’s room can get warm in the afternoon, so we will store the case in the hallway instead of beside her bedroom window or the radiator.",
+     "speaker": "Parent"
+    },
+    {
+     "startMs": 142513,
+     "endMs": 160937,
+     "text": "Please contact us before arranging any repair. Our appointed technician handles work on loan instruments, and the agreement does not permit borrowers to use another repairer without approval. That protects the instrument’s record and ensures we know about changes before lending it to the next player.",
+     "speaker": "Music office"
+    },
+    {
+     "startMs": 161637,
+     "endMs": 176717,
+     "text": "Thank you. We will keep the contact card inside the case. I see that the first review is after six months, when you will ask whether the size is still suitable. That seems sensible because she may grow before the full year of lessons has finished.",
+     "speaker": "Parent"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0128,
+    "espeakWer": 0.0746
+   }
+  },
+  "listening-v3-library-registration": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-library-registration.ogg",
+   "bytes": 575041,
+   "sha256": "54f883c71e457e7f553bc03fcf49eb719f2a2eac2c6ba7c9f28e1d554fd7c2fe",
+   "durationMs": 147396,
+   "decodedDurationMs": 147396,
+   "masterPcmSha256": "9bf9cdb99a3410e8509f08d94c55afd7ddf76cb9cdf58f254379ae32642890bb",
+   "peak": 0.5293,
+   "split": "DIAGNOSTIC",
+   "speakers": [
+    {
+     "label": "Librarian",
+     "voice": "GB_F",
+     "model": "en_GB-cori-high",
+     "accent": "British English"
+    },
+    {
+     "label": "Elena",
+     "voice": "US_F1",
+     "model": "en_US-kristin-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "b9449afbc23cebe63b0187d04a1fee50970c66f6ef55bd6d58ef9995e40d8150",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 15867,
+     "text": "Good morning, and welcome to Lakeside Library. This is a synthetic practice conversation. I understand that you have moved into the neighbourhood and would like a borrowing card. We issue new cards at the information desk, just beside the entrance.",
+     "speaker": "Librarian"
+    },
+    {
+     "startMs": 16567,
+     "endMs": 31299,
+     "text": "Yes, I arrived last week and I am staying with my sister while I find a flat. My name is Elena Morris. I have brought my passport because the website says applicants must show identification, even if they already use another library.",
+     "speaker": "Elena"
+    },
+    {
+     "startMs": 31999,
+     "endMs": 45465,
+     "text": "That is suitable for identification. We also need evidence of your current address. A recent bank statement will do; a travel ticket will not. You can display the statement on your phone, so there is no need to print it.",
+     "speaker": "Librarian"
+    },
+    {
+     "startMs": 46165,
+     "endMs": 59747,
+     "text": "I can show you that now. I had expected an annual charge of fifteen pounds because that appeared in an old leaflet. Your current notice says membership is free, although replacing a lost card may still involve a separate charge.",
+     "speaker": "Elena"
+    },
+    {
+     "startMs": 60447,
+     "endMs": 74064,
+     "text": "You have read the correct notice. With your new card, you can borrow eight books at a time. Magazines do not count towards that total because they stay in the building. Downloadable material has its own separate allowance in the application.",
+     "speaker": "Librarian"
+    },
+    {
+     "startMs": 74764,
+     "endMs": 87731,
+     "text": "Eight will be plenty for me. I usually read one novel during the week and something about history at weekends. I see that books are normally loaned for three weeks, which should give me enough time to finish both types.",
+     "speaker": "Elena"
+    },
+    {
+     "startMs": 88431,
+     "endMs": 103430,
+     "text": "If nobody has reserved a book, you may renew it through our website. Calling the building is unnecessary, and the self-service machines do not handle renewals. Please check your online account after submitting the request to make sure the new date appears.",
+     "speaker": "Librarian"
+    },
+    {
+     "startMs": 104130,
+     "endMs": 118664,
+     "text": "That sounds straightforward. I also need a quiet place for an online interview next month. I noticed a room labelled Cedar on the floor plan. The larger Maple room looks useful for groups, but Cedar seems the right size for one person.",
+     "speaker": "Elena"
+    },
+    {
+     "startMs": 119364,
+     "endMs": 133492,
+     "text": "Cedar can be reserved in advance for up to two hours. Reservations open seven days before the date you need. Please bring your own headphones because sound from computer speakers would disturb readers using the desks immediately outside the room.",
+     "speaker": "Librarian"
+    },
+    {
+     "startMs": 134192,
+     "endMs": 146996,
+     "text": "Thank you. Before I leave, I will collect the card and check the opening hours. I had planned to return on Sunday, but I see the library is closed then. I will come on Monday instead, when the building opens again.",
+     "speaker": "Elena"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0367,
+    "espeakWer": 0.0513
+   }
+  },
+  "listening-v3-planetarium-reservation": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-planetarium-reservation.ogg",
+   "bytes": 661043,
+   "sha256": "e1f17b973ca73a8bc253eb1dea3583a3c83b8c104e53f308c6f3273d3ef98838",
+   "durationMs": 167770,
+   "decodedDurationMs": 167770,
+   "masterPcmSha256": "64740764af32f38ac1ab17171ed905f3e274dee73fd5b1ae3638458cf8ab58d2",
+   "peak": 0.704,
+   "split": "ASSESSMENT",
+   "speakers": [
+    {
+     "label": "Bookings officer",
+     "voice": "US_M2",
+     "model": "en_US-norman-medium",
+     "accent": "American English"
+    },
+    {
+     "label": "Teacher",
+     "voice": "GB_F",
+     "model": "en_GB-cori-high",
+     "accent": "British English"
+    }
+   ],
+   "transcriptSha256": "4a9956eb93a41b8384944b03d823d1039f82b1e8689e548d442e0fbe80cb55e2",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 18781,
+     "text": "Good afternoon, Hillview Planetarium bookings. This is a synthetic practice conversation about a fictional school visit. You asked for a programme about the Moon, but that presentation is unavailable during your visit week. We can offer the programme about navigation, which connects the night sky with finding directions.",
+     "speaker": "Bookings officer"
+    },
+    {
+     "startMs": 19481,
+     "endMs": 35536,
+     "text": "Navigation would fit our geography work well. We will bring twenty-six pupils rather than the thirty I first estimated. Four are attending a sports event that day. There will also be three adults, but I understand that you need the pupil and adult counts recorded separately on the booking.",
+     "speaker": "Teacher"
+    },
+    {
+     "startMs": 36236,
+     "endMs": 52871,
+     "text": "Thank you for separating those numbers. Your group’s presentation begins at eleven forty-five. We recommend arriving half an hour beforehand because pupils need time to use the toilets and put away bags. That arrival allowance is separate from the presentation’s advertised starting time.",
+     "speaker": "Bookings officer"
+    },
+    {
+     "startMs": 53571,
+     "endMs": 68558,
+     "text": "We can arrive early. Our coach driver asked where to stop because the front entrance faces a narrow road. The instructions you sent mention the service entrance on Park Lane. I will send those directions to the driver so we do not block the road while the pupils get out.",
+     "speaker": "Teacher"
+    },
+    {
+     "startMs": 69258,
+     "endMs": 84222,
+     "text": "That is the correct entrance. A member of staff will meet you there and lead the class to the lockers. Please leave large bags in those lockers before entering the dome, because the seating aisles must remain clear throughout the presentation, including while the lights are dimmed.",
+     "speaker": "Bookings officer"
+    },
+    {
+     "startMs": 84922,
+     "endMs": 101372,
+     "text": "I will remind the pupils. One child is sensitive to sudden loud sounds, so I am interested in the accessibility notes. They say the session has a spoken introduction before the lights change. That should help the class understand what is about to happen rather than being surprised by the darkened room.",
+     "speaker": "Teacher"
+    },
+    {
+     "startMs": 102072,
+     "endMs": 119195,
+     "text": "The presenter can also explain the sound levels before the programme. After the dome session, your group has a practical activity using compasses. These are supplied by us, so pupils do not need to bring their own equipment. The activity is designed to connect the presentation with simple observations outdoors.",
+     "speaker": "Bookings officer"
+    },
+    {
+     "startMs": 119894,
+     "endMs": 134893,
+     "text": "That will be useful. We plan to bring packed lunches because the café would take too long for a group this size. I see that the covered terrace is available for school groups. We will use that space and make sure everyone takes their rubbish back to the collection point afterwards.",
+     "speaker": "Teacher"
+    },
+    {
+     "startMs": 135593,
+     "endMs": 151033,
+     "text": "Please confirm the final numbers by the Monday before your visit. We used to request confirmation on Friday, but that left too little time to prepare the activity materials. You can update the booking online, and the system will send a new confirmation showing any changes.",
+     "speaker": "Bookings officer"
+    },
+    {
+     "startMs": 151733,
+     "endMs": 167370,
+     "text": "I will update the booking by then. Please send the invoice to our school office rather than to my personal email. The office handles payments and needs the reference number on its own copy. I will still keep the visit confirmation for the teaching arrangements and arrival instructions.",
+     "speaker": "Teacher"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0473,
+    "espeakWer": 0.0802
+   }
+  },
+  "listening-v3-podcast-project": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-podcast-project.ogg",
+   "bytes": 649036,
+   "sha256": "8080e25d956af3a940b1fea05598845f1f9262532ca1dcbfe29421439a93b56c",
+   "durationMs": 164302,
+   "decodedDurationMs": 164302,
+   "masterPcmSha256": "642cc3d1e2b9c3600ce648cfafe7cc3e5a52ff992dd1b9295925270ad9252c49",
+   "peak": 0.7069,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Student A",
+     "voice": "US_M2",
+     "model": "en_US-norman-medium",
+     "accent": "American English"
+    },
+    {
+     "label": "Student B",
+     "voice": "GB_F",
+     "model": "en_GB-cori-high",
+     "accent": "British English"
+    }
+   ],
+   "transcriptSha256": "0ff051d5bf9e8ac93065846a449f45c372f1126a252518a7b2f6eea14c8fad6d",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 19791,
+     "text": "Thanks for meeting before class. This is a synthetic practice discussion about our fictional history podcast project. We initially considered famous buildings, but the tutor suggested a narrower focus. I think the old railway station gives us enough material for a short episode without covering the whole town.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 20491,
+     "endMs": 35955,
+     "text": "I agree with that choice. The assignment asks for an episode lasting twelve minutes, including the introduction and credits. We should not plan twelve minutes of interviews and then add everything else, because the tutor said the complete recording must stay within the same limit.",
+     "speaker": "Student B"
+    },
+    {
+     "startMs": 36655,
+     "endMs": 54579,
+     "text": "For background information, I have found a collection of local newspapers in the library. A few websites repeat the same story without identifying where it came from. The newspapers should help us distinguish contemporary reports from details that were added much later in popular accounts.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 55279,
+     "endMs": 69941,
+     "text": "That will be useful, but we should still include a personal perspective. My neighbour worked at the station as a porter, and he is willing to speak with us. His memories will not establish every historical fact, so we should compare dates he mentions with your written sources.",
+     "speaker": "Student B"
+    },
+    {
+     "startMs": 70641,
+     "endMs": 85722,
+     "text": "Before recording him, we need written permission. The tutor gave us a consent form that explains where the audio may be shared and allows the speaker to decline particular questions. I will print it and give him time to read it before the interview begins.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 86421,
+     "endMs": 101873,
+     "text": "For the interview location, I first thought of the station café because it would sound atmospheric. On reflection, the noise would make his voice difficult to understand. His sitting room is quieter, and we can add a brief separate recording of station sounds later.",
+     "speaker": "Student B"
+    },
+    {
+     "startMs": 102573,
+     "endMs": 117386,
+     "text": "That is sensible. I can borrow a microphone from the media office, but we should test it before the interview rather than assuming it works. I will also make a short practice recording so we can find a comfortable distance between the microphone and the speaker.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 118086,
+     "endMs": 132748,
+     "text": "While you arrange the equipment, I will prepare the questions. I want to begin with daily routines rather than ask for opinions immediately. Describing an ordinary working day may help our neighbour remember concrete details before we move on to how the station changed over time.",
+     "speaker": "Student B"
+    },
+    {
+     "startMs": 133448,
+     "endMs": 148889,
+     "text": "After we have selected the interview extracts, we can write the narration around them. I do not want to write a complete script first and force his answers into it. The strongest extracts should determine which points need explanation and where listeners need help following the chronology.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 149588,
+     "endMs": 163902,
+     "text": "Let us send a rough edit to the tutor on Friday. The final deadline is Monday, but an earlier version leaves time to act on comments. We should label it clearly as a draft so the tutor knows that the sound levels and final credits may still change.",
+     "speaker": "Student B"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0108,
+    "espeakWer": 0.0325
+   }
+  },
+  "listening-v3-recycling-induction": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-recycling-induction.ogg",
+   "bytes": 621159,
+   "sha256": "3c559dcb6d6b78a7a345a2aeae9df9dd08a513bada9f63c1b809550b79f1c0c5",
+   "durationMs": 156768,
+   "decodedDurationMs": 156768,
+   "masterPcmSha256": "851ff019168765b9ba628058e57810cb925a85ba81b5f8ba4b998c742a0235eb",
+   "peak": 0.5038,
+   "split": "DIAGNOSTIC",
+   "speakers": [
+    {
+     "label": "Centre supervisor",
+     "voice": "GB_F",
+     "model": "en_GB-cori-high",
+     "accent": "British English"
+    }
+   ],
+   "transcriptSha256": "644ac95d5bce2cc23ce5cfd0050d3f120315d9d47fda338f948b5424b9a60e6c",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 15937,
+     "text": "Welcome to the community recycling centre. This is a synthetic practice recording for new volunteers. Today we will concentrate on the sorting area rather than collection rounds. Before entering that area, please collect a yellow vest from the cupboard beside reception.",
+     "speaker": "Centre supervisor"
+    },
+    {
+     "startMs": 16387,
+     "endMs": 30236,
+     "text": "You should already have received a short timetable. It places the safety briefing in the office, but that room is too small for our group. The briefing will actually take place in the courtyard, where everyone can see the equipment demonstration.",
+     "speaker": "Centre supervisor"
+    },
+    {
+     "startMs": 30686,
+     "endMs": 47020,
+     "text": "We begin sorting at half past nine. The delivery vehicle arrives earlier, but only trained staff unload it. Please do not start moving containers while they are working. Once the engine is off, the supervisor will invite volunteers into the covered sorting space.",
+     "speaker": "Centre supervisor"
+    },
+    {
+     "startMs": 47470,
+     "endMs": 62747,
+     "text": "The first table is for clean paper. Remove plastic sleeves before placing documents there, but leave ordinary metal staples attached because our processing equipment can remove them later. Wet paper belongs in a different container and should never be mixed with the dry material.",
+     "speaker": "Centre supervisor"
+    },
+    {
+     "startMs": 63197,
+     "endMs": 80936,
+     "text": "Glass is handled in the next section. We separate bottles according to colour rather than size, because the receiving factory processes clear glass independently. You will find examples above each container. If you cannot identify a colour confidently, ask before placing the bottle anywhere.",
+     "speaker": "Centre supervisor"
+    },
+    {
+     "startMs": 81386,
+     "endMs": 95885,
+     "text": "The metal station accepts drinks cans and food tins. Please leave the large pieces of machinery where staff have placed them. Those objects require a separate assessment, and volunteers should not try to dismantle them, even if they recognise the type of machine.",
+     "speaker": "Centre supervisor"
+    },
+    {
+     "startMs": 96335,
+     "endMs": 110138,
+     "text": "You may find small batteries among donated objects. Put these in the red box beside the supervisor’s desk, not in the general metal container. The box remains indoors throughout the day so the collection team can account for its contents at closing time.",
+     "speaker": "Centre supervisor"
+    },
+    {
+     "startMs": 110588,
+     "endMs": 124008,
+     "text": "We take a break at eleven, and there is drinking water in the kitchen. Bring your own cup if possible. Cups can also be borrowed, but they must be washed before you leave. Food should be eaten in the kitchen, away from the sorting tables.",
+     "speaker": "Centre supervisor"
+    },
+    {
+     "startMs": 124458,
+     "endMs": 139399,
+     "text": "At the end of your shift, record the number of full containers on the clipboard. We are counting containers rather than weighing their contents today. Keep the counts for paper, glass, and metal separate so the office can arrange suitable transport for each material.",
+     "speaker": "Centre supervisor"
+    },
+    {
+     "startMs": 139848,
+     "endMs": 156368,
+     "text": "Finally, return your vest to the same cupboard and sign out at reception. The next volunteer session is on Wednesday. A previous message said Tuesday, but a maintenance visit now occupies that morning. Your coordinator will send a reminder with the corrected day this afternoon.",
+     "speaker": "Centre supervisor"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0462,
+    "espeakWer": 0.0831
+   }
+  },
+  "listening-v3-rock-pool-study": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-rock-pool-study.ogg",
+   "bytes": 787001,
+   "sha256": "c34460a23ab7fe23b7189a19640772f3d70eb45db15032df0c69b4408e169885",
+   "durationMs": 194654,
+   "decodedDurationMs": 194654,
+   "masterPcmSha256": "765001f5a8100cc132ca6f1a781f61cf79d242373d1023cac4ce27c05e3b5c74",
+   "peak": 0.6658,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Lecturer",
+     "voice": "US_F2",
+     "model": "en_US-ljspeech-high",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "c6f1f7105077e9726d02ed664f6c078b5a13b24e0bf1b28c2ec0e09ac3de15dc",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 20001,
+     "text": "This is a synthetic practice lecture about an invented field investigation. A class studied small rock pools on a sheltered shore, asking how conditions differed between pools at different heights. The exercise was about comparing habitats, not collecting animals to take back to the classroom.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 20451,
+     "endMs": 37923,
+     "text": "The teacher divided the shore into three zones. These zones were based on height above the water at low tide rather than on distance from the nearest car park. Each group worked in one zone so the class could combine observations without repeatedly visiting the same pools.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 38373,
+     "endMs": 57296,
+     "text": "Within a zone, students selected pools using numbered locations on a prepared grid. Choosing only the largest or most attractive pools would have biased the comparison. The grid did not guarantee a perfect sample, but it provided a method that another class could understand and repeat.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 57746,
+     "endMs": 73511,
+     "text": "The first measurement was water depth at the centre of each pool. Students used the same marked ruler and recorded the result in centimetres. They avoided pressing the ruler into soft sediment because that would measure part of the bottom as though it were water.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 73961,
+     "endMs": 93743,
+     "text": "Next, the groups recorded the number of visible snails without moving rocks. The teacher emphasised that this was a count of animals they could see, not necessarily every animal present. Hidden organisms remained outside the observation, so the wording of the result needed to preserve that limitation.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 94193,
+     "endMs": 114672,
+     "text": "Some students wanted to record every species they encountered. For this short exercise, the teacher restricted the task to one recognisable group. A narrower question could be answered consistently within the available time, whereas an incomplete list of many unfamiliar species might be difficult to compare.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 115122,
+     "endMs": 134277,
+     "text": "Clouds moved across the sun during the morning, and students recorded the time of each visit. This helped the class discuss whether pools measured later had experienced different conditions. The teacher did not allow students to treat all readings as simultaneous simply because they were collected on the same day.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 134727,
+     "endMs": 156797,
+     "text": "In the fictional results, higher pools showed a wider range of water depths than lower pools. That observation did not establish that height alone caused the difference. Pool shape and recent wave action could also matter, so the discussion considered several plausible influences rather than announcing one certain cause.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 157247,
+     "endMs": 176065,
+     "text": "For the follow-up, students proposed revisiting the same pools after a week. Matching the locations would help distinguish change within a pool from differences between newly selected pools. They would still record weather and timing, because revisiting a location does not hold every environmental condition constant.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 176515,
+     "endMs": 194254,
+     "text": "Before leaving, the class checked that no equipment remained on the shore. Animals and rocks were left where they had been found. The final report included a method diagram so readers could see the zones and selection grid without mistaking the drawing for a precise map of every pool.",
+     "speaker": "Lecturer"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0276,
+    "espeakWer": 0.0892
+   }
+  },
+  "listening-v3-seed-storage-demonstration": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-seed-storage-demonstration.ogg",
+   "bytes": 700541,
+   "sha256": "d512d4c1528befba34d6d671fc7714373eca96b4930158031f253b7370177287",
+   "durationMs": 175172,
+   "decodedDurationMs": 175172,
+   "masterPcmSha256": "aa29b6dabe7fa312a31867c6a4ef0e328686fb86b58286430f882d697a817ce0",
+   "peak": 0.481,
+   "split": "ASSESSMENT",
+   "speakers": [
+    {
+     "label": "Lecturer",
+     "voice": "GB_F",
+     "model": "en_GB-cori-high",
+     "accent": "British English"
+    }
+   ],
+   "transcriptSha256": "79e543b50296deeac378a0f2f053982c43f6030fed7663cfaf9386ae570dcaa2",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 18085,
+     "text": "This is a synthetic practice lecture describing a fictional classroom demonstration of seed storage. The class compared batches of the same seed variety under different conditions. The aim was to design a careful comparison, not to recommend a storage method for every crop or to report a real agricultural trial.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 18535,
+     "endMs": 35183,
+     "text": "The teacher divided the seeds into labelled paper envelopes. Each envelope held thirty seeds, so later counts could be compared using the same starting total. Students wrote the batch code before filling the envelope, reducing the chance of confusing two groups when several people worked at the table.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 35633,
+     "endMs": 52106,
+     "text": "One set was stored in a cool cupboard and another in a warmer room. Both remained away from direct sunlight. The class recorded the actual temperature rather than relying only on the words cool and warm, since those labels would be too vague for someone trying to repeat the demonstration.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 52556,
+     "endMs": 69192,
+     "text": "The envelopes were inspected once a week without opening every packet. Students checked the labels and looked for signs that the storage area had become damp. If a packet was moved, the change was written in the log rather than remembered informally until the final presentation several weeks later.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 69642,
+     "endMs": 86127,
+     "text": "After the storage period, seeds from each batch were placed on moist paper for a germination check. The amount of water was kept consistent across dishes. Otherwise, a difference during this later check could be mistaken for an effect of the earlier storage condition the class actually wanted to compare.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 86577,
+     "endMs": 103817,
+     "text": "The class agreed on a visible criterion before counting a seed as germinated: a root had to emerge. They did not change the rule after seeing the results. A clear criterion made it easier for different students to classify the same seed consistently instead of relying on a general impression.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 104267,
+     "endMs": 122249,
+     "text": "In the fictional results, one batch had fewer germinated seeds at the first count but caught up later. The teacher therefore asked students to distinguish the speed of germination from the eventual proportion germinated. Reporting only the earliest count would have hidden that difference between two possible outcomes.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 122699,
+     "endMs": 139266,
+     "text": "A few seeds showed signs of mould during the check. The class recorded those observations separately instead of silently removing the seeds from the denominator. Changing the starting total after seeing an inconvenient outcome would make the reported proportions difficult for readers to interpret or reproduce.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 139716,
+     "endMs": 156026,
+     "text": "The teacher reminded students that a small classroom batch has limited scope. They had not tested many varieties or repeated the demonstration across several years. The report could describe what happened in this example while explaining why broader recommendations would require substantially more evidence.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 156476,
+     "endMs": 174772,
+     "text": "For the final display, students showed both the raw counts and the calculated percentages. This allowed visitors to see the small number of seeds behind each percentage. They also displayed the written procedure, so the visual presentation communicated how the observations were obtained rather than presenting numbers without context.",
+     "speaker": "Lecturer"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0269,
+    "espeakWer": 0.0475
+   }
+  },
+  "listening-v3-stream-sound-investigation": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-stream-sound-investigation.ogg",
+   "bytes": 749732,
+   "sha256": "87247e7a16f3cb1f7dbe2d40040216904a5b411c9f47ec0f847eade213dfc4fd",
+   "durationMs": 186190,
+   "decodedDurationMs": 186190,
+   "masterPcmSha256": "af1302c6ec2a9a570bb933bcca1ef2d840dafb44bc0b54bbe67a96c8faf5f035",
+   "peak": 0.5984,
+   "split": "ASSESSMENT",
+   "speakers": [
+    {
+     "label": "Lecturer",
+     "voice": "US_M1",
+     "model": "en_US-john-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "c09d4ff8f39fe9a8665ac1df8e81ced027be081479e543d68e87c2541b93e00a",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 19409,
+     "text": "This is a synthetic practice lecture about a fictional environmental recording project. Students investigated how a stream’s sound changed at different points along its course. Their question concerned the recorded sound, not whether one location was more pleasant for visitors, which would require evidence about people’s responses.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 19859,
+     "endMs": 35299,
+     "text": "The team selected six recording points between a small bridge and a footpath crossing. Each point received a number on a sketch map. The map showed enough detail for a return visit without claiming to be an accurate survey of the entire valley or the stream’s full length.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 35749,
+     "endMs": 53383,
+     "text": "At every point, the microphone was held at the same height above the water. Students used a marked pole to check that position. They also kept the recorder’s input setting unchanged, because automatic changes in recording level could make two similar sounds appear different in the resulting files.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 53833,
+     "endMs": 70620,
+     "text": "Each recording lasted forty seconds. The students waited quietly before pressing the record button so footsteps and conversation would not dominate the opening. A longer file would not automatically be better if it contained more movement by the people collecting it instead of the stream they wanted to study.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 71070,
+     "endMs": 88612,
+     "text": "The field notes included recent rainfall as reported by a nearby weather station. This did not tell the students exactly how much water passed each recording point. It did, however, provide context for discussing why recordings made on different days might not be directly comparable without further measurements.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 89062,
+     "endMs": 108008,
+     "text": "One recording contained a passing motorcycle. The team labelled that interval instead of pretending it was part of the water sound. They retained the original file and documented any section excluded from the analysis, allowing another listener to understand how the processed sample differed from the original recording.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 108458,
+     "endMs": 128379,
+     "text": "In the fictional analysis, recordings near small drops contained more rapid fluctuations than recordings beside a smooth stretch. The lecturer cautioned that this comparison alone could not isolate the effect of the drops. Water volume, nearby surfaces, and microphone surroundings might also influence the recorded pattern.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 128829,
+     "endMs": 148600,
+     "text": "For visual comparison, the students displayed waveforms on a shared time scale. They resisted stretching each file differently just to fill the available page width. Consistent display settings mattered because a reader might otherwise attribute a visual difference to the sound when it actually came from how the figure was drawn.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 149050,
+     "endMs": 167485,
+     "text": "A follow-up proposal involved recording the same points after a dry period. The team would keep the microphone position and recording settings comparable. The comparison would still need careful field notes, because repeating equipment settings does not make every feature of an outdoor environment remain unchanged.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 167935,
+     "endMs": 185790,
+     "text": "The final report kept the original recordings alongside a description of the analysis procedure. A short audio excerpt could illustrate a point in the presentation, but it could not replace the complete evidence. Readers needed to know how the excerpt was selected before judging how well it represented the wider set.",
+     "speaker": "Lecturer"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0311,
+    "espeakWer": 0.0663
+   }
+  },
+  "listening-v3-study-space-proposal": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-study-space-proposal.ogg",
+   "bytes": 671949,
+   "sha256": "38899790e11b3a86944b850b914c0d44f4b24302fc08c959ada1ec69ab552cd5",
+   "durationMs": 169974,
+   "decodedDurationMs": 169974,
+   "masterPcmSha256": "31ba464d848df85afa2e00ed126471ff226b696def84ec96a0bac8426ae21a5f",
+   "peak": 0.71,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Student A",
+     "voice": "US_F1",
+     "model": "en_US-kristin-medium",
+     "accent": "American English"
+    },
+    {
+     "label": "Student B",
+     "voice": "US_M2",
+     "model": "en_US-norman-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "0fe6fac11faae4741a38c759de3c0b7925ea9c20b22d7f6ea141b18dbd4280df",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 17865,
+     "text": "This is a synthetic practice discussion between two students preparing a fictional facilities proposal. Our tutor asked us to choose one change that could improve an existing study room. I first thought about extending opening hours, but we do not have enough information about staffing costs to evaluate that properly.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 18565,
+     "endMs": 35468,
+     "text": "Then let us focus on noise within the room. Students use the same area for silent reading and group discussion, which creates competing expectations. We could propose dividing the room into zones without claiming that conversation is always inappropriate in a university study space.",
+     "speaker": "Student B"
+    },
+    {
+     "startMs": 36168,
+     "endMs": 51410,
+     "text": "Before suggesting a layout, we should observe how the room is currently used. I propose three visits at different times of day rather than one long visit on a quiet morning. That should show whether the pattern changes when students arrive between lectures or stay into the evening.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 52110,
+     "endMs": 68584,
+     "text": "We should count occupied seats and note the locations of conversations. We do not need to record people’s names or what they say. The purpose is to understand activity patterns, and collecting personal details would add information that is unnecessary for the layout question we are trying to answer.",
+     "speaker": "Student B"
+    },
+    {
+     "startMs": 69284,
+     "endMs": 86221,
+     "text": "For a rough plan, the silent zone could be beside the windows. There are already individual desks there, and the daylight is useful for reading. I would leave the larger tables near the entrance for conversation so groups do not walk through the quiet section whenever someone joins them.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 86921,
+     "endMs": 102919,
+     "text": "That could work, but a sign alone may not change behaviour. We should ask students whether movable screens would make the boundary clearer. The screens would not soundproof the room, and our proposal should avoid suggesting that a lightweight divider can completely block normal conversation.",
+     "speaker": "Student B"
+    },
+    {
+     "startMs": 103619,
+     "endMs": 120127,
+     "text": "I can prepare a short survey with a sketch of both zones. We should include an option for people who prefer the current arrangement, rather than offering only different versions of our proposal. Otherwise, the form would push respondents towards agreeing that some change is necessary.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 120827,
+     "endMs": 136058,
+     "text": "After the survey, we could suggest a trial lasting two weeks. Permanent furniture changes would be premature before seeing how the zones work in practice. During the trial, the staff could keep a simple record of complaints and compare it with observations from the earlier period.",
+     "speaker": "Student B"
+    },
+    {
+     "startMs": 136758,
+     "endMs": 154032,
+     "text": "We need to be careful with that comparison. Fewer complaints would not necessarily mean less noise; students might simply be busy elsewhere. We should look at occupancy as well, so any claim about improvement considers how many people actually used the room during each observation period.",
+     "speaker": "Student A"
+    },
+    {
+     "startMs": 154482,
+     "endMs": 169574,
+     "text": "Let us divide the work now. You will draw the plan, and I will draft the survey. We can meet on Tuesday to combine them, even though the proposal is not due until Thursday. Meeting earlier gives us a chance to remove unclear wording before submission.",
+     "speaker": "Student A"
+    }
+   ],
+   "asr": {
+    "newWer": 0.0299,
+    "espeakWer": 0.0448
+   }
+  },
+  "listening-v3-textile-reuse-study": {
+   "compactAssetPath": "audio/compact/listening-voices/listening-v3-textile-reuse-study.ogg",
+   "bytes": 742725,
+   "sha256": "f08c748f8ef21af6e541d2ea16795dbc40f82aa11174a569e6f71f909d996d26",
+   "durationMs": 184900,
+   "decodedDurationMs": 184900,
+   "masterPcmSha256": "c0a00023bef86e5a53768c82756a1427dbbdf06c4e8f10d6c48a7df64acbc300",
+   "peak": 0.6647,
+   "split": "PRACTICE",
+   "speakers": [
+    {
+     "label": "Lecturer",
+     "voice": "US_M1",
+     "model": "en_US-john-medium",
+     "accent": "American English"
+    }
+   ],
+   "transcriptSha256": "aee3b1f37a027e6c6d6c804920283272f0bae1f271c766395d6947393230d0e4",
+   "segments": [
+    {
+     "startMs": 300,
+     "endMs": 19293,
+     "text": "This is a synthetic practice lecture about an invented study of clothing donations. The researchers followed garments through a local sorting centre to examine what happened after donation. They focused on reuse as clothing, which is different from turning fabric into industrial wiping cloths or other recycled products.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 19743,
+     "endMs": 36855,
+     "text": "The centre received donations from collection bins and from a staffed counter. The team recorded the two sources separately because items handed to a member of staff might differ from bags left anonymously. Combining both streams immediately would hide a distinction that could help interpret the sorting results.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 37305,
+     "endMs": 50783,
+     "text": "Each sampled garment received a temporary code. This allowed the team to follow it between sorting stages without writing a donor’s name on the record. The code tracked the garment, not its original buyer or wearer.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 51233,
+     "endMs": 70086,
+     "text": "Sorters first checked whether an item was dry. Wet garments were set aside because moisture could affect other items stored nearby. The researchers recorded this initial condition separately from later decisions about style, size, or visible damage, since those decisions answered different questions about possible reuse.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 70536,
+     "endMs": 88483,
+     "text": "The next stage considered repairs. A missing button was treated differently from a large tear across the fabric. Staff estimated the work needed before deciding whether a repair was practical within the centre’s resources. The study did not assume that every technically possible repair would be economical to perform.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 88933,
+     "endMs": 107067,
+     "text": "In the fictional sample, labels were often too faded to read. The team therefore reported material information as unknown when it could not be established reliably. They did not guess fabric composition from appearance alone, because a confident-looking guess could distort comparisons between different material categories.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 107517,
+     "endMs": 125720,
+     "text": "The researchers visited on four separate days. They chose days across the month rather than four consecutive mornings, hoping to capture some variation in incoming donations. That choice broadened the observation window, but the report still described the sample as limited to one centre and one month.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 126170,
+     "endMs": 145081,
+     "text": "One chart showed the proportion of garments reaching each sorting stage. Another showed the staff time used for repairs. These charts measured different things. A category containing relatively few garments could still require substantial work, so the researchers avoided equating item counts with labour requirements.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 145531,
+     "endMs": 164094,
+     "text": "The report noted that sorting decisions can change with local demand. A garment accepted during one season might be less useful during another. Consequently, the invented study does not support a universal list of items that every centre should accept regardless of storage space, customers, or time of year.",
+     "speaker": "Lecturer"
+    },
+    {
+     "startMs": 164544,
+     "endMs": 184500,
+     "text": "For a follow-up, the researchers proposed repeating the same tracking procedure at another centre. Using compatible categories would make comparison easier, while recording local differences would prevent misleading conclusions. Repeating the method would be valuable precisely because the second centre might not produce the same pattern as the first.",
+     "speaker": "Lecturer"
+    }
+   ],
+   "asr": {
+    "newWer": 0.043,
+    "espeakWer": 0.1183
+   }
+  }
+ },
+ "samples": {
+  "ielts-speak-a1": {
+   "compactAssetPath": "audio/compact/speaking-voices/ielts-speak-a1.ogg",
+   "bytes": 221704,
+   "sha256": "09f41538d5f114437e952d05d9cca94921d01b88e2540fe7cac66e374f3ace1f",
+   "durationMs": 55605,
+   "decodedDurationMs": 55605,
+   "masterPcmSha256": "833d778f5ace7a454558d50ab0faf4658da2eb4033907d7cc1cde7f30b547056",
+   "peak": 0.4678,
+   "voice": "GB_F",
+   "model": "en_GB-cori-high",
+   "accent": "British English",
+   "transcriptSha256": "74cbc7f088e1a4099c6d6f0c93aa89cf2831ebaabc64f6a9769fe2e4afe0fde1",
+   "asr": {
+    "newWer": 0.0244,
+    "espeakWer": 0.0976
+   }
+  },
+  "ielts-speak-d1": {
+   "compactAssetPath": "audio/compact/speaking-voices/ielts-speak-d1.ogg",
+   "bytes": 206408,
+   "sha256": "5e5c794d8baf4cc273eabdc8ce6ec255bad73d142fcaaad19ab5138748658b3b",
+   "durationMs": 51440,
+   "decodedDurationMs": 51440,
+   "masterPcmSha256": "2ea39643d621d13e3a29f17891bd0061ca705ea53da54daed9527228a3101459",
+   "peak": 0.5935,
+   "voice": "US_M1",
+   "model": "en_US-john-medium",
+   "accent": "American English",
+   "transcriptSha256": "b3d5c11edbd58f7840677f42cde8c7e482b2423edc5ac64fe3682563f2087896",
+   "asr": {
+    "newWer": 0.0392,
+    "espeakWer": 0.0458
+   }
+  },
+  "ielts-speak-p1": {
+   "compactAssetPath": "audio/compact/speaking-voices/ielts-speak-p1.ogg",
+   "bytes": 203648,
+   "sha256": "f61d223d9eb3a802fe7c9a2d160601565ec6ac1dea953f4182f4300234227697",
+   "durationMs": 51358,
+   "decodedDurationMs": 51358,
+   "masterPcmSha256": "037ff40af87b073ab34414d80bf4ff1d3a3e1453a61f3249db451938de940428",
+   "peak": 0.4551,
+   "voice": "US_F1",
+   "model": "en_US-kristin-medium",
+   "accent": "American English",
+   "transcriptSha256": "f03c879821a4fbc36f879220783f3a800c3736b98ebfb5c319719eeec6fc2a05",
+   "asr": {
+    "newWer": 0.0387,
+    "espeakWer": 0.2065
+   }
+  },
+  "ielts-speak-v3-meal-for-others": {
+   "compactAssetPath": "audio/compact/speaking-voices/ielts-speak-v3-meal-for-others.ogg",
+   "bytes": 241477,
+   "sha256": "1b924afcea798a201af818f729bcebd2d8b2e9e36d444e7639f357693cbe86d2",
+   "durationMs": 61070,
+   "decodedDurationMs": 61070,
+   "masterPcmSha256": "25bc5a153fb0add2539764c525746e9756dd2d4d11c17992acf7dd4077d58eb7",
+   "peak": 0.6747,
+   "voice": "US_M2",
+   "model": "en_US-norman-medium",
+   "accent": "American English",
+   "transcriptSha256": "3957b3dd3cad8c6a7e03f53275d1d964edea20b50028d02c00930294ab7037dd",
+   "asr": {
+    "newWer": 0.0294,
+    "espeakWer": 0.0931
+   }
+  },
+  "ielts-speak-v3-meaningful-photograph": {
+   "compactAssetPath": "audio/compact/speaking-voices/ielts-speak-v3-meaningful-photograph.ogg",
+   "bytes": 284937,
+   "sha256": "a80ff9359e90ff17e50d1b915879fcb2ca818a56de178a6a865faf35d9a61a6e",
+   "durationMs": 70428,
+   "decodedDurationMs": 70428,
+   "masterPcmSha256": "75873363afee811663dba79b0de9c029a3612a9e2e571db5950d682ee6485e16",
+   "peak": 0.6428,
+   "voice": "US_F2",
+   "model": "en_US-ljspeech-high",
+   "accent": "American English",
+   "transcriptSha256": "3ccf2ac0719ebb7e8f9fa2f36976e879c75b6b3e24b6fefad060c4c1c6751402",
+   "asr": {
+    "newWer": 0.0,
+    "espeakWer": 0.05
+   }
+  },
+  "ielts-speak-v3-small-achievement": {
+   "compactAssetPath": "audio/compact/speaking-voices/ielts-speak-v3-small-achievement.ogg",
+   "bytes": 266219,
+   "sha256": "ffc45b3026f4cf99c7be50120da6332df31802a8dbc63e6b9e0e50f13c93a6be",
+   "durationMs": 66979,
+   "decodedDurationMs": 66979,
+   "masterPcmSha256": "9b0af175c2b6bdaa140f268d409fb2007c365772906544a972c768ce978ce0b6",
+   "peak": 0.4854,
+   "voice": "GB_F",
+   "model": "en_GB-cori-high",
+   "accent": "British English",
+   "transcriptSha256": "855f25c42fbfcc16cf70e35b8a18c8bc05b8481876dbc1a451e8dbd547257b9f",
+   "asr": {
+    "newWer": 0.0148,
+    "espeakWer": 0.069
+   }
+  }
+ },
+ "statistics": {
+  "files": 30,
+  "bytes": 15958842
+ }
+}

@@ -32,7 +32,7 @@ private val StudyShapes = Shapes(
 @Composable
 fun StylishSATTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val palette = if (dark) DarkPalette else LightPalette
-    CompositionLocalProvider(LocalPalette provides palette) {
+    CompositionLocalProvider(LocalPalette provides palette, LocalReducedMotion provides rememberSystemAnimationsOff()) {
         MaterialTheme(colorScheme = palette.scheme(), typography = Typography, shapes = StudyShapes, content = content)
     }
 }

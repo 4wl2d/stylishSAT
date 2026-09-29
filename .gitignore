@@ -44,6 +44,7 @@ keystore.properties
 !/docs/content/audio-manifest.json
 !/docs/content/compact-audio-manifest.json
 !/docs/content/speaking-audio-manifest.json
+!/docs/content/listening-voices-manifest.json
 !/docs/content/chart-source-data.json
 /tools/*
 !/tools/release/
@@ -56,6 +57,9 @@ keystore.properties
 /tools/content/pilot/*
 !/tools/content/pilot/seed-v2.json
 !/tools/content/pilot/full-bank-v3.json
+!/tools/content/pilot/package4-index.json
+!/tools/content/pilot/package5-index.json
+!/tools/content/pilot/package6-index.json
 /tools/content/expansion/*
 !/tools/content/expansion/listening_work/
 /tools/content/expansion/listening_work/*

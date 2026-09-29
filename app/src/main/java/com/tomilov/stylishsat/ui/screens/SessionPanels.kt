@@ -75,44 +75,12 @@ fun ListeningPlayer(assetPath: String, l: Language, sample: Boolean = false) {
             toggle, tint = c.paper, background = c.ink, size = 52.dp)
         Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Meta(if (sample) l.label("Speaking · synthetic sample", "Speaking · синтетический образец") else l.label("Listening · synthetic audio", "Listening · синтетическая запись"))
+            Meta(if (sample) l.label("Speaking · synthetic sample", "Speaking · синтетический образец") else l.label("Listening · synthetic voices · expert review pending", "Listening · синтетические голоса · экспертная проверка ожидается"))
             Text(if (sample) l.label("Unreviewed sample, not a band exemplar.", "Образец без экспертной проверки, не эталон band.")
                 else l.label("Transcript opens after you answer.", "Транскрипт откроется после ответа."), style = StudyType.Small, color = c.inkSoft)
             if (errorValue.isNotEmpty()) Text(errorValue, style = StudyType.Small, color = c.bad)
         }
-        GlyphIcon(Glyph.Headphones, tint = c.inkFaint, size = 20.dp)
-    }
-}
-
-@Composable
-fun Chart(chart: ChartData) {
-    val c = Study.colors
-    Block {
-        Text(chart.title, style = StudyType.Strong, color = c.ink)
-        Meta("${chart.xLabel} · ${chart.yLabel} (${chart.unit})")
-        val maximum = chart.series.flatMap { it.values }.maxOrNull()?.coerceAtLeast(1.0) ?: 1.0
-        val shades = listOf(c.ink, c.inkSoft, c.inkFaint, c.good)
-        if (chart.series.size > 1) Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            chart.series.forEachIndexed { index, series ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(10.dp).clip(RoundedCornerShape(3.dp)).background(shades[index % shades.size]))
-                    Spacer(Modifier.width(6.dp))
-                    Text(series.name, style = StudyType.Small, color = c.ink)
-                }
-            }
-        }
-        chart.labels.forEachIndexed { index, label ->
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Text(label, style = StudyType.Strong.copy(fontSize = 14.sp), color = c.ink)
-                chart.series.forEachIndexed { seriesIndex, series ->
-                    val value = series.values.getOrNull(index) ?: 0.0
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Bar((value / maximum).toFloat(), Modifier.weight(1f), color = shades[seriesIndex % shades.size], height = 10.dp)
-                        Text("${if (value % 1 == 0.0) value.toInt() else value}", Modifier.width(56.dp).padding(start = 8.dp), style = StudyType.Mono.copy(fontSize = 12.sp), color = c.inkSoft)
-                    }
-                }
-            }
-        }
+        if (playingValue) Waves(true, color = c.ink) else GlyphIcon(Glyph.Headphones, tint = c.inkFaint, size = 20.dp)
     }
 }
 
@@ -151,7 +119,7 @@ fun SpeakingPanel(s: StudyUiState, vm: StudyViewModel) {
                     if (active != null) scope.launch { vm.runtime.recorder.stop()?.let { vm.attachRecording(it.file.absolutePath, stepKey) } }
                     else if (context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) beginRecording()
                     else permission.launch(Manifest.permission.RECORD_AUDIO)
-                }, tint = if (active != null) androidx.compose.ui.graphics.Color.White else c.paper, background = if (active != null) c.bad else c.ink,
+                }, Modifier.pulseRing(active != null, c.bad), tint = if (active != null) androidx.compose.ui.graphics.Color.White else c.paper, background = if (active != null) c.bad else c.ink,
                 size = 60.dp, enabled = !transcribingValue, filled = true)
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {

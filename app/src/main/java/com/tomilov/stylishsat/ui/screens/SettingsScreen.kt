@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -15,17 +16,24 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.tomilov.stylishsat.BackupStatus
 import com.tomilov.stylishsat.StudyUiState
 import com.tomilov.stylishsat.StudyViewModel
+import com.tomilov.stylishsat.data.BackupException
 import com.tomilov.stylishsat.ai.*
 import com.tomilov.stylishsat.domain.*
 import com.tomilov.stylishsat.speech.Recording
 import com.tomilov.stylishsat.ui.components.*
 import com.tomilov.stylishsat.ui.theme.Study
 import com.tomilov.stylishsat.ui.theme.StudyType
+import com.tomilov.stylishsat.ui.theme.rememberSystemAnimationsOff
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
@@ -45,22 +53,24 @@ fun SettingsScreen(s: StudyUiState, vm: StudyViewModel, back: () -> Unit) {
         }
         Column(Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).navigationBarsPadding()
             .padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(34.dp)) {
-            ProfileSection(s, vm)
-            Section(l.label("Language", "Язык")) {
+            ProfileSection(s, vm, Modifier.rise(0))
+            Section(l.label("Language", "Язык"), Modifier.rise(1)) {
                 Segmented(Language.entries.map { it to if (it == Language.RU) "Русский" else "English" }, l, vm::selectLanguage, Modifier.fillMaxWidth(), fill = true)
                 Hint(l.label("Menus and explanations follow this choice. Exam tasks stay in English.", "Интерфейс и объяснения меняют язык. Экзаменационные задания остаются на английском."))
             }
-            ModelsSection(s, vm)
-            ContentSection(s, vm)
+            MotionSection(s, vm, Modifier.rise(2))
+            ModelsSection(s, vm, Modifier.rise(3))
+            ContentSection(s, vm, Modifier.rise(4))
             RecordingsSection(s, vm)
-            AboutSection(s)
+            DataSection(s, vm)
+            AboutSection(s, Modifier.rise(5))
         }
     }
 }
 
 @Composable
-private fun Section(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+private fun Section(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SectionLabel(title)
         content()
     }
@@ -71,7 +81,7 @@ private fun Hint(text: String) { Text(text, style = StudyType.Small, color = Stu
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ProfileSection(s: StudyUiState, vm: StudyViewModel) {
+private fun ProfileSection(s: StudyUiState, vm: StudyViewModel, modifier: Modifier = Modifier) {
     val l = s.language
     val c = Study.colors
     val profile = s.profile
@@ -83,7 +93,7 @@ private fun ProfileSection(s: StudyUiState, vm: StudyViewModel) {
     var savedValue by remember(s.exam) { mutableStateOf(false) }
     val dirty = targetValue.trim() != profile.target || knownValue.trim() != profile.knownResult ||
         dateValue != profile.examDateEpochDay || minutesValue != profile.dailyMinutes
-    Section(l.label("${if (s.exam == Exam.IELTS) "IELTS" else "SAT"} profile", "Профиль ${if (s.exam == Exam.IELTS) "IELTS" else "SAT"}")) {
+    Section(l.label("${if (s.exam == Exam.IELTS) "IELTS" else "SAT"} profile", "Профиль ${if (s.exam == Exam.IELTS) "IELTS" else "SAT"}"), modifier) {
         Text(l.label("Minutes a day", "Минут в день"), style = StudyType.Strong, color = c.ink)
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             (listOf(15, 30, 45, 60, 75, 90, 105, 120) + profile.dailyMinutes).distinct().sorted().forEach { value ->
@@ -109,8 +119,8 @@ private fun ProfileSection(s: StudyUiState, vm: StudyViewModel) {
         if (dirty) StudyButton(l.label("Save profile", "Сохранить профиль"), {
             vm.saveProfile(profile.copy(target = targetValue.trim(), knownResult = knownValue.trim(), examDateEpochDay = dateValue, dailyMinutes = minutesValue))
             savedValue = true
-        }, Modifier.fillMaxWidth()) else if (savedValue) Row(verticalAlignment = Alignment.CenterVertically) {
-            GlyphIcon(Glyph.Check, tint = c.good, size = 16.dp); Spacer(Modifier.width(6.dp)); Meta(l.label("Saved on this device", "Сохранено на устройстве"), color = c.good)
+        }, Modifier.fillMaxWidth().popIn(from = 0.9f)) else if (savedValue) Row(verticalAlignment = Alignment.CenterVertically) {
+            GlyphIcon(Glyph.Check, Modifier.popIn(from = 0.2f), tint = c.good, size = 16.dp); Spacer(Modifier.width(6.dp)); Meta(l.label("Saved on this device", "Сохранено на устройстве"), color = c.good)
         }
     }
     if (pickerValue) {
@@ -131,7 +141,7 @@ private fun ProfileSection(s: StudyUiState, vm: StudyViewModel) {
 }
 
 @Composable
-private fun ModelsSection(s: StudyUiState, vm: StudyViewModel) {
+private fun ModelsSection(s: StudyUiState, vm: StudyViewModel, modifier: Modifier = Modifier) {
     val l = s.language
     val c = Study.colors
     val downloadValue by vm.runtime.downloads.state.collectAsStateWithLifecycle()
@@ -149,7 +159,7 @@ private fun ModelsSection(s: StudyUiState, vm: StudyViewModel) {
             ModelCatalog.all.associate { it.id to vm.runtime.downloads.isInstalled(it) }
         }
     }
-    Section(l.label("On-device AI", "ИИ на устройстве")) {
+    Section(l.label("On-device AI", "ИИ на устройстве"), modifier) {
         Hint(if (capability.supported) l.label("This 8 GB+ ARM64 device can run optional local feedback and transcription. Practice never needs them.", "Это устройство (ARM64, 8+ ГБ) может запускать локальный разбор и распознавание. Для практики они не нужны.")
             else l.label("Local AI needs 8 GB+ RAM and ARM64. Lessons, practice, recording and manual transcripts work on this device.", "Для локального ИИ нужны 8+ ГБ RAM и ARM64. Уроки, практика, запись и ручной транскрипт работают на этом устройстве."))
         ModelCatalog.all.forEach { spec ->
@@ -203,15 +213,36 @@ private fun ModelsSection(s: StudyUiState, vm: StudyViewModel) {
     }
 }
 
+/** Calmer motion keeps touch feedback but drops slides, bursts, shakes and staggered entrances. */
+@Composable
+private fun MotionSection(s: StudyUiState, vm: StudyViewModel, modifier: Modifier = Modifier) {
+    val l = s.language
+    val c = Study.colors
+    val systemOff = rememberSystemAnimationsOff()
+    Section(l.label("Motion", "Анимация"), modifier) {
+        Row(Modifier.fillMaxWidth().toggleable(s.settings.reduceMotion || systemOff, enabled = !systemOff, role = Role.Switch) { vm.setReduceMotion(it) }
+            .padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(l.label("Calmer motion", "Спокойная анимация"), style = StudyType.Strong, color = c.ink)
+                Hint(if (systemOff) l.label("Android animations are off, so the app stays still.", "Анимации Android отключены, поэтому приложение не анимируется.")
+                    else l.label("Fades instead of slides. No confetti, shakes or staggered entrances.", "Плавная смена вместо сдвигов. Без конфетти, встряхиваний и поочерёдного появления."))
+            }
+            Switch(s.settings.reduceMotion || systemOff, null, enabled = !systemOff, colors = SwitchDefaults.colors(
+                checkedThumbColor = c.onMarker, checkedTrackColor = c.marker, checkedBorderColor = c.marker,
+                uncheckedThumbColor = c.inkSoft, uncheckedTrackColor = c.sunken, uncheckedBorderColor = c.inkFaint))
+        }
+    }
+}
+
 private fun sizeLabel(bytes: Long) = if (bytes >= 1_000_000_000) "%.2f GB".format(java.util.Locale.ROOT, bytes / 1e9) else "${(bytes + 500_000) / 1_000_000} MB"
 
 @Composable
-private fun ContentSection(s: StudyUiState, vm: StudyViewModel) {
+private fun ContentSection(s: StudyUiState, vm: StudyViewModel, modifier: Modifier = Modifier) {
     val l = s.language
     val c = Study.colors
     val pack = s.pack ?: return
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(vm::importContent) }
-    Section(l.label("Content", "Материалы")) {
+    Section(l.label("Content", "Материалы"), modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text("${pack.title.text(l)} · v${pack.version}", style = StudyType.Strong, color = c.ink)
@@ -252,16 +283,99 @@ private fun RecordingsSection(s: StudyUiState, vm: StudyViewModel) {
     }
 }
 
+private const val MIN_PASSPHRASE = 10
+
+/** Encrypted export and restore. No account or cloud: the learner decides where the file goes. */
 @Composable
-private fun AboutSection(s: StudyUiState) {
+private fun DataSection(s: StudyUiState, vm: StudyViewModel) {
+    val l = s.language
+    val c = Study.colors
+    val status by vm.backup.collectAsStateWithLifecycle()
+    // The passphrase is kept only in memory for the file picker round trip and is never saved.
+    var passphrase by remember { mutableStateOf("") }
+    var confirm by remember { mutableStateOf("") }
+    var dialog by remember { mutableStateOf<Boolean?>(null) }
+    var restoreUri by remember { mutableStateOf<Uri?>(null) }
+    var lostPassphrase by remember { mutableStateOf(false) }
+    fun clear() { passphrase = ""; confirm = ""; dialog = null }
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+        if (uri != null && passphrase.length >= MIN_PASSPHRASE) vm.exportBackup(uri, passphrase.toCharArray()) else if (uri != null) lostPassphrase = true
+        clear()
+    }
+    val restoreLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) { restoreUri = uri; vm.clearBackupStatus(); dialog = false }
+    }
+    val working = status is BackupStatus.Working
+    Section(l.label("Your data", "Ваши данные")) {
+        Text(l.label("Everything stays on this device, and uninstalling the app deletes it. Export an encrypted file to keep your own copy: no account and no cloud.",
+            "Всё хранится только на устройстве, и удаление приложения стирает данные. Экспортируйте зашифрованный файл, чтобы сохранить свою копию: без аккаунта и облака."),
+            style = StudyType.Small, color = c.ink)
+        Hint(l.label("Includes answers, drafts, revisions, plans, the mistake notebook, exam sittings and recordings. Downloaded models and app settings are not included.",
+            "Включает ответы, черновики, версии, планы, тетрадь ошибок, пробные экзамены и записи. Скачанные модели и настройки приложения не включаются."))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            StudyButton(l.label("Export encrypted file", "Экспорт в зашифрованный файл"), { vm.clearBackupStatus(); dialog = true }, Modifier.weight(1f), tone = Tone.Quiet, compact = true, enabled = !working)
+            StudyButton(l.label("Restore", "Восстановить"), { restoreLauncher.launch(arrayOf("*/*")) }, tone = Tone.Quiet, compact = true, enabled = !working)
+        }
+        val message = when (val current = status) {
+            BackupStatus.Idle -> if (lostPassphrase) l.label("The passphrase was cleared while choosing the file. Start the export again.", "Пароль сброшен при выборе файла. Начните экспорт снова.") else null
+            is BackupStatus.Working -> if (current.export) l.label("Encrypting…", "Шифрование…") else l.label("Checking the file and restoring…", "Проверка файла и восстановление…")
+            is BackupStatus.Exported -> l.label("Saved ${current.answers} answers and ${current.recordings} recordings. Keep the file and passphrase safe: without the passphrase nobody, including you, can open it.",
+                "Сохранено ответов: ${current.answers}, записей: ${current.recordings}. Храните файл и пароль: без пароля файл не откроет никто, включая вас.")
+            is BackupStatus.Restored -> l.label("Restored ${current.added + current.replacedFresh} items." + if (current.keptLocal > 0) " ${current.keptLocal} items already on this device were newer or different and were kept." else "",
+                "Восстановлено элементов: ${current.added + current.replacedFresh}." + if (current.keptLocal > 0) " Элементов, уже бывших на устройстве и оставленных без изменений: ${current.keptLocal}." else "")
+            is BackupStatus.Failed -> when (current.reason) {
+                BackupException.Reason.WRONG_PASSPHRASE_OR_DAMAGED -> l.label("Wrong passphrase, or the file is damaged. Nothing was restored.", "Неверный пароль или файл повреждён. Ничего не восстановлено.")
+                BackupException.Reason.TRUNCATED -> l.label("The file is incomplete. Nothing was restored.", "Файл неполный. Ничего не восстановлено.")
+                BackupException.Reason.NOT_A_BACKUP -> l.label("This is not a StylishSAT backup file.", "Это не файл резервной копии StylishSAT.")
+                BackupException.Reason.UNSUPPORTED_FORMAT, BackupException.Reason.UNSAFE_ENTRY -> l.label("This file was made by a newer app version or contains unexpected data. Nothing was restored.",
+                    "Файл создан более новой версией приложения или содержит неожиданные данные. Ничего не восстановлено.")
+                null -> l.label("Could not finish: ${current.detail}", "Не удалось завершить: ${current.detail}")
+            }
+        }
+        message?.let { Row(verticalAlignment = Alignment.CenterVertically) {
+            if (working) { CircularProgressIndicator(Modifier.size(16.dp), color = c.ink, strokeWidth = 2.dp); Spacer(Modifier.width(8.dp)) }
+            Text(it, style = StudyType.Small, color = if (status is BackupStatus.Failed) c.bad else c.inkSoft)
+        } }
+    }
+    dialog?.let { exporting ->
+        val tooShort = passphrase.length < MIN_PASSPHRASE
+        val mismatch = exporting && confirm != passphrase
+        AlertDialog(onDismissRequest = { clear(); restoreUri = null }, containerColor = c.paper,
+            title = { Text(if (exporting) l.label("Encrypt your data", "Зашифровать данные") else l.label("Open backup", "Открыть копию"), style = StudyType.Title, color = c.ink) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(if (exporting) l.label("Choose a passphrase of at least $MIN_PASSPHRASE characters. It is not stored anywhere and cannot be recovered.",
+                        "Придумайте пароль не короче $MIN_PASSPHRASE символов. Он нигде не хранится и не может быть восстановлен.")
+                        else l.label("Enter the passphrase used for this file. Work already on this device is kept.", "Введите пароль этого файла. Данные, уже бывшие на устройстве, сохранятся."),
+                        style = StudyType.Small, color = c.inkSoft)
+                    OutlinedTextField(passphrase, { passphrase = it }, Modifier.fillMaxWidth(), label = { Text(l.label("Passphrase", "Пароль")) }, singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false),
+                        shape = RoundedCornerShape(16.dp), colors = studyFieldColors())
+                    if (exporting) OutlinedTextField(confirm, { confirm = it }, Modifier.fillMaxWidth(), label = { Text(l.label("Repeat passphrase", "Повторите пароль")) }, singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false),
+                        shape = RoundedCornerShape(16.dp), colors = studyFieldColors(), isError = confirm.isNotEmpty() && mismatch)
+                }
+            },
+            confirmButton = {
+                TextButton(enabled = !tooShort && !mismatch, onClick = {
+                    if (exporting) { lostPassphrase = false; dialog = null; exportLauncher.launch("stylishsat-backup-${LocalDate.now()}.stylishsat") }
+                    else { restoreUri?.let { vm.restoreBackup(it, passphrase.toCharArray()) }; restoreUri = null; clear() }
+                }) { Text(if (exporting) l.label("Choose where to save", "Выбрать место") else l.label("Restore", "Восстановить"), style = StudyType.Button, color = if (!tooShort && !mismatch) c.ink else c.inkFaint) }
+            },
+            dismissButton = { TextButton(onClick = { clear(); restoreUri = null }) { Text(l.label("Cancel", "Отмена"), style = StudyType.Button, color = c.inkSoft) } })
+    }
+}
+
+@Composable
+private fun AboutSection(s: StudyUiState, modifier: Modifier = Modifier) {
     val l = s.language
     val c = Study.colors
     val context = LocalContext.current
     var licensesValue by remember { mutableStateOf<String?>(null) }
     val version = remember { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() }
-    Section(l.label("About", "О приложении")) {
-        Text(l.label("Private by default. Answers, drafts, recordings and feedback stay on this device and are excluded from system backup. Text leaves only when you copy or share it.",
-            "Данные остаются на устройстве. Ответы, черновики, записи и отзывы исключены из системной резервной копии. Текст передаётся только когда вы копируете его или делитесь им."),
+    Section(l.label("About", "О приложении"), modifier) {
+        Text(l.label("Private by default. Answers, drafts, recordings and feedback stay on this device and are excluded from system backup. Text leaves only when you copy or share it, or export an encrypted file.",
+            "Данные остаются на устройстве. Ответы, черновики, записи и отзывы исключены из системной резервной копии. Текст передаётся только когда вы копируете его, делитесь им или экспортируете зашифрованный файл."),
             style = StudyType.Small, color = c.ink)
         Text(l.label("Lessons and tasks are original AI-authored drafts, machine-validated. Expert editorial review and student testing are pending. Accuracy here is a training estimate, not an official SAT score or IELTS band. AI and external feedback never change keys, grades or mastery.",
             "Уроки и задания — оригинальные ИИ-черновики с машинной проверкой. Экспертная редактура и испытания с учениками ожидаются. Точность здесь — учебная оценка, не официальный SAT score или IELTS band. ИИ и внешние отзывы не меняют ключи, оценки и уровень навыков."),
