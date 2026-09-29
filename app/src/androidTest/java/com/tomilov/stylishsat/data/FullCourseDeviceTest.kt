@@ -168,7 +168,7 @@ class FullCourseDeviceTest {
             main { vm = StudyViewModel(application, database, settings, clock) }
             var current = vm!!; ready(current, "initial-load")
             val pack = current.state.value.pack!!
-            assertEquals(810, pack.exercises.size)
+            assertEquals(884, pack.exercises.size)
             assertEquals(48, pack.lessons.size)
             main { current.saveProfile(current.state.value.profile.copy(dailyMinutes = 15)); current.makePlan() }
             ready(current, "initial-plan")
